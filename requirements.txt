@@ -1,0 +1,5 @@
+aenum==3.1.15
+dbf==0.99.9
+pathlib==1.0.1
+prettytable==3.11.0
+wcwidth==0.2.13
