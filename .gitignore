@@ -1,6 +1,9 @@
-# DBF and SQL files
-*.dbf
-*.sql
+# Misc storage
+storage/
+pool.txt
+logs.txt
+config.toml
+*.cast
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "dbfxsql"
+version = "0.1.0"
+description = "A CLI tool to manage data between DBF files and SQL databases."
+authors = ["Joel Abreu <joelabreurojas@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+click = "8.1.7"
+dbf = "0.99.9"
+pathlib = "1.0.1"
+prettytable = "3.11.0"
+python = "^3.12"
+python-decouple = "3.8"
+python-dotenv = "1.0.1"
+watchfiles = "0.24.0"
+yaspin = "3.0.2"
+pytest = "^8.3.3"
+tomli-w = "^1.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+dbfxsql = "dbfxsql:run"
