@@ -1,268 +1,390 @@
+from .constants import config, sample_commands
+from .models.order_commands import OrderCommands
+from .modules import dbf_controller, sql_controller, sync_controller
+from .helpers import utils
+
 import click
 import asyncio
 from yaspin import yaspin
 
-from dbfxsql.functionalities import dbf_controller, sql_controller, sync_controller
-from dbfxsql.common import models, utils
 
-
-@click.group(cls=models.OrderCommands)
+@click.group(cls=OrderCommands)
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
 def cli():
     """This script helps with the initialization of the tool."""
 
 
 @cli.command()
-@click.option("-db", "--database", help="Name of the SQL database.")
-@click.option("-t", "--table", help="Name of the DBF/SQL table.")
+@click.option(
+    "-e",
+    "--engine",
+    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
+    required=True,
+)
+@click.option(
+    "-r",
+    "--rdbms",
+    type=click.Choice(["SQLite", "SQLServer"], case_sensitive=False),
+    default="SQLite",
+    show_default=True,
+)
+@click.option(
+    "-s",
+    "--source",
+    help="Expects a file.",
+    required=True,
+)
+@click.option(
+    "-t",
+    "--table",
+    help="[required for SQL]",
+    default="",
+)
 @click.option(
     "-f",
-    "--field",
+    "--fields",
     type=(str, str),
     multiple=True,
-    help="Field of the table with their DBF/SQL type.",
+    help="Fields with their types.",
+    required=True,
 )
-def create(database: str, table: str, field: tuple[tuple[str, str], ...]) -> None:
-    """
-    Create a new SQL database or a new DBF/SQL table.
-
-    \b
-    Examples:
-    ----------
-    - DBF TABLE => dbfxsql create -t users -f id "N(20,0)" -f name "C(20)"
-    - SQL DB    => dbfxsql create -db mydb
-    - SQL TABLE => dbfxsql create -db mydb -t users -f id "integer primary key" -f name text
-    """
-    # Errors
-    if not (database or table):
-        raise click.UsageError(
-            "Missing option '-db' / '--database' or '-t' / '--table'."
-        )
-    if table and not field:
-        raise click.UsageError("Missing option '-f' / '--field'.")
-    if not table and field:
-        raise click.UsageError("Missing option '-t' / '--table'.")
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
+@utils.embed_examples
+def create(
+    engine: str, rdbms: str, source: str, table: str | None, fields: tuple
+) -> None:
+    """Create a DBF/SQL table."""
 
     # Use cases
-    if database and table:
-        fields = ", ".join([f"{field[0]} {field[1]}" for field in field])
-        sql_controller.create_table(database, table, fields)
-    elif table:
-        fields = "; ".join([f"{field[0]} {field[1]}" for field in field])
-        dbf_controller.create_table(table, fields)
-    elif database:
-        sql_controller.create_database(database)
+    if "DBF" == engine:
+        dbf_controller.create_table(engine, source, fields)
+
+    elif not table:
+        raise click.UsageError("Missing option '-t' / '--table'.")
+
+    elif "SQLite" == rdbms:
+        sql_controller.create_table(engine, source, table, fields)
+
     else:
-        raise click.UsageError("Unknown behavior.")
+        raise NotImplementedError
 
 
 @cli.command()
-@click.option("-db", "--database", help="Name of the SQL database.")
-@click.option("-t", "--table", help="Name of the DBF/SQL table.")
+@click.option(
+    "-e",
+    "--engine",
+    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
+    required=True,
+)
+@click.option(
+    "-r",
+    "--rdbms",
+    default="SQLite",
+    show_default=True,
+)
+@click.option(
+    "-s",
+    "--source",
+    help="Expects a file.",
+    required=True,
+)
+@click.option(
+    "-t",
+    "--table",
+    default="",
+)
 @click.confirmation_option(
     prompt="Are you sure you want to drop?", help="Confirm the operation."
 )
-def drop(database: str, table: str):
-    """
-    Drop an existing SQL database or an existing DBF/SQL table.
-
-    \b
-    Examples:
-    ----------
-    - DBF TABLE => dbfxsql drop -t users
-    - SQL DB    => dbfxsql drop -db mydb
-    - SQL TABLE => dbfxsql drop -db mydb -t users
-    """
-    # Errors
-    if not (database or table):
-        raise click.UsageError(
-            "Missing option '-db' / '--database' or '-t' / '--table'."
-        )
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
+@utils.embed_examples
+def drop(engine: str, rdbms: str, source: str, table: str | None) -> None:
+    """Drop a DBF/SQL source or SQL table."""
 
     # Use cases
-    if database and table:
-        sql_controller.drop_table(database, table)
+    if "DBF" == engine:
+        dbf_controller.drop_table(engine, source)
 
-    elif table:
-        dbf_controller.drop_table(table)
+    elif not table and "SQLite" == rdbms:
+        sql_controller.drop_database(engine, source)
 
-    elif database:
-        sql_controller.drop_database(database)
+    elif "SQLite" == rdbms:
+        sql_controller.drop_table(engine, source, table)
 
     else:
-        raise click.UsageError("Unknown behavior.")
+        raise NotImplementedError
 
 
 @cli.command()
-@click.option("-t", "--table", required=True, help="Name of the DBF/SQL table.")
+@click.option(
+    "-e",
+    "--engine",
+    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
+    required=True,
+)
+@click.option(
+    "-r",
+    "--rdbms",
+    default="SQLite",
+    show_default=True,
+)
+@click.option(
+    "-s",
+    "--source",
+    help="Expects a file.",
+    required=True,
+)
+@click.option(
+    "-t",
+    "--table",
+    help="[required for SQL]",
+    default="",
+)
 @click.option(
     "-f",
-    "--field",
-    required=True,
+    "--fields",
     type=(str, str),
     multiple=True,
-    help="Field of the table with their DBF/SQL type.",
-)
-@click.option("--increment", is_flag=True, help="Set an increment int in id field.")
-def add(table: str, field: tuple[tuple[str, str], ...], increment: bool):
-    """
-    Add fields with their DBF types to an existing table.
-
-    \b
-    Examples:
-    ----------
-    - DBF TABLE => dbfxsql add -t users -f id "N(20,0)" -f name "C(20)" --increment
-    """
-    # Handle input
-    fields = "; ".join([f"{field[0]} {field[1]}" for field in field])
-
-    # Use case
-    dbf_controller.add_fields(table, fields, str(increment))
-
-
-@cli.command()
-@click.option("-db", "--database", help="Name of the SQL database.")
-@click.option("-t", "--table", required=True, help="Name of the DBF/SQL table.")
-@click.option(
-    "-f",
-    "--field",
-    type=(str, str),
-    multiple=True,
+    help="Fields with their types.",
     required=True,
-    help="Field and value pair as data to be inserted.",
 )
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
+@utils.embed_examples
 def insert(
-    database: str | None,
-    table: str,
-    field: tuple[tuple[str, str], ...],
-):
-    """
-    Insert a new record to an existing DBF/SQL table.
-
-    \b
-    Examples:
-    ----------
-    - DBF TABLE => dbfxsql insert -t users -f id 1 -f name John
-    - SQL TABLE => dbfxsql insert -db mydb -t users -f id 1 -f name John
-    """
-    # Handle input
-    fields = ", ".join(f"{f[0]}" for f in field)
-    values = ", ".join(f"{f[1]}" for f in field)
-
-    if not database:
-        dbf_controller.insert_record(table, fields, values)
-    else:
-        sql_controller.insert_record(database, table, fields, values)
-
-
-@cli.command()
-@click.option("-db", "--database", help="Name of the SQL database.")
-@click.option("-t", "--table", required=True, help="Name of the DBF/SQL table.")
-@click.option(
-    "-c",
-    "--condition",
-    type=(str, str, str),
-    help="Field, operator and value to filter records.",
-)
-def read(database: str | None, table: str, condition: tuple[str, str, str] | None):
-    """
-    Read existing records from an existing DBF/SQL table.
-
-    \b
-    Examples:
-    ----------
-    - DBF TABLE => dbfxsql read -t users -c id == 1
-    - SQL TABLE => dbfxsql read -db mydb -t users -c id == 1
-    """
-    condition = f"{condition[0]} {condition[1]} {condition[2]}" if condition else None
+    engine: str, rdbms: str, source: str, table: str | None, fields: tuple
+) -> None:
+    """Insert a record into a DBF/SQL table."""
 
     # Use cases
-    if not database:
-        utils.show_table(dbf_controller.read_records(table, condition))
+    if "DBF" == engine:
+        dbf_controller.insert_record(engine, source, fields)
+
+    elif not table:
+        raise click.UsageError("Missing option '-t' / '--table'.")
+
+    elif "SQLite" == rdbms:
+        sql_controller.insert_record(engine, source, table, fields)
+
     else:
-        utils.show_table(sql_controller.read_records(database, table, condition))
+        raise NotImplementedError
 
 
 @cli.command()
-@click.option("-db", "--database", help="Name of the SQL database.")
-@click.option("-t", "--table", required=True, help="Name of the DBF/SQL table.")
+@click.option(
+    "-e",
+    "--engine",
+    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
+    required=True,
+)
+@click.option(
+    "-r",
+    "--rdbms",
+    type=click.Choice(["SQLite", "SQLServer"], case_sensitive=False),
+    default="SQLite",
+    show_default=True,
+)
+@click.option(
+    "-s",
+    "--source",
+    help="Expects a file.",
+    required=True,
+)
+@click.option(
+    "-t",
+    "--table",
+    help="[required for SQL]",
+    default="",
+)
 @click.option(
     "-f",
-    "--field",
-    type=(str, str),
+    "--fields",
     multiple=True,
-    required=True,
-    help="Field and value pair as data to be updated.",
+    metavar="<TEXT>...",
+    default=["*"],
+    show_default=True,
 )
 @click.option(
     "-c",
     "--condition",
-    type=(str, str, str),
-    required=True,
-    help="Field, operator and value to filter records.",
+    type=(click.Tuple([str, str, str])),
+    metavar="TEXT TEXT TEXT",
+    help="Field, operator and value.",
 )
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
+@utils.embed_examples
+def read(
+    engine: str,
+    rdbms: str,
+    source: str,
+    table: str | None,
+    fields: tuple,
+    condition: tuple | None,
+) -> None:
+    """Read records from a DBF/SQL table."""
+
+    records: list = []
+
+    # Use cases
+    if "DBF" == engine:
+        records = dbf_controller.read_records(engine, source, fields, condition)
+
+    elif not table:
+        raise click.UsageError("Missing option '-t' / '--table'.")
+
+    elif "SQLite" == rdbms:
+        records = sql_controller.read_records(engine, source, table, fields, condition)
+
+    else:
+        raise NotImplementedError
+
+    utils.show_table(records)
+
+
+@cli.command()
+@click.option(
+    "-e",
+    "--engine",
+    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
+    required=True,
+)
+@click.option(
+    "-r",
+    "--rdbms",
+    type=click.Choice(["SQLite", "SQLServer"], case_sensitive=False),
+    default="SQLite",
+    show_default=True,
+)
+@click.option(
+    "-s",
+    "--source",
+    help="Expects a file.",
+    required=True,
+)
+@click.option(
+    "-t",
+    "--table",
+    help="[required for SQL]",
+    default="",
+)
+@click.option(
+    "-f",
+    "--fields",
+    multiple=True,
+    metavar="<TEXT>...",
+    default=["*"],
+    show_default=True,
+)
+@click.option(
+    "-c",
+    "--condition",
+    type=(click.Tuple([str, str, str])),
+    metavar="TEXT TEXT TEXT",
+    help="Field, operator and value.",
+)
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
+@utils.embed_examples
 def update(
-    database: str | None,
-    table: str,
-    field: tuple[tuple[str, str], ...],
-    condition: tuple[str, str, str],
-):
-    """
-    Update existing records from an existing DBF/SQL table.
-
-    \b
-    Examples:
-    ----------
-    - DBF TABLE => dbfxsql update -t users -f id 1 -f name John -c id == 1
-    - SQL TABLE => dbfxsql update -db users -t mydb -f id 1 -f name John -c id == 1
-    """
-
-    # Handle input
-    fields = ", ".join(f"{f[0]}" for f in field)
-    values = ", ".join(f"{f[1]}" for f in field)
-    condition = f"{condition[0]} {condition[1]} {condition[2]}" if condition else None
+    engine: str,
+    rdbms: str,
+    source: str,
+    table: str | None,
+    fields: tuple,
+    condition: tuple,
+) -> None:
+    """Update records from a DBF/SQL table."""
 
     # Use cases
-    if not database:
-        dbf_controller.update_records(table, fields, values, condition)
+    if "DBF" != engine:
+        dbf_controller.update_records(engine, source, *fields, condition)
+
+    elif not table:
+        raise click.UsageError("Missing option '-t' / '--table'.")
+
+    elif "SQLite" == rdbms:
+        sql_controller.update_records(engine, source, table, *fields, condition)
+
     else:
-        sql_controller.update_records(database, table, fields, values, condition)
+        raise NotImplementedError()
 
 
 @cli.command()
-@click.option("-db", "--database", help="Name of the SQL database.")
-@click.option("-t", "--table", required=True, help="Name of the DBF/SQL table.")
+@click.option(
+    "-e",
+    "--engine",
+    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
+    required=True,
+)
+@click.option(
+    "-r",
+    "--rdbms",
+    type=click.Choice(["SQLite", "SQLServer"], case_sensitive=False),
+    default="SQLite",
+    show_default=True,
+)
+@click.option(
+    "-s",
+    "--source",
+    help="Expects a file.",
+    required=True,
+)
+@click.option(
+    "-t",
+    "--table",
+    help="[required for SQL]",
+    default="",
+)
 @click.option(
     "-c",
     "--condition",
-    type=(str, str, str),
-    required=True,
-    help="Field, operator and value to filter records.",
+    type=(click.Tuple([str, str, str])),
+    metavar="TEXT TEXT TEXT",
+    help="Field, operator and value.",
 )
-def delete(database: str | None, table: str, condition: tuple[str, str, str]):
-    """
-    Delete existing records from an existing DBF/SQL table.
-
-    \b
-    Examples:
-    ----------
-    - DBF TABLE => dbfxsql delete -t users -c id == 1
-    - SQL TABLE => dbfxsql delete -db mydb -t users -c id == 1
-    """
-    condition = f"{condition[0]} {condition[1]} {condition[2]}" if condition else None
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
+@utils.embed_examples
+def delete(
+    engine: str, rdbms: str, source: str, table: str | None, condition: tuple
+) -> None:
+    """Delete records from an DBF/SQL table."""
 
     # Use cases
-    if not database:
-        dbf_controller.delete_records(table, condition)
+    if "DBF" != engine:
+        dbf_controller.update_records(engine, source, condition)
+
+    elif not table:
+        raise click.UsageError("Missing option '-t' / '--table'.")
+
+    elif "SQLite" == rdbms:
+        sql_controller.update_records(engine, source, table, condition)
+
     else:
-        sql_controller.delete_records(database, table, condition)
+        raise NotImplementedError()
 
 
 @cli.command()
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
 def migrate():
+    """
+    Migrate data between DBF and SQL databases.
+
+    This read a config.toml file with the necessary information to migrate
+    data between DBF and SQL databases.
+    """
+
     raise NotImplementedError()
 
 
 @cli.command()
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
 def sync():
     """
     Synchronize data between DBF and SQL databases.

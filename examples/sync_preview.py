@@ -1,5 +1,4 @@
-from dbfxsql.common import utils
-from dbfxsql.functionalities import dbf_controller, sql_controller, sync_controller
+from dbfxsql.modules import dbf_controller, sql_controller, sync_controller
 
 
 def test_dbf_to_sql(db: str, table: str) -> None:

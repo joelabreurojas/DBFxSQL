@@ -1,36 +1,7 @@
-import click
-from dataclasses import dataclass
 from importlib import import_module
 from functools import cached_property
 
-
-@dataclass(frozen=True, slots=True)
-class Actor:
-    file: str
-    table: str
-    fields: list[str]
-    records: list[dict[str, any]]
-
-
-@dataclass(frozen=True, slots=True)
-class Filter:
-    """Defines criteria for filtering records."""
-
-    field: str
-    operator: str
-    value: str
-
-    def __str__(self) -> str:
-        return f"{self.field} {self.operator} {self.value}"
-
-
-class OrderCommands(click.Group):
-    """Top-level command group for managing orders."""
-
-    def list_commands(self, ctx: click.Context) -> list[str]:
-        """Returns a list of available subcommands in the declared order."""
-
-        return self.commands
+import click
 
 
 class LazyGroup(click.Group):

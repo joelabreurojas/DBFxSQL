@@ -2,7 +2,7 @@ import datetime
 import decimal
 
 
-DBF: dict[str, any] = {
+DBF: dict = {
     "C": str,
     "D": datetime.date,
     "N": decimal.Decimal,  # Numeric
@@ -12,10 +12,12 @@ DBF: dict[str, any] = {
     "@": datetime.datetime,
 }
 
-SQL: dict[str, any] = {
+SQL: dict = {
     "NULL": None,
     "INTEGER": int,
     "REAL": float,
     "TEXT": str,
     "BLOB": bytes,  # Binary data
 }
+
+DATA_TYPES: dict[str, dict] = {"DBF": DBF, "SQL": SQL}

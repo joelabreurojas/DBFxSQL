@@ -1,7 +1,5 @@
-# DBF ORM
-
-from dbfxsql.functionalities import dbf_controller
-from dbfxsql.common import utils
+from dbfxsql.modules import dbf_controller
+from dbfxsql import utils
 
 
 def test_create(table: str, fields: str) -> None:

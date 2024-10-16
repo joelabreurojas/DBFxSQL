@@ -1,6 +1,9 @@
-from . import sync_connection
-from dbfxsql.common import formatters, utils, models
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
+from . import sync_queries
+from dbfxsql.models.sync_table import SyncTable
+from dbfxsql.helpers import formatters, utils
+
 from watchfiles import awatch
 
 
@@ -16,7 +19,7 @@ def relevant_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
     changes: list = []
 
     for filename in filenames:
-        origin: models.Actor = None
+        origin: SyncTable = None
         destinies: list = []
 
         for relation in relations:
@@ -30,7 +33,7 @@ def relevant_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
     return changes
 
 
-def classify(origin: models.Actor, destiny: models.Actor) -> tuple[list, list, list]:
+def classify(origin: SyncTable, destiny: SyncTable) -> tuple[list, list, list]:
     """Classifies changes into insert, update and delete operations."""
 
     origin_records: list = formatters.depurate_empty_records(origin.records)
@@ -57,7 +60,7 @@ def classify(origin: models.Actor, destiny: models.Actor) -> tuple[list, list, l
 def operate(insert: list, update: list, delete: list, header: dict) -> None:
     """Executes insert, update and delete operations."""
     for record in insert:
-        sync_connection.insert(
+        sync_queries.insert(
             header["file"],
             header["table"],
             header["destiny_fields"],
@@ -70,7 +73,7 @@ def operate(insert: list, update: list, delete: list, header: dict) -> None:
     header["destiny_fields"].remove("id")
 
     for record in update:
-        sync_connection.update(
+        sync_queries.update(
             header["file"],
             header["table"],
             ", ".join(header["destiny_fields"]),
@@ -79,20 +82,20 @@ def operate(insert: list, update: list, delete: list, header: dict) -> None:
         )
 
     for record in delete:
-        sync_connection.delete(header["file"], header["table"], f"id == {record['id']}")
+        sync_queries.delete(header["file"], header["table"], f"id == {record['id']}")
 
 
-def _parse_actors(filename: str, relation: dict, origin: models.Actor | None) -> tuple:
+def _parse_actors(filename: str, relation: dict, origin: SyncTable | None) -> tuple:
     for index, file in enumerate(relation["files"]):
         if filename == file:
             if not origin:
-                origin: models.Actor = __create_actor(relation, index)
+                origin: SyncTable = __create_actor(relation, index)
 
             else:
                 origin.fields.append(relation["fields"][index])
 
         else:
-            destiny: models.Actor = __create_actor(relation, index)
+            destiny: SyncTable = __create_actor(relation, index)
 
     return origin, destiny
 
@@ -103,10 +106,10 @@ def _comparator(origin: dict, destiny: dict, fields: tuple) -> dict | None:
             return origin
 
 
-def __create_actor(relation: dict, index: int) -> models.Actor:
+def __create_actor(relation: dict, index: int) -> SyncTable:
     file: str = relation["files"][index]
     table: str = relation["tables"][index]
     fields: list[str] = [relation["fields"][index]]
-    records: list[dict[str, any]] = sync_connection.read(file, table)
+    records: list[dict] = sync_queries.read(file, table)
 
-    return models.Actor(file=file, table=table, fields=fields, records=records)
+    return SyncTable(file=file, table=table, fields=fields, records=records)

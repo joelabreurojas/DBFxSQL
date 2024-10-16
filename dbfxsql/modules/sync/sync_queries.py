@@ -1,5 +1,5 @@
-from dbfxsql.common import file_manager
-from dbfxsql.functionalities import dbf_controller, sql_controller
+from dbfxsql.helpers import file_manager
+from dbfxsql.modules import dbf_controller, sql_controller
 
 
 def insert(filename: str, table: str, fields: str, values: str) -> None:
