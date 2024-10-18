@@ -10,13 +10,7 @@ from dbfxsql.helpers import file_manager
 def test_create_table() -> None:
     os.system(sample_commands.DBF["create"])
 
-    assert file_manager.path_exists("./data.dbf") is True
-
-
-def test_drop_table() -> None:
-    os.system(sample_commands.DBF["drop"] + " --yes")
-
-    assert file_manager.path_exists("./data.dbf") is False
+    assert file_manager.path_exists("./data.dbf")
 
 
 def test_insert_record() -> None:
@@ -26,13 +20,7 @@ def test_insert_record() -> None:
 
     try:
         output: str = subprocess.check_output(command, shell=True, text=True)
-        table: str = """
-            +----+----------+\n
-            | id |   name   |\n
-            +----+----------+\n
-            | 1  | John Doe |\n
-            +----+----------+\n\n
-        """
+        table: str = "+----+----------+\n| id |   name   |\n+----+----------+\n| 1  | John Doe |\n+----+----------+\n\n"
 
         assert output == table
 
@@ -45,13 +33,7 @@ def test_read_records() -> None:
 
     try:
         output: str = subprocess.check_output(command, shell=True, text=True)
-        table: str = """
-            +----+----------+\n
-            | id |   name   |\n
-            +----+----------+\n
-            | 1  | John Doe |\n
-            +----+----------+\n\n
-        """
+        table: str = "+----+----------+\n| id |   name   |\n+----+----------+\n| 1  | John Doe |\n+----+----------+\n\n"
 
         assert output == table
 
@@ -66,13 +48,7 @@ def test_update_records() -> None:
 
     try:
         output: str = subprocess.check_output(command, shell=True, text=True)
-        table: str = """
-            +----+----------+\n
-            | id |   name   |\n
-            +----+----------+\n
-            | 1  | Jane Doe |\n
-            +----+----------+\n\n
-        """
+        table: str = "+----+----------+\n| id |   name   |\n+----+----------+\n| 1  | Jane Doe |\n+----+----------+\n\n"
 
         assert output == table
 
@@ -88,14 +64,23 @@ def test_delete_records() -> None:
     try:
         command = "dbfxsql read -e DBF -s data.dbf"
         output: str = subprocess.check_output(command, shell=True, text=True)
-        table: str = """
-            +----+----------+\n
-            | id |   name   |\n
-            +----+----------+\n
-            +----+----------+\n\n
-        """
-
+        table: str = "+----+------+\n| id | name |\n+----+------+\n|    |      |\n+----+------+\n\n"
         assert output == table
 
     except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
+
+
+def test_drop_table() -> None:
+    os.system(sample_commands.DBF["drop"] + " --yes")
+
+    assert not file_manager.path_exists("./data.dbf")
+
+
+if __name__ == "__main__":
+    test_create_table()
+    test_insert_record()
+    test_read_records()
+    test_update_records()
+    test_delete_records()
+    test_drop_table()

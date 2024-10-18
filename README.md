@@ -113,6 +113,7 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Add FIELDS options for filtering read queries.</li>
       <li>[x] Standardize the cli and config formats.</li>
       <li>[x] Automatic SQL database creation during SQL table creation.</li>
+      <li>[x] Replace controller with commands during the sync</li>
       <li>[ ] Suppress id in fields if their value it's the same in condition.</li>
       <li>[ ] Decorator for listening command.</li>
       <li>[ ] Row-based sync implementation.</li>

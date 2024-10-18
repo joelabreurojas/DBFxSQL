@@ -5,7 +5,7 @@ from dbfxsql.exceptions.table_errors import TableAlreadyExists, TableNotFound
 
 
 def create(sourcepath: str, table: str, fields: str) -> None:
-    if _table_exists(sourcepath, table):
+    if table_exists(sourcepath, table):
         raise TableAlreadyExists(table)
 
     query: str = f"CREATE TABLE IF NOT EXISTS {table} ({fields})"
@@ -13,90 +13,69 @@ def create(sourcepath: str, table: str, fields: str) -> None:
 
 
 def drop(sourcepath: str, table: str) -> None:
-    if not _table_exists(sourcepath, table):
+    if not table_exists(sourcepath, table):
         raise TableNotFound(table)
 
     query: str = f"DROP TABLE IF EXISTS {table}"
     sql_connection.fetch_none(sourcepath, query)
 
 
-def insert(sourcepath: str, table: str, record: dict) -> None:
-    if not _table_exists(sourcepath, table):
+def insert(sourcepath: str, table: str, record: dict, fields: tuple[str, str]) -> None:
+    if not table_exists(sourcepath, table):
         raise TableNotFound(table)
 
-    # [key] -> [:key]
-    fields: str = ", ".join([f"{key.lower()}" for key in record.keys()])
-    _fields: str = ", ".join([f":{key.lower()}" for key in record.keys()])
+    field_names, values = fields
 
-    query: str = f"INSERT INTO {table} ({fields}) VALUES ({_fields})"
+    query: str = f"INSERT INTO {table} ({field_names}) VALUES ({values})"
     parameters: dict = {**record}
 
     sql_connection.fetch_none(sourcepath, query, parameters)
 
 
-def read(sourcepath: str, table: str, filter: str | None = None) -> list[dict]:
-    if not _table_exists(sourcepath, table):
+def read(sourcepath: str, table: str, condition: tuple | None) -> list[dict]:
+    if not table_exists(sourcepath, table):
         raise TableNotFound(table)
 
     query: str = f"SELECT * FROM {table}"
 
-    if filter:
-        query += f" WHERE {filter}"
+    if condition:
+        query += f" WHERE {"".join(condition)}"
+        field: str = condition[0]
 
-        if "id" == filter.field:
+        if "id" == field.lower():
             return sql_connection.fetch_one(sourcepath, query)
 
     return sql_connection.fetch_all(sourcepath, query)
 
 
-def update(sourcepath: str, table: str, record: dict, filter: str) -> None:
-    if not _table_exists(sourcepath, table):
+def update(
+    sourcepath: str, table: str, record: dict, fields: str, condition: tuple
+) -> None:
+    if not table_exists(sourcepath, table):
         raise TableNotFound(table)
 
-    # [key] -> [key = :key]
-    fields: str = ", ".join([f"{key} = :{key.lower()}" for key in record.keys()])
-
-    query: str = f"UPDATE {table} SET {fields} WHERE {filter}"
+    query: str = f"UPDATE {table} SET {fields} WHERE {"".join(condition)}"
     parameters: dict = {**record}
 
     sql_connection.fetch_none(sourcepath, query, parameters)
 
 
-def delete(sourcepath: str, table: str, filter: str) -> None:
-    if not _table_exists(sourcepath, table):
+def delete(sourcepath: str, table: str, condition: tuple) -> None:
+    if not table_exists(sourcepath, table):
         raise TableNotFound(table)
 
-    query: str = f"DELETE FROM {table} WHERE {filter}"
+    query: str = f"DELETE FROM {table} WHERE {"".join(condition)}"
 
     sql_connection.fetch_none(sourcepath, query)
 
 
-def fetch_types(sourcepath: str, table: str, fields: str) -> list[dict[str, str]]:
-    """Fetches the types of specified fields in a SQL table."""
+def fetch_types(sourcepath: str, table: str) -> dict[str, str]:
+    query: str = f"SELECT name, type FROM pragma_table_info('{table}')"
 
-    fields_list = fields.lower().replace(", ", ",").split(",")
-
-    fields = ", ".join([f"'{field}'" for field in fields_list])
-
-    query: str = (
-        f"SELECT name, type FROM pragma_table_info('{table}') WHERE name IN ({fields})"
-    )
-
-    records = sql_connection.fetch_all(sourcepath, query)
-
-    fields_types: dict[str, str] = dict(
-        zip([types["name"] for types in records], [types["type"] for types in records])
-    )
-
-    types: list[str] = []
-
-    for field in fields_list:
-        types.append(fields_types[field])  # if KeyError -> Invalid field
-
-    return types
+    return sql_connection.fetch_all(sourcepath, query)
 
 
-def _table_exists(sourcepath: str, table: str) -> bool:
+def table_exists(sourcepath: str, table: str) -> bool:
     query = f"SELECT COUNT(1) FROM sqlite_master WHERE type='table' AND name='{table}'"
 
     return bool(sql_connection.fetch_one(sourcepath, query)[0]["COUNT(1)"])

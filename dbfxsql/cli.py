@@ -148,7 +148,7 @@ def drop(engine: str, rdbms: str, source: str, table: str | None) -> None:
     "--fields",
     type=(str, str),
     multiple=True,
-    help="Fields with their types.",
+    help="Fields with their values.",
     required=True,
 )
 @click.version_option(config.VERSION, "-v", "--version")
@@ -200,14 +200,6 @@ def insert(
     default="",
 )
 @click.option(
-    "-f",
-    "--fields",
-    multiple=True,
-    metavar="<TEXT>...",
-    default=["*"],
-    show_default=True,
-)
-@click.option(
     "-c",
     "--condition",
     type=(click.Tuple([str, str, str])),
@@ -222,22 +214,21 @@ def read(
     rdbms: str,
     source: str,
     table: str | None,
-    fields: tuple,
     condition: tuple | None,
 ) -> None:
     """Read records from a DBF/SQL table."""
 
+    # Use cases
     records: list = []
 
-    # Use cases
     if "DBF" == engine:
-        records = dbf_controller.read_records(engine, source, fields, condition)
+        records = dbf_controller.read_records(engine, source, condition)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table'.")
 
     elif "SQLite" == rdbms:
-        records = sql_controller.read_records(engine, source, table, fields, condition)
+        records = sql_controller.read_records(engine, source, table, condition)
 
     else:
         raise NotImplementedError
@@ -274,10 +265,10 @@ def read(
 @click.option(
     "-f",
     "--fields",
+    type=(str, str),
     multiple=True,
-    metavar="<TEXT>...",
-    default=["*"],
-    show_default=True,
+    help="Fields with their values.",
+    required=True,
 )
 @click.option(
     "-c",
@@ -285,6 +276,7 @@ def read(
     type=(click.Tuple([str, str, str])),
     metavar="TEXT TEXT TEXT",
     help="Field, operator and value.",
+    required=True,
 )
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
@@ -300,14 +292,14 @@ def update(
     """Update records from a DBF/SQL table."""
 
     # Use cases
-    if "DBF" != engine:
-        dbf_controller.update_records(engine, source, *fields, condition)
+    if "DBF" == engine:
+        dbf_controller.update_records(engine, source, fields, condition)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table'.")
 
     elif "SQLite" == rdbms:
-        sql_controller.update_records(engine, source, table, *fields, condition)
+        sql_controller.update_records(engine, source, table, fields, condition)
 
     else:
         raise NotImplementedError()
@@ -345,6 +337,7 @@ def update(
     type=(click.Tuple([str, str, str])),
     metavar="TEXT TEXT TEXT",
     help="Field, operator and value.",
+    required=True,
 )
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
@@ -355,14 +348,14 @@ def delete(
     """Delete records from an DBF/SQL table."""
 
     # Use cases
-    if "DBF" != engine:
-        dbf_controller.update_records(engine, source, condition)
+    if "DBF" == engine:
+        dbf_controller.delete_records(engine, source, condition)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table'.")
 
     elif "SQLite" == rdbms:
-        sql_controller.update_records(engine, source, table, condition)
+        sql_controller.delete_records(engine, source, table, condition)
 
     else:
         raise NotImplementedError()

@@ -1,10 +1,12 @@
+from collections.abc import Iterable
+
 from . import dbf_queries
 from dbfxsql.helpers import file_manager, formatters
 from dbfxsql.exceptions.source_errors import SourceAlreadyExists, SourceNotFound
 from dbfxsql.exceptions.record_errors import RecordNotFound
 
 
-def create_table(engine: str, source: str, fields: tuple[tuple]) -> None:
+def create_table(engine: str, source: str, fields: Iterable[tuple]) -> None:
     sourcepath: str = file_manager.add_folderpath(engine, source)
 
     if file_manager.path_exists(sourcepath):
@@ -25,7 +27,7 @@ def drop_table(engine: str, source: str) -> None:
     file_manager.remove_file(sourcepath)
 
 
-def insert_record(engine: str, source: str, fields: tuple[tuple]) -> None:
+def insert_record(engine: str, source: str, fields: Iterable[tuple]) -> None:
     sourcepath: str = file_manager.add_folderpath(engine, source)
 
     if not file_manager.path_exists(sourcepath):
@@ -39,9 +41,7 @@ def insert_record(engine: str, source: str, fields: tuple[tuple]) -> None:
     dbf_queries.insert(sourcepath, record)
 
 
-def read_records(
-    engine: str, source: str, fields: tuple, condition: tuple | None
-) -> list[dict]:
+def read_records(engine: str, source: str, condition: tuple | None) -> list[dict]:
     sourcepath: str = file_manager.add_folderpath(engine, source)
 
     if not file_manager.path_exists(sourcepath):
@@ -60,7 +60,9 @@ def read_records(
     return records
 
 
-def update_records(engine: str, source: str, fields: tuple, condition: tuple) -> None:
+def update_records(
+    engine: str, source: str, fields: Iterable[tuple], condition: tuple
+) -> None:
     sourcepath: str = file_manager.add_folderpath(engine, source)
 
     if not file_manager.path_exists(sourcepath):
@@ -87,7 +89,7 @@ def update_records(engine: str, source: str, fields: tuple, condition: tuple) ->
         dbf_queries.update(sourcepath, record, indexes)
 
 
-def delete_records(engine: str, source: str, condition: str) -> None:
+def delete_records(engine: str, source: str, condition: tuple) -> None:
     sourcepath: str = file_manager.add_folderpath(engine, source)
 
     if not file_manager.path_exists(sourcepath):

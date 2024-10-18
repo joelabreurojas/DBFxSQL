@@ -48,6 +48,21 @@ def _apply_type_cases(field: str, value: str, _type: str) -> str:
     return value
 
 
+def deglose_fields(record: dict) -> tuple:
+    keys: list = [str(key) for key in record.keys()]
+
+    field_names: str = ", ".join(keys)  # [key]
+    values: str = ":" + ", :".join(keys)  # [:key]
+
+    return field_names, values
+
+
+def merge_fields(fields: tuple[str, str], sep: str) -> str:
+    field_names, values = fields
+
+    return sep.join([field_names, values])
+
+
 def scourgify_records(records: list[dict]) -> list[dict]:
     """Convert fields to lowercase and stripping values."""
 
@@ -102,6 +117,13 @@ def values_are_different(records: list[dict], record: dict) -> bool:
     return False
 
 
+def scourgify_types(types: list[dict[str, str]]) -> dict[str, str]:
+    names: list = [type["name"] for type in types]
+    data_structure: list = [type["type"] for type in types]
+
+    return dict(zip(names, data_structure))
+
+
 def depurate_empty_records(records: list[dict]) -> list:
     """Return an empty list if a list of records only contains empty records."""
 
@@ -148,5 +170,3 @@ def parse_extensions(relations: list[dict]) -> list[str]:
 
     for relation in relations:
         extensions.append(file_manager.decompose_filename(relation["source"])[1])
-
-    print(extensions)

@@ -2,13 +2,12 @@ import tomllib
 
 from ..constants import config
 
-import tomli_w
 from pathlib import Path
 
 
 def add_folderpath(engine: str, source: str) -> str:
     """Adds the folderpath to the source depending on the engine."""
-    folderpath: str = load_toml()["folderpaths"][engine][0]
+    folderpath: str = load_config()["folderpaths"][engine][0]
 
     if not folderpath.endswith("/"):
         folderpath += "/"
@@ -16,11 +15,11 @@ def add_folderpath(engine: str, source: str) -> str:
     return folderpath + source
 
 
-def load_toml() -> dict:
+def load_config() -> dict:
     configpath: Path = Path(config.PATH).expanduser()
 
     if not configpath.exists():
-        _new_toml(configpath)
+        _create_default_config(configpath)
 
     with open(configpath.as_posix(), "rb") as configfile:
         toml_data: dict = tomllib.load(configfile)
@@ -46,9 +45,9 @@ def decompose_filename(file: str) -> tuple[str, str]:
     return Path(file).stem, Path(file).suffix
 
 
-def _new_toml(configpath: Path) -> None:
+def _create_default_config(configpath: Path) -> None:
     configpath.parent.mkdir(parents=True, exist_ok=True)
     configpath.touch()
 
-    with open(configpath.as_posix(), "wb") as file:
-        tomli_w.dump(config.TEMPLATE, file)
+    with open(configpath.as_posix(), "w") as configfile:
+        configfile.write(config.TEMPLATE[1:])  # remove the first newline

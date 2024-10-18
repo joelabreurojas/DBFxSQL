@@ -11,7 +11,6 @@ def fetch_all(sourcepath: str, query: str) -> list[dict]:
     with _get_cursor(sourcepath) as cursor:
         cursor.execute(query)
 
-        # Save field names in a list
         fields: list[str] = [description[0] for description in cursor.description]
 
         records: list[dict] = [dict(zip(fields, row)) for row in cursor.fetchall()]
@@ -25,10 +24,8 @@ def fetch_one(sourcepath: str, query: str) -> list[dict] | None:
     with _get_cursor(sourcepath) as cursor:
         cursor.execute(query)
 
-        # Save field names in a list
         fields = [description[0] for description in cursor.description]
 
-        # If there are row
         if row := cursor.fetchone():
             return [dict(zip(fields, row))]
 
