@@ -8,26 +8,26 @@ def create(sourcepath: str, fields: str) -> None:
         table.add_fields(fields)
 
 
-def insert(sourcepath: str, record: dict) -> None:
+def insert(sourcepath: str, row: dict) -> None:
     with get_table(sourcepath) as table:
-        table.append(record)
+        table.append(row)
 
 
 def read(sourcepath: str) -> list[dict]:
     with get_table(sourcepath) as table:
         field_names: list[str] = [field.lower() for field in table.field_names]
 
-        records: list[dict] = [dict(zip(field_names, record)) for record in table]
+        rows: list[dict] = [dict(zip(field_names, row)) for row in table]
 
-    return records if records else [{field: "" for field in field_names}]
+    return rows if rows else [{field: "" for field in field_names}]
 
 
-def update(sourcepath: str, record: dict, indexes: list[int]) -> None:
+def update(sourcepath: str, row: dict, indexes: list[int]) -> None:
     with get_table(sourcepath) as table:
         for index in indexes:
-            with table[index] as row:
-                for key, value in record.items():
-                    setattr(row, key, value)
+            with table[index] as _row:
+                for key, value in row.items():
+                    setattr(_row, key, value)
 
 
 def delete(sourcepath: str, indexes: list[int]) -> None:

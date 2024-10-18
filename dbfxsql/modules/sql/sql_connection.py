@@ -13,9 +13,9 @@ def fetch_all(sourcepath: str, query: str) -> list[dict]:
 
         fields: list[str] = [description[0] for description in cursor.description]
 
-        records: list[dict] = [dict(zip(fields, row)) for row in cursor.fetchall()]
+        rows: list[dict] = [dict(zip(fields, row)) for row in cursor.fetchall()]
 
-    return records if records else [{field: "" for field in fields}]
+    return rows if rows else [{field: "" for field in fields}]
 
 
 def fetch_one(sourcepath: str, query: str) -> list[dict] | None:

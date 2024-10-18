@@ -4,15 +4,15 @@ from prettytable import PrettyTable
 from watchfiles import Change
 
 
-def show_table(records: list[dict]) -> None:
-    """Displays a list of records in a table format."""
+def show_table(rows: list[dict]) -> None:
+    """Displays a list of rows in a table format."""
 
     table = PrettyTable()
 
-    table.field_names = records[0].keys() if records else []
+    table.field_names = rows[0].keys() if rows else []
 
-    for record in records:
-        table.add_row([record[field] for field in table.field_names])
+    for row in rows:
+        table.add_row([row[field] for field in table.field_names])
 
     print(table, end="\n\n")
 
@@ -47,17 +47,17 @@ def only_modified(change: Change, path: str) -> bool:
 
 
 def notify(insert: list, update: list, delete: list, header: dict) -> None:
-    for record in insert:
-        print(f"Insert in table '{header['table']}': {record}")
+    for row in insert:
+        print(f"Insert in table '{header['table']}': {row}")
 
-    for record in update:
+    for row in update:
         print(
             f"""
             Update in table '{header['table']}'
             on fields '{header['destiny_fields']}'
-            with record: {record}
+            with row: {row}
             """
         )
 
-    for record in delete:
-        print(f"Delete in table '{header['table']}' with id: {record['id']}")
+    for row in delete:
+        print(f"Delete in table '{header['table']}' with id: {row['id']}")

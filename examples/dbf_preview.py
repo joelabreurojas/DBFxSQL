@@ -23,16 +23,16 @@ def test_add_fields(table: str, fields: str, increment: str) -> None:
 def test_insert(table: str, fields: str, values: str) -> None:
     print(f"INSERT INTO {table} ({fields}) VALUES ({values});")
 
-    dbf_controller.insert_record(table, fields, values)
+    dbf_controller.insert_row(table, fields, values)
 
 
 def test_read_all(table: str) -> None:
-    utils.show_table(dbf_controller.read_records(table))
+    utils.show_table(dbf_controller.read_rows(table))
 
 
 def test_read_with_condition(table: str, condition: str) -> None:
     print(f"SELECT * FROM {table} WHERE ({condition});")
-    utils.show_table(dbf_controller.read_records(table, condition))
+    utils.show_table(dbf_controller.read_rows(table, condition))
 
 
 def test_update(table: str, fields: str, values: str, condition: str) -> None:
@@ -42,13 +42,13 @@ def test_update(table: str, fields: str, values: str, condition: str) -> None:
         f"WHERE ({condition});",
     )
 
-    dbf_controller.update_records(table, fields, values, condition)
+    dbf_controller.update_rows(table, fields, values, condition)
 
 
 def test_delete(table: str, condition: str) -> None:
     print(f"DELETE FROM users WHERE ({condition});")
 
-    dbf_controller.delete_records(table, condition)
+    dbf_controller.delete_rows(table, condition)
 
 
 if __name__ == "__main__":

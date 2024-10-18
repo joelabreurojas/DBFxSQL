@@ -21,16 +21,16 @@ def test_drop(database: str) -> None:
 def test_insert(database: str, table: str, fields: str, values: str) -> None:
     print(f"INSERT INTO {table} ({fields}) VALUES ({values});")
 
-    sql_controller.insert_record(database, table, fields, values)
+    sql_controller.insert_row(database, table, fields, values)
 
 
 def test_read_all(database: str, table: str) -> None:
-    utils.show_table(sql_controller.read_records(database, table))
+    utils.show_table(sql_controller.read_rows(database, table))
 
 
 def test_read_with_condition(database: str, table: str, condition: str) -> None:
     print(f"SELECT * FROM {table} WHERE ({condition});")
-    utils.show_table(sql_controller.read_records(database, table, condition))
+    utils.show_table(sql_controller.read_rows(database, table, condition))
 
 
 def test_update(
@@ -42,13 +42,13 @@ def test_update(
         f"WHERE ({condition});",
     )
 
-    sql_controller.update_records(database, table, fields, values, condition)
+    sql_controller.update_rows(database, table, fields, values, condition)
 
 
 def test_delete(database: str, table: str, condition: str) -> None:
     print(f"DELETE FROM users WHERE ({condition});")
 
-    sql_controller.delete_records(database, table, condition)
+    sql_controller.delete_rows(database, table, condition)
 
 
 if __name__ == "__main__":

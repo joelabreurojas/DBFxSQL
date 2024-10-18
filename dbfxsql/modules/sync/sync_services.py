@@ -36,53 +36,53 @@ def relevant_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
 def classify(origin: SyncTable, destiny: SyncTable) -> tuple[list, list, list]:
     """Classifies changes into insert, update and delete operations."""
 
-    origin_records: list = formatters.depurate_empty_records(origin.records)
-    destiny_records: list = formatters.depurate_empty_records(destiny.records)
+    origin_rows: list = formatters.depurate_empty_rows(origin.rows)
+    destiny_rows: list = formatters.depurate_empty_rows(destiny.rows)
 
-    insert: list = origin_records[:]
+    insert: list = origin_rows[:]
     update: list = []
-    delete: list = destiny_records[:]
+    delete: list = destiny_rows[:]
 
     fields: tuple = formatters.package_fields(origin, destiny)
 
-    for origin_record in origin_records:
-        for destiny_record in destiny_records:
-            if origin_record["id"] == destiny_record["id"]:
-                if change := _comparator(origin_record, destiny_record, fields):
+    for origin_row in origin_rows:
+        for destiny_row in destiny_rows:
+            if origin_row["id"] == destiny_row["id"]:
+                if change := _comparator(origin_row, destiny_row, fields):
                     update.append(change)
 
-                insert.remove(origin_record)
-                delete.remove(destiny_record)
+                insert.remove(origin_row)
+                delete.remove(destiny_row)
 
     return insert, update, delete
 
 
 def operate(insert: list, update: list, delete: list, header: dict) -> None:
     """Executes insert, update and delete operations."""
-    for record in insert:
+    for row in insert:
         sync_queries.insert(
             header["file"],
             header["table"],
             header["destiny_fields"],
-            ", ".join(f"{record[field]}" for field in header["origin_fields"]),
+            ", ".join(f"{row[field]}" for field in header["origin_fields"]),
         )
 
-    # avoid RecordAlreadyExists error
+    # avoid RowAlreadyExists error
     header["origin_fields"].remove("id")
     header["destiny_fields"] = header["destiny_fields"].split(", ")
     header["destiny_fields"].remove("id")
 
-    for record in update:
+    for row in update:
         sync_queries.update(
             header["file"],
             header["table"],
             ", ".join(header["destiny_fields"]),
-            ", ".join(f"{record[field]}" for field in header["origin_fields"]),
-            f"id == {record['id']}",
+            ", ".join(f"{row[field]}" for field in header["origin_fields"]),
+            f"id == {row['id']}",
         )
 
-    for record in delete:
-        sync_queries.delete(header["file"], header["table"], f"id == {record['id']}")
+    for row in delete:
+        sync_queries.delete(header["file"], header["table"], f"id == {row['id']}")
 
 
 def _parse_actors(filename: str, relation: dict, origin: SyncTable | None) -> tuple:
@@ -110,6 +110,6 @@ def __create_actor(relation: dict, index: int) -> SyncTable:
     file: str = relation["files"][index]
     table: str = relation["tables"][index]
     fields: list[str] = [relation["fields"][index]]
-    records: list[dict] = sync_queries.read(file, table)
+    rows: list[dict] = sync_queries.read(file, table)
 
-    return SyncTable(file=file, table=table, fields=fields, records=records)
+    return SyncTable(file=file, table=table, fields=fields, rows=rows)

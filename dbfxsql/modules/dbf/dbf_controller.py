@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from . import dbf_queries
 from dbfxsql.helpers import file_manager, formatters
 from dbfxsql.exceptions.source_errors import SourceAlreadyExists, SourceNotFound
-from dbfxsql.exceptions.record_errors import RecordNotFound
+from dbfxsql.exceptions.row_errors import RowNotFound
 
 
 def create_table(engine: str, source: str, fields: Iterable[tuple]) -> None:
@@ -27,40 +27,39 @@ def drop_table(engine: str, source: str) -> None:
     file_manager.remove_file(sourcepath)
 
 
-def insert_record(engine: str, source: str, fields: Iterable[tuple]) -> None:
+def insert_row(engine: str, source: str, fields: Iterable[tuple]) -> None:
     sourcepath: str = file_manager.add_folderpath(engine, source)
 
     if not file_manager.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
     types: dict = dbf_queries.fetch_types(sourcepath)
-    record: dict = formatters.fields_to_dict(fields)
+    row: dict = formatters.fields_to_dict(fields)
 
-    record = formatters.assign_types(engine, types, record)
+    row = formatters.assign_types(engine, types, row)
 
-    dbf_queries.insert(sourcepath, record)
+    dbf_queries.insert(sourcepath, row)
 
 
-def read_records(engine: str, source: str, condition: tuple | None) -> list[dict]:
+def read_rows(engine: str, source: str, condition: tuple | None) -> list[dict]:
     sourcepath: str = file_manager.add_folderpath(engine, source)
 
     if not file_manager.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
-    records: list[dict] = dbf_queries.read(sourcepath)
-    records = formatters.scourgify_records(records)
+    rows: list[dict] = dbf_queries.read(sourcepath)
+    rows = formatters.scourgify_rows(rows)
 
     if condition:
-        records, _ = formatters.filter_records(records, condition)
+        rows, _ = formatters.filter_rows(rows, condition)
 
-    if not records:
-        raise RecordNotFound(condition)
+    if not rows:
+        raise RowNotFound(condition)
 
-    # utils.show_table(records)
-    return records
+    return rows
 
 
-def update_records(
+def update_rows(
     engine: str, source: str, fields: Iterable[tuple], condition: tuple
 ) -> None:
     sourcepath: str = file_manager.add_folderpath(engine, source)
@@ -68,39 +67,39 @@ def update_records(
     if not file_manager.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
-    # assign types to each record's value
+    # assign types to each row's value
     types: dict = dbf_queries.fetch_types(sourcepath)
-    record: dict = formatters.fields_to_dict(fields)
+    row: dict = formatters.fields_to_dict(fields)
 
-    record = formatters.assign_types(engine, types, record)
+    row = formatters.assign_types(engine, types, row)
 
-    # get a sanitized list of records
-    records: list[dict] = dbf_queries.read(sourcepath)
-    records = formatters.scourgify_records(records)
+    # get a sanitized list of rows
+    rows: list[dict] = dbf_queries.read(sourcepath)
+    rows = formatters.scourgify_rows(rows)
 
-    # manual filter of records by condition
-    records, indexes = formatters.filter_records(records, condition)
+    # manual filter of rows by condition
+    rows, indexes = formatters.filter_rows(rows, condition)
 
-    if not records:
-        raise RecordNotFound(condition)
+    if not rows:
+        raise RowNotFound(condition)
 
-    # update filtered records by their index
-    if formatters.values_are_different(records, record):
-        dbf_queries.update(sourcepath, record, indexes)
+    # update filtered rows by their index
+    if formatters.values_are_different(rows, row):
+        dbf_queries.update(sourcepath, row, indexes)
 
 
-def delete_records(engine: str, source: str, condition: tuple) -> None:
+def delete_rows(engine: str, source: str, condition: tuple) -> None:
     sourcepath: str = file_manager.add_folderpath(engine, source)
 
     if not file_manager.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
-    records: list[dict] = dbf_queries.read(sourcepath)
-    records = formatters.scourgify_records(records)
+    rows: list[dict] = dbf_queries.read(sourcepath)
+    rows = formatters.scourgify_rows(rows)
 
-    records, indexes = formatters.filter_records(records, condition)
+    rows, indexes = formatters.filter_rows(rows, condition)
 
-    if not records:
-        raise RecordNotFound(condition)
+    if not rows:
+        raise RowNotFound(condition)
 
     dbf_queries.delete(sourcepath, indexes)

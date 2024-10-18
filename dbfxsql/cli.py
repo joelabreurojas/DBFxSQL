@@ -157,17 +157,17 @@ def drop(engine: str, rdbms: str, source: str, table: str | None) -> None:
 def insert(
     engine: str, rdbms: str, source: str, table: str | None, fields: tuple
 ) -> None:
-    """Insert a record into a DBF/SQL table."""
+    """Insert a row into a DBF/SQL table."""
 
     # Use cases
     if "DBF" == engine:
-        dbf_controller.insert_record(engine, source, fields)
+        dbf_controller.insert_row(engine, source, fields)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table'.")
 
     elif "SQLite" == rdbms:
-        sql_controller.insert_record(engine, source, table, fields)
+        sql_controller.insert_row(engine, source, table, fields)
 
     else:
         raise NotImplementedError
@@ -216,24 +216,24 @@ def read(
     table: str | None,
     condition: tuple | None,
 ) -> None:
-    """Read records from a DBF/SQL table."""
+    """Read rows from a DBF/SQL table."""
 
     # Use cases
-    records: list = []
+    rows: list = []
 
     if "DBF" == engine:
-        records = dbf_controller.read_records(engine, source, condition)
+        rows = dbf_controller.read_rows(engine, source, condition)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table'.")
 
     elif "SQLite" == rdbms:
-        records = sql_controller.read_records(engine, source, table, condition)
+        rows = sql_controller.read_rows(engine, source, table, condition)
 
     else:
         raise NotImplementedError
 
-    utils.show_table(records)
+    utils.show_table(rows)
 
 
 @cli.command()
@@ -289,17 +289,17 @@ def update(
     fields: tuple,
     condition: tuple,
 ) -> None:
-    """Update records from a DBF/SQL table."""
+    """Update rows from a DBF/SQL table."""
 
     # Use cases
     if "DBF" == engine:
-        dbf_controller.update_records(engine, source, fields, condition)
+        dbf_controller.update_rows(engine, source, fields, condition)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table'.")
 
     elif "SQLite" == rdbms:
-        sql_controller.update_records(engine, source, table, fields, condition)
+        sql_controller.update_rows(engine, source, table, fields, condition)
 
     else:
         raise NotImplementedError()
@@ -345,17 +345,17 @@ def update(
 def delete(
     engine: str, rdbms: str, source: str, table: str | None, condition: tuple
 ) -> None:
-    """Delete records from an DBF/SQL table."""
+    """Delete rows from an DBF/SQL table."""
 
     # Use cases
     if "DBF" == engine:
-        dbf_controller.delete_records(engine, source, condition)
+        dbf_controller.delete_rows(engine, source, condition)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table'.")
 
     elif "SQLite" == rdbms:
-        sql_controller.delete_records(engine, source, table, condition)
+        sql_controller.delete_rows(engine, source, table, condition)
 
     else:
         raise NotImplementedError()

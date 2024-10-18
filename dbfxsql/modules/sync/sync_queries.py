@@ -4,31 +4,31 @@ from dbfxsql.modules import dbf_controller, sql_controller
 
 def insert(filename: str, table: str, fields: str, values: str) -> None:
     if filename.endswith(".dbf"):
-        dbf_controller.insert_record(table, fields, values)
+        dbf_controller.insert_row(table, fields, values)
     else:
         database, _ = file_manager.decompose_filename(filename)
-        sql_controller.insert_record(database, table, fields, values)
+        sql_controller.insert_row(database, table, fields, values)
 
 
 def read(filename: str, table: str) -> dict:
     if filename.endswith(".dbf"):
-        return dbf_controller.read_records(table)
+        return dbf_controller.read_rows(table)
 
     database, _ = file_manager.decompose_filename(filename)
-    return sql_controller.read_records(database, table)
+    return sql_controller.read_rows(database, table)
 
 
 def update(filename: str, table: str, fields: str, values: str, condition: str) -> None:
     if filename.endswith(".dbf"):
-        dbf_controller.update_records(table, fields, values, condition)
+        dbf_controller.update_rows(table, fields, values, condition)
     else:
         database, _ = file_manager.decompose_filename(filename)
-        sql_controller.update_records(database, table, fields, values, condition)
+        sql_controller.update_rows(database, table, fields, values, condition)
 
 
 def delete(filename: str, table: str, condition: str) -> None:
     if filename.endswith(".dbf"):
-        dbf_controller.delete_records(table, condition)
+        dbf_controller.delete_rows(table, condition)
     else:
         database, _ = file_manager.decompose_filename(filename)
-        sql_controller.delete_records(database, table, condition)
+        sql_controller.delete_rows(database, table, condition)

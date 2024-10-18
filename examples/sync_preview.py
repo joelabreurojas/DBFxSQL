@@ -4,13 +4,13 @@ from dbfxsql.modules import dbf_controller, sql_controller, sync_controller
 def test_dbf_to_sql(db: str, table: str) -> None:
     print("\nRunning DBF -> SQL tests...", end="\n\n")
 
-    # dbf_controller.read_records("users", "users")
+    # dbf_controller.read_rows("users", "users")
 
     print("Read DBF Table")
-    dbf_controller.read_records("users")
+    dbf_controller.read_rows("users")
 
     print("Read SQL Table")
-    sql_controller.read_records("users", "users")
+    sql_controller.read_rows("users", "users")
 
     print("Syncing...", end="\n\n")
 
@@ -18,7 +18,7 @@ def test_dbf_to_sql(db: str, table: str) -> None:
     sync_controller.dbf_to_sql(db, table)
 
     print("Read SQL Table")
-    sql_controller.read_records("users", "users")
+    sql_controller.read_rows("users", "users")
 
     print("DBF -> SQL test done!")
 
@@ -27,10 +27,10 @@ def test_sql_to_dbf(db: str, table: str) -> None:
     print("\nRunning SQL -> DBF tests...", end="\n\n")
 
     print("Read SQL Table")
-    sql_controller.read_records("users", "users")
+    sql_controller.read_rows("users", "users")
 
     print("Read DBF Table")
-    dbf_controller.read_records("users")
+    dbf_controller.read_rows("users")
 
     print("Syncing...", end="\n\n")
 
@@ -38,7 +38,7 @@ def test_sql_to_dbf(db: str, table: str) -> None:
     sync_controller.sql_to_dbf(db, table)
 
     print("Read DBF Table")
-    dbf_controller.read_records("users")
+    dbf_controller.read_rows("users")
 
     print("SQL -> DBF test done!")
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
         # Insert
         for parameter in dbf_parameters:
-            dbf_controller.insert_record(*parameter)
+            dbf_controller.insert_row(*parameter)
 
         # Test
         test_dbf_to_sql("users", "users")
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
         # Insert
         for parameter in sql_parameters:
-            sql_controller.insert_record(*parameter)
+            sql_controller.insert_row(*parameter)
 
         # Test
         test_sql_to_dbf("users", "users")

@@ -20,14 +20,14 @@ def drop(sourcepath: str, table: str) -> None:
     sql_connection.fetch_none(sourcepath, query)
 
 
-def insert(sourcepath: str, table: str, record: dict, fields: tuple[str, str]) -> None:
+def insert(sourcepath: str, table: str, row: dict, fields: tuple[str, str]) -> None:
     if not table_exists(sourcepath, table):
         raise TableNotFound(table)
 
     field_names, values = fields
 
     query: str = f"INSERT INTO {table} ({field_names}) VALUES ({values})"
-    parameters: dict = {**record}
+    parameters: dict = {**row}
 
     sql_connection.fetch_none(sourcepath, query, parameters)
 
@@ -49,13 +49,13 @@ def read(sourcepath: str, table: str, condition: tuple | None) -> list[dict]:
 
 
 def update(
-    sourcepath: str, table: str, record: dict, fields: str, condition: tuple
+    sourcepath: str, table: str, row: dict, fields: str, condition: tuple
 ) -> None:
     if not table_exists(sourcepath, table):
         raise TableNotFound(table)
 
     query: str = f"UPDATE {table} SET {fields} WHERE {"".join(condition)}"
-    parameters: dict = {**record}
+    parameters: dict = {**row}
 
     sql_connection.fetch_none(sourcepath, query, parameters)
 

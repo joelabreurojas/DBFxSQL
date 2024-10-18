@@ -1,4 +1,5 @@
 import decimal
+from collections.abc import Iterable
 
 from . import file_manager
 from ..constants.data_types import DATA_TYPES
@@ -6,11 +7,11 @@ from ..models.sync_table import SyncTable
 from ..exceptions.value_errors import ValueNotFound, ValueNotValid
 
 
-def fields_to_str(fields: tuple[tuple], sep: str = ", ") -> str:
+def fields_to_str(fields: Iterable[tuple], sep: str = ", ") -> str:
     return sep.join([f"{field[0]} {field[1]}" for field in fields])
 
 
-def fields_to_dict(fields: tuple[tuple]) -> dict:
+def fields_to_dict(fields: Iterable[tuple]) -> dict:
     return {field[0]: field[1] for field in fields}
 
 
@@ -34,6 +35,12 @@ def assign_types(engine: str, _types: dict[str, str], record: dict[str, str]) ->
             raise ValueNotValid(field, value, _type)
 
     return record
+
+
+def field_id_exists(record: dict) -> bool:
+    for _field_name in record.keys():
+        if "id" == _field_name.lower():
+            return True
 
 
 def _apply_type_cases(field: str, value: str, _type: str) -> str:

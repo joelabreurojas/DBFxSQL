@@ -13,7 +13,7 @@ def test_create_table() -> None:
     assert file_manager.path_exists("./data.dbf")
 
 
-def test_insert_record() -> None:
+def test_insert_row() -> None:
     os.system(sample_commands.DBF["insert"])
 
     command: str = sample_commands.DBF["read"]
@@ -28,7 +28,7 @@ def test_insert_record() -> None:
         print(f"Error: {e}")
 
 
-def test_read_records() -> None:
+def test_read_rows() -> None:
     command: str = sample_commands.DBF["read"]
 
     try:
@@ -41,7 +41,7 @@ def test_read_records() -> None:
         print(f"Error: {e}")
 
 
-def test_update_records() -> None:
+def test_update_rows() -> None:
     os.system(sample_commands.DBF["update"])
 
     command: str = sample_commands.DBF["read"]
@@ -56,7 +56,7 @@ def test_update_records() -> None:
         print(f"Error: {e}")
 
 
-def test_delete_records() -> None:
+def test_delete_rows() -> None:
     os.system(sample_commands.DBF["delete"])
 
     command: str = sample_commands.DBF["read"]
@@ -75,12 +75,3 @@ def test_drop_table() -> None:
     os.system(sample_commands.DBF["drop"] + " --yes")
 
     assert not file_manager.path_exists("./data.dbf")
-
-
-if __name__ == "__main__":
-    test_create_table()
-    test_insert_record()
-    test_read_records()
-    test_update_records()
-    test_delete_records()
-    test_drop_table()

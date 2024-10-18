@@ -104,19 +104,19 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Detect changes in folder paths.</li>
       <li>[x] Merge DBF/SQL commands into a more friendly CLI format.</li>
       <li>[x] Explain each single command in the CLI documentation.</li>
-      <li>[x] Get the records of all relations in the config file.</li>
-      <li>[x] Optimize read queries saving origin records for future comparations.</li>
-      <li>[x] Filtering records for optimized data changesets.</li>
-      <li>[x] Refactor update query to ignore DBF records that haven't changed.</li>
+      <li>[x] Get the rows of all relations in the config file.</li>
+      <li>[x] Optimize read queries saving origin rows for future comparations.</li>
+      <li>[x] Filtering rows for optimized data changesets.</li>
+      <li>[x] Refactor update query to ignore DBF rows that haven't changed.</li>
       <li>[x] Force SQL -> DBF "synchronization" (read all tables).</li>
       <li>[x] Replace dictionaries with classes during synchronization.</li>
       <li>[x] Add FIELDS options for filtering read queries.</li>
-      <li>[x] Standardize the cli and config formats.</li>
       <li>[x] Automatic SQL database creation during SQL table creation.</li>
-      <li>[x] Replace controller with commands during the sync</li>
-      <li>[ ] Suppress id in fields if their value it's the same in condition.</li>
-      <li>[ ] Decorator for listening command.</li>
+      <li>[x] Refactor project structure with data structures as inputs.</li>
+      <li>[x] Unit tests for code validation.</li>
       <li>[ ] Row-based sync implementation.</li>
+      <li>[ ] Decorator for listening command.</li>
+      <li>[ ] Replace controller with commands during the sync</li>
       <li>[ ] SQL triggers/procedures for table changes.</li>
       <li>[ ] Configuration commands for upload and edit.</li>
       <li>[ ] Perform table migration before initial data synchronization.</li>
@@ -125,7 +125,6 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[ ] Validate KeyErrors for invalid fields.</li>
       <li>[ ] Validate type lengths and names for consistency between DBF and SQL.</li>
       <li>[ ] Support for relationships between +2 tables in the config file.</li>
-      <li>[ ] Unit tests for code validation.</li>
       <li>[ ] Comprehensive project documentation.</li>
       <li>[ ] Implementation of CQRS (Command Query Responsibility Segregation) patterns.</li>
       <li>[ ] Sharing as a Python library.</li>
