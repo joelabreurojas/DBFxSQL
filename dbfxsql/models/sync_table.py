@@ -7,4 +7,5 @@ class SyncTable:
     source: str
     name: str
     fields: list[str]
-    rows: list[dict]
+    rows: list | None = None
+    indexes: list | None = None

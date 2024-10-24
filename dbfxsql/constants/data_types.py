@@ -21,3 +21,4 @@ SQL: dict = {
 }
 
 DATA_TYPES: dict[str, dict] = {"DBF": DBF, "SQL": SQL}
+

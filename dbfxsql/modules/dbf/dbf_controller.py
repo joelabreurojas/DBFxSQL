@@ -1,16 +1,20 @@
 from collections.abc import Iterable
 
 from . import dbf_queries
-from dbfxsql.helpers import file_manager, formatters
+from dbfxsql.helpers import file_manager, formatters, validators
 from dbfxsql.exceptions.source_errors import SourceAlreadyExists, SourceNotFound
+from dbfxsql.exceptions.field_errors import FieldReserved
 from dbfxsql.exceptions.row_errors import RowNotFound
 
 
 def create_table(engine: str, source: str, fields: Iterable[tuple]) -> None:
-    sourcepath: str = file_manager.add_folderpath(engine, source)
+    sourcepath: str = formatters.add_folderpath(engine, source)
 
-    if file_manager.path_exists(sourcepath):
+    if validators.path_exists(sourcepath):
         raise SourceAlreadyExists(source)
+
+    if row_number := validators.field_name_in(fields, "row_number"):
+        raise FieldReserved(row_number)
 
     _fields: str = formatters.fields_to_str(fields, sep="; ")
 
@@ -18,19 +22,10 @@ def create_table(engine: str, source: str, fields: Iterable[tuple]) -> None:
     dbf_queries.create(sourcepath, _fields)
 
 
-def drop_table(engine: str, source: str) -> None:
-    sourcepath: str = file_manager.add_folderpath(engine, source)
-
-    if not file_manager.path_exists(sourcepath):
-        raise SourceNotFound(sourcepath)
-
-    file_manager.remove_file(sourcepath)
-
-
 def insert_row(engine: str, source: str, fields: Iterable[tuple]) -> None:
-    sourcepath: str = file_manager.add_folderpath(engine, source)
+    sourcepath: str = formatters.add_folderpath(engine, source)
 
-    if not file_manager.path_exists(sourcepath):
+    if not validators.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
     types: dict = dbf_queries.fetch_types(sourcepath)
@@ -42,9 +37,9 @@ def insert_row(engine: str, source: str, fields: Iterable[tuple]) -> None:
 
 
 def read_rows(engine: str, source: str, condition: tuple | None) -> list[dict]:
-    sourcepath: str = file_manager.add_folderpath(engine, source)
+    sourcepath: str = formatters.add_folderpath(engine, source)
 
-    if not file_manager.path_exists(sourcepath):
+    if not validators.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
     rows: list[dict] = dbf_queries.read(sourcepath)
@@ -62,9 +57,9 @@ def read_rows(engine: str, source: str, condition: tuple | None) -> list[dict]:
 def update_rows(
     engine: str, source: str, fields: Iterable[tuple], condition: tuple
 ) -> None:
-    sourcepath: str = file_manager.add_folderpath(engine, source)
+    sourcepath: str = formatters.add_folderpath(engine, source)
 
-    if not file_manager.path_exists(sourcepath):
+    if not validators.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
     # assign types to each row's value
@@ -84,14 +79,14 @@ def update_rows(
         raise RowNotFound(condition)
 
     # update filtered rows by their index
-    if formatters.values_are_different(rows, row):
+    if validators.values_are_different(rows, row):
         dbf_queries.update(sourcepath, row, indexes)
 
 
 def delete_rows(engine: str, source: str, condition: tuple) -> None:
-    sourcepath: str = file_manager.add_folderpath(engine, source)
+    sourcepath: str = formatters.add_folderpath(engine, source)
 
-    if not file_manager.path_exists(sourcepath):
+    if not validators.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
     rows: list[dict] = dbf_queries.read(sourcepath)
@@ -103,3 +98,12 @@ def delete_rows(engine: str, source: str, condition: tuple) -> None:
         raise RowNotFound(condition)
 
     dbf_queries.delete(sourcepath, indexes)
+
+
+def drop_table(engine: str, source: str) -> None:
+    sourcepath: str = formatters.add_folderpath(engine, source)
+
+    if not validators.path_exists(sourcepath):
+        raise SourceNotFound(sourcepath)
+
+    file_manager.remove_file(sourcepath)

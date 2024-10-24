@@ -1,39 +1,58 @@
-from . import sync_services
-from dbfxsql.models.sync_table import SyncTable
-from dbfxsql.helpers import file_manager, utils
-
 import logging
+from pprint import pprint
+
+from . import sync_queries
+from dbfxsql.models.sync_table import SyncTable
+from dbfxsql.helpers import file_manager, formatters
 
 
-def init() -> None:
+def init() -> dict:
     logging.getLogger("watchfiles").setLevel(logging.ERROR)
 
-    setup: dict = file_manager.load_toml()
-    setup["folders"]: tuple[str] = ("DBF_FOLDERPATH"), ("SQL_FOLDERPATH")
-
-    return setup
+    return file_manager.load_config()
 
 
-async def synchronize(setup: list[list[dict]]) -> None:
-    folders: tuple[str] = setup["folders"]
+def migrate(priority: str, extensions: tuple, setup: dict) -> None:
+    folders: list[str] = setup["folderpaths"][priority]
+    filenames: list[str] = file_manager.get_filenames(folders, extensions)
+
     relations: list[dict] = setup["relations"]
+    filenames = formatters.relevant_filenames(filenames, relations)
 
-    async for filenames in sync_services.listen(folders):
-        for change in sync_services.relevant_changes(filenames, relations):
-            origin: SyncTable = change["origin"]
+    origins, destinies = formatters.package_tables(filenames, relations)
 
-            for index, destiny in enumerate(change["destinies"]):
-                # copy with only the correspond fie
-                _origin: SyncTable = utils.clone_actor(origin, index)
+    origin, destinies = _depurate_tables(origins, destinies)
 
-                insert, update, delete = sync_services.classify(_origin, destiny)
+    residual_tables: list = formatters.compare_tables(origin, destinies)
 
-                # data to know where do the changes
-                header: dict = _parse_header(_origin, destiny)
+    formatters.classify_operations(residual_tables)
 
-                # utils.notify(insert, update, delete, header)
+    print("\n")
+    pprint(residual_tables)
 
-                sync_services.operate(insert, update, delete, header)
+
+async def synchronize(setup: dict) -> None:
+    pass
+    # folders: tuple[str] = setup["folders"]
+    # relations: list[dict] = setup["relations"]
+
+    # async for filenames in sync_services.listen(folders):
+    # for change in sync_services.relevant_changes(filenames, relations):
+    # origin: SyncTable = change["origin"]
+
+    # for index, destiny in enumerate(change["destinies"]):
+    # copy with only the correspond fie
+    # _origin: SyncTable = utils.clone_actor(origin, index)
+
+    # insert, update, delete = sync_services.classify(_origin, destiny)
+
+    # data to know where do the changes
+
+    # header: dict = _parse_header(_origin, destiny)
+
+    # utils.notify(insert, update, delete, header)
+
+    # sync_services.operate(insert, update, delete, header)
 
 
 def _parse_header(origin: SyncTable, destiny: SyncTable) -> dict:
@@ -43,3 +62,33 @@ def _parse_header(origin: SyncTable, destiny: SyncTable) -> dict:
         "origin_fields": origin.fields[0].split(", "),
         "destiny_fields": destiny.fields[0],
     }
+
+
+def _depurate_tables(origins: list[SyncTable], destinies: list[SyncTable]) -> tuple:
+    rows: list[dict] = sync_queries.read(
+        origins[0].engine, origins[0].source, origins[0].name
+    )
+    origin: SyncTable = SyncTable(
+        engine=origins[0].engine,
+        source=origins[0].source,
+        name=origins[0].name,
+        fields=[origin.fields for origin in origins],
+        rows=formatters.depurate_empty_rows(rows),
+    )
+
+    _destinies: list = []
+
+    for destiny in destinies:
+        rows = sync_queries.read(destiny.engine, destiny.source, destiny.name)
+
+        destiny: SyncTable = SyncTable(
+            engine=destiny.engine,
+            source=destiny.source,
+            name=destiny.name,
+            fields=destiny.fields,
+            rows=formatters.depurate_empty_rows(rows),
+        )
+
+        _destinies.append(destiny)
+
+    return origin, _destinies

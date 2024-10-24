@@ -1,4 +1,4 @@
-from .constants import config, sample_commands
+from .constants import config
 from .models.order_commands import OrderCommands
 from .modules import dbf_controller, sql_controller, sync_controller
 from .helpers import utils
@@ -55,10 +55,10 @@ def cli():
 def create(
     engine: str, rdbms: str, source: str, table: str | None, fields: tuple
 ) -> None:
-    """Create a DBF/SQL table."""
+    """Create a DBF file/SQL file and table."""
 
     # Use cases
-    if "DBF" == engine:
+    if "DBF" == engine.upper():
         dbf_controller.create_table(engine, source, fields)
 
     elif not table:
@@ -66,53 +66,6 @@ def create(
 
     elif "SQLite" == rdbms:
         sql_controller.create_table(engine, source, table, fields)
-
-    else:
-        raise NotImplementedError
-
-
-@cli.command()
-@click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
-    required=True,
-)
-@click.option(
-    "-r",
-    "--rdbms",
-    default="SQLite",
-    show_default=True,
-)
-@click.option(
-    "-s",
-    "--source",
-    help="Expects a file.",
-    required=True,
-)
-@click.option(
-    "-t",
-    "--table",
-    default="",
-)
-@click.confirmation_option(
-    prompt="Are you sure you want to drop?", help="Confirm the operation."
-)
-@click.version_option(config.VERSION, "-v", "--version")
-@click.help_option("-h", "--help")
-@utils.embed_examples
-def drop(engine: str, rdbms: str, source: str, table: str | None) -> None:
-    """Drop a DBF/SQL source or SQL table."""
-
-    # Use cases
-    if "DBF" == engine:
-        dbf_controller.drop_table(engine, source)
-
-    elif not table and "SQLite" == rdbms:
-        sql_controller.drop_database(engine, source)
-
-    elif "SQLite" == rdbms:
-        sql_controller.drop_table(engine, source, table)
 
     else:
         raise NotImplementedError
@@ -157,10 +110,10 @@ def drop(engine: str, rdbms: str, source: str, table: str | None) -> None:
 def insert(
     engine: str, rdbms: str, source: str, table: str | None, fields: tuple
 ) -> None:
-    """Insert a row into a DBF/SQL table."""
+    """Insert a row into a DBF file/SQL table."""
 
     # Use cases
-    if "DBF" == engine:
+    if "DBF" == engine.upper():
         dbf_controller.insert_row(engine, source, fields)
 
     elif not table:
@@ -216,12 +169,12 @@ def read(
     table: str | None,
     condition: tuple | None,
 ) -> None:
-    """Read rows from a DBF/SQL table."""
+    """Read rows from a DBF file/SQL table."""
 
     # Use cases
     rows: list = []
 
-    if "DBF" == engine:
+    if "DBF" == engine.upper():
         rows = dbf_controller.read_rows(engine, source, condition)
 
     elif not table:
@@ -289,10 +242,10 @@ def update(
     fields: tuple,
     condition: tuple,
 ) -> None:
-    """Update rows from a DBF/SQL table."""
+    """Update rows from a DBF file/SQL table."""
 
     # Use cases
-    if "DBF" == engine:
+    if "DBF" == engine.upper():
         dbf_controller.update_rows(engine, source, fields, condition)
 
     elif not table:
@@ -345,10 +298,10 @@ def update(
 def delete(
     engine: str, rdbms: str, source: str, table: str | None, condition: tuple
 ) -> None:
-    """Delete rows from an DBF/SQL table."""
+    """Delete rows from an DBF file/SQL table."""
 
     # Use cases
-    if "DBF" == engine:
+    if "DBF" == engine.upper():
         dbf_controller.delete_rows(engine, source, condition)
 
     elif not table:
@@ -362,17 +315,98 @@ def delete(
 
 
 @cli.command()
+@click.option(
+    "-e",
+    "--engine",
+    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
+    required=True,
+)
+@click.option(
+    "-r",
+    "--rdbms",
+    default="SQLite",
+    show_default=True,
+)
+@click.option(
+    "-s",
+    "--source",
+    help="Expects a file.",
+    required=True,
+)
+@click.option(
+    "-t",
+    "--table",
+    default="",
+)
+@click.confirmation_option(
+    prompt="Are you sure you want to drop?", help="Confirm the operation."
+)
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
-def migrate():
-    """
-    Migrate data between DBF and SQL databases.
+@utils.embed_examples
+def drop(engine: str, rdbms: str, source: str, table: str | None) -> None:
+    """Drop a DBF file/SQL file/SQL table."""
 
-    This read a config.toml file with the necessary information to migrate
-    data between DBF and SQL databases.
+    # Use cases
+    if "DBF" == engine.upper():
+        dbf_controller.drop_table(engine, source)
+
+    elif not table and "SQLite" == rdbms:
+        sql_controller.drop_database(engine, source)
+
+    elif "SQLite" == rdbms:
+        sql_controller.drop_table(engine, source, table)
+
+    else:
+        raise NotImplementedError
+
+
+@cli.command()
+@click.option(
+    "-p",
+    "--priority",
+    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
+    required=True,
+)
+@click.option(
+    "-e",
+    "--extensions",
+    multiple=True,
+    help="Scopes in the priority folders.",
+    required=True,
+)
+@click.version_option(config.VERSION, "-v", "--version")
+@click.help_option("-h", "--help")
+def migrate(priority: str, extensions: tuple) -> None:
+    """
+    Migrate data between DBF and SQL files.
+
+    Expects a priority folder where the files will be migrated to the other
+    and a list of extensions.
+
+    This read `~/.config/dbfxsql/config.toml` with the necessary information
+    to handle data between the engines.
+
+    \b
+    Examples:
+    ---------
+
+    dbfxsql migrate -p DBF -e .dbf -e .DBF -e .dbase
+    dbfxsql migrate -p SQL -e .sql -e .SQL -e .mfd
     """
 
-    raise NotImplementedError()
+    with yaspin(color="cyan", timer=True) as spinner:
+        try:
+            spinner.text = "Initializing..."
+            setup: dict = sync_controller.init()
+
+            spinner.text = "Migrating..."
+            sync_controller.migrate(priority, extensions, setup)
+
+            spinner.ok("DONE")
+
+        except KeyboardInterrupt:
+            spinner.ok("END")
 
 
 @cli.command()
@@ -380,10 +414,10 @@ def migrate():
 @click.help_option("-h", "--help")
 def sync():
     """
-    Synchronize data between DBF and SQL databases.
+    Synchronize data between DBF and SQL files.
 
-    This read a config.toml file with the necessary information to sync data
-    between DBF and SQL databases.
+    This read `~/.config/dbfxsql/config.toml` with the necessary information
+    to handle data between the engines.
     """
     with yaspin(color="cyan", timer=True) as spinner:
         try:

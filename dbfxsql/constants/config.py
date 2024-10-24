@@ -7,9 +7,9 @@ SQL = ["."]
 
 [[relations]]
 engines = ["DBF", "SQL"]
-sources = ["data.dbf", "data.sql"]
+sources = ["tmp.dbf", "tmp.sql"]
 tables = ["", "users"]
-fields = [["name"], ["name"]]
+fields = [["id", "name"], ["id", "name"]]
 """
 
 VERSION = "0.1.0"

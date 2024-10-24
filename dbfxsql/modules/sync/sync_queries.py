@@ -10,12 +10,11 @@ def insert(filename: str, table: str, fields: str, values: str) -> None:
         sql_controller.insert_row(database, table, fields, values)
 
 
-def read(filename: str, table: str) -> dict:
-    if filename.endswith(".dbf"):
-        return dbf_controller.read_rows(table)
+def read(engine: str, source: str, table: str) -> dict:
+    if "DBF" == engine.upper():
+        return dbf_controller.read_rows(engine, source, condition=None)
 
-    database, _ = file_manager.decompose_filename(filename)
-    return sql_controller.read_rows(database, table)
+    return sql_controller.read_rows(engine, source, table, condition=None)
 
 
 def update(filename: str, table: str, fields: str, values: str, condition: str) -> None:

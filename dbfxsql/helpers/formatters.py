@@ -4,43 +4,233 @@ from collections.abc import Iterable
 from . import file_manager
 from ..constants.data_types import DATA_TYPES
 from ..models.sync_table import SyncTable
-from ..exceptions.value_errors import ValueNotFound, ValueNotValid
+from ..exceptions.field_errors import FieldNotFound
+from ..exceptions.value_errors import ValueNotValid
+
+from pathlib import Path
 
 
-def fields_to_str(fields: Iterable[tuple], sep: str = ", ") -> str:
+def decompose_filename(file: str) -> tuple[str, str]:
+    """Decomposes a filename into its stem and suffix."""
+
+    return Path(file).stem, Path(file).suffix
+
+
+def add_folderpath(engine: str, source: str) -> str:
+    """Adds the folderpath to the source depending on the engine."""
+    folderpath: str = file_manager.load_config()["folderpaths"][engine][0]
+
+    if not folderpath.endswith("/"):
+        folderpath += "/"
+
+    return folderpath + source
+
+
+def fields_to_str(fields: Iterable[tuple[str, str]], sep: str = ", ") -> str:
     return sep.join([f"{field[0]} {field[1]}" for field in fields])
 
 
-def fields_to_dict(fields: Iterable[tuple]) -> dict:
+def fields_to_dict(fields: Iterable[tuple[str, str]]) -> dict:
     return {field[0]: field[1] for field in fields}
 
 
-def assign_types(engine: str, _types: dict[str, str], record: dict[str, str]) -> dict:
+def assign_types(engine: str, _types: dict[str, str], row: dict[str, str]) -> dict:
     data_type: dict = DATA_TYPES[engine]
 
-    field_names: list[str] = [field.lower() for field in record.keys()]
+    field_names: list[str] = [field.lower() for field in row.keys()]
     type_names: list[str] = [_type.lower() for _type in _types.keys()]
 
     for field in field_names:
         if field not in type_names:
-            raise ValueNotFound(field)
+            raise FieldNotFound(field)
 
         _type: str = _types[field]
-        value: str = _apply_type_cases(field, record[field], _type)
+        value: str = _apply_type_cases(field, row[field], _type)
 
         try:
-            record[field] = data_type[_type](value)
+            row[field] = data_type[_type](value)
 
         except (ValueError, AttributeError, decimal.InvalidOperation):
             raise ValueNotValid(field, value, _type)
 
-    return record
+    return row
 
 
-def field_id_exists(record: dict) -> bool:
-    for _field_name in record.keys():
-        if "id" == _field_name.lower():
-            return True
+def deglose_fields(row: dict) -> tuple:
+    keys: list = [str(key) for key in row.keys()]
+
+    field_names: str = ", ".join(keys)  # [key]
+    values: str = ":" + ", :".join(keys)  # [:key]
+
+    return field_names, values
+
+
+def merge_fields(fields: tuple[str, str], sep: str) -> str:
+    field_names, values = fields
+
+    return sep.join([field_names, values])
+
+
+def scourgify_rows(rows: list[dict]) -> list[dict]:
+    """Convert fields to lowercase and stripping values."""
+
+    lower_fields: list[str] = [key.lower() for key in rows[0].keys()]
+
+    for row in rows:
+        for key in row.keys():
+            row[key] = row[key].rstrip() if isinstance(row[key], str) else row[key]
+
+    return [dict(zip(lower_fields, row.values())) for row in rows]
+
+
+def filter_rows(rows: list, condition: tuple) -> tuple[list, list]:
+    filter: str = ""
+    _rows: list = []
+    indexes: list = []
+
+    field, operator, value = _parse_condition(condition)
+
+    if "==" == operator and "row_number" == field:
+        return [rows[value]], [value]
+
+    for index, row in enumerate(rows):
+        if isinstance(row[field], str):
+            filter = f"'{row[field]}'{operator}'{value}'"
+        else:
+            filter = f"{row[field]}{operator}{value}"
+
+        if eval(filter):
+            _rows.append(row)
+            indexes.append(index)
+
+    return _rows, indexes
+
+
+def scourgify_types(types: list[dict[str, str]]) -> dict[str, str]:
+    names: list = [type["name"] for type in types]
+    data_structure: list = [type["type"] for type in types]
+
+    return dict(zip(names, data_structure))
+
+
+def depurate_empty_rows(rows: list[dict]) -> list:
+    """Return an empty list if a list of rows only contains empty rows."""
+
+    if not rows:
+        return rows
+
+    if [{""}] == [{row for row in rows.values()} for rows in rows]:
+        return []
+
+    return rows
+
+
+def relevant_filenames(filenames: list[str], relations: list[dict]) -> list[str]:
+    relevant_filenames: list = []
+
+    for filename in filenames:
+        if filename := _search_filenames(filename, relations):
+            relevant_filenames.append(filename)
+
+    return relevant_filenames
+
+
+def package_tables(filenames: list[str], relations: list[dict]) -> list[dict]:
+    origins: list = []
+    destinies: list = []
+
+    origin: SyncTable = None
+    destiny: SyncTable = None
+
+    for filename in filenames:
+        for relation in relations:
+            if filename in relation["sources"]:
+                tables = _parse_tables(relation, filename)
+                origin, destiny = _define_tables(tables, filename)
+
+                origins.append(origin)
+                destinies.append(destiny)
+
+    return origins, destinies
+
+
+def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> tuple:
+    residual_tables: list = []
+
+    if not origin.rows:
+        return residual_tables
+
+    for index, destiny in enumerate(destinies):
+        if not destiny.rows:
+            continue
+
+        _origin: SyncTable = SyncTable(
+            engine=origin.engine,
+            source=origin.source,
+            name=origin.name,
+            fields=origin.fields[index],
+            rows=origin.rows,
+        )
+
+        residual_tables.append(_compare_rows(_origin, destiny))
+
+    return residual_tables
+
+
+def classify_operations(residual_tables: list) -> tuple:
+    return (None,)
+
+
+def _compare_rows(origin: SyncTable, destiny: SyncTable) -> tuple:
+    fields: tuple = (origin.fields, destiny.fields)
+    residual_destiny: list = []
+    destiny_indexes: list = []
+
+    residual_origin: list = []
+    origin_indexes: list = []
+
+    for origin_index, origin_row in enumerate(origin.rows):
+        for destiny_index, destiny_row in enumerate(destiny.rows):
+            if not __same_rows(origin_row, destiny_row, fields):
+                residual_destiny.append(destiny_row)
+                destiny_indexes.append(destiny_index)
+
+        residual_origin.append(origin_row)
+        origin_indexes.append(origin_index)
+
+    _origin: SyncTable = SyncTable(
+        engine=origin.engine,
+        source=origin.source,
+        name=origin.name,
+        fields=origin.fields,
+        rows=residual_origin,
+        indexes=origin_indexes,
+    )
+
+    _destiny: SyncTable = SyncTable(
+        engine=destiny.engine,
+        source=destiny.source,
+        name=destiny.name,
+        fields=destiny.fields,
+        rows=residual_destiny,
+        indexes=destiny_indexes,
+    )
+
+    return _origin, _destiny
+
+
+def __same_rows(origin_row: dict, destiny_row: dict, fields: tuple) -> bool:
+    for origin_field, destiny_field in zip(*fields):
+        if origin_row[origin_field] != destiny_row[destiny_field]:
+            return False
+
+    return True
+
+
+def _search_filenames(filename: str, relations: list[dict]) -> str | None:
+    for relation in relations:
+        if filename in relation["sources"]:
+            return filename
 
 
 def _apply_type_cases(field: str, value: str, _type: str) -> str:
@@ -55,125 +245,58 @@ def _apply_type_cases(field: str, value: str, _type: str) -> str:
     return value
 
 
-def deglose_fields(record: dict) -> tuple:
-    keys: list = [str(key) for key in record.keys()]
-
-    field_names: str = ", ".join(keys)  # [key]
-    values: str = ":" + ", :".join(keys)  # [:key]
-
-    return field_names, values
-
-
-def merge_fields(fields: tuple[str, str], sep: str) -> str:
-    field_names, values = fields
-
-    return sep.join([field_names, values])
-
-
-def scourgify_records(records: list[dict]) -> list[dict]:
-    """Convert fields to lowercase and stripping values."""
-
-    lower_fields: list[str] = [key.lower() for key in records[0].keys()]
-
-    for record in records:
-        for key in record.keys():
-            record[key] = (
-                record[key].rstrip() if isinstance(record[key], str) else record[key]
-            )
-
-    return [dict(zip(lower_fields, record.values())) for record in records]
-
-
-def filter_records(_records: list, condition: tuple) -> tuple[list, list]:
-    filter: str = ""
-    records: list = []
-    indexes: list = []
-
-    field, condition, value = _parse_condition(condition)
-
-    for index, record in enumerate(_records):
-        if isinstance(record[field], str):
-            filter = f"'{record[field]}'{condition}'{value}'"
-        else:
-            filter = f"{record[field]}{condition}{value}"
-
-        if eval(filter):
-            records.append(record)
-            indexes.append(index)
-
-    return records, indexes
-
-
 def _parse_condition(condition: tuple[str, str, str]) -> tuple:
     field, operator, value = condition
 
     if "=" == operator:
         operator = "=="
 
+    try:
+        if "rowid" == field.lower() or "row_number" == field.lower():
+            value = int(value) - 1
+
+    except ValueError:
+        raise ValueNotValid(value, field, "int")
+
     return field, operator, value
 
 
-def values_are_different(records: list[dict], record: dict) -> bool:
-    """Checks if a list of records are different from a given record."""
+def _parse_tables(relation: dict, filename: str) -> list[SyncTable, SyncTable]:
+    tables: list[SyncTable] = []
 
-    for _record in records:
-        for key, value in record.items():
-            if value != _record[key]:
-                return True
+    for index, _ in enumerate(relation["sources"]):
+        table: SyncTable = SyncTable(
+            engine=relation["engines"][index],
+            source=relation["sources"][index],
+            name=relation["tables"][index],
+            fields=relation["fields"][index],
+        )
 
-    return False
+        tables.append(table)
 
-
-def scourgify_types(types: list[dict[str, str]]) -> dict[str, str]:
-    names: list = [type["name"] for type in types]
-    data_structure: list = [type["type"] for type in types]
-
-    return dict(zip(names, data_structure))
+    return tables
 
 
-def depurate_empty_records(records: list[dict]) -> list:
-    """Return an empty list if a list of records only contains empty records."""
+def _define_tables(tables: list[SyncTable], filename: str) -> tuple:
+    origin: SyncTable = None
+    destiny: SyncTable = None
 
-    if not records:
-        return records
+    for table in tables:
+        if filename == table.source:
+            origin = table
+        else:
+            destiny = table
 
-    if [{""}] == [{record for record in records.values()} for records in records]:
-        return []
-
-    return records
-
-
-def parse_filepaths(changes: list[set]) -> list:
-    """Retrieves the modified file from the environment variables."""
-
-    filenames: list = []
-
-    for change in changes:
-        filepath: str = change[-1]
-        name, extension = file_manager.decompose_filename(filepath)
-        filenames.append(name + extension)
-
-    return filenames
+    return origin, destiny
 
 
-def package_fields(origin: SyncTable, destiny: SyncTable) -> tuple[str, str]:
-    """Returns a tuple of fields to be compared."""
-
-    return zip(origin.fields[0].split(", "), destiny.fields[0].split(", "))
+def _insert_rows(origin: list[dict], destiny: list[dict]) -> list:
+    return origin[len(destiny) :]
 
 
-def copy_with_indexed_field(table: SyncTable, index: int) -> SyncTable:
-    return SyncTable(
-        name=table.name,
-        source=table.source,
-        fields=[table.fields[index]],
-        records=table.records[:],
-    )
+def _delete_rows(origin: list[dict], destiny: list[dict], limit: int = 0) -> tuple:
+    return origin[len(destiny) :], origin[:limit]
 
 
-def parse_extensions(relations: list[dict]) -> list[str]:
-    """Returns a list of extensions from a list of relations."""
-    extensions: list = []
-
-    for relation in relations:
-        extensions.append(file_manager.decompose_filename(relation["source"])[1])
+def _update_rows(origin: list[dict], destiny: list[dict]) -> list:
+    return origin

@@ -4,13 +4,13 @@ import os
 import subprocess
 
 from dbfxsql.constants import sample_commands
-from dbfxsql.helpers import file_manager
+from dbfxsql.helpers import validators
 
 
 def test_create_table() -> None:
     os.system(sample_commands.DBF["create"])
 
-    assert file_manager.path_exists("./data.dbf")
+    assert validators.path_exists("./data.dbf")
 
 
 def test_insert_row() -> None:
@@ -74,4 +74,4 @@ def test_delete_rows() -> None:
 def test_drop_table() -> None:
     os.system(sample_commands.DBF["drop"] + " --yes")
 
-    assert not file_manager.path_exists("./data.dbf")
+    assert not validators.path_exists("./data.dbf")

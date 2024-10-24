@@ -5,16 +5,6 @@ from ..constants import config
 from pathlib import Path
 
 
-def add_folderpath(engine: str, source: str) -> str:
-    """Adds the folderpath to the source depending on the engine."""
-    folderpath: str = load_config()["folderpaths"][engine][0]
-
-    if not folderpath.endswith("/"):
-        folderpath += "/"
-
-    return folderpath + source
-
-
 def load_config() -> dict:
     configpath: Path = Path(config.PATH).expanduser()
 
@@ -27,10 +17,6 @@ def load_config() -> dict:
     return toml_data
 
 
-def path_exists(sourcepath: str) -> None:
-    return Path(sourcepath).exists()
-
-
 def new_file(sourcepath: str) -> None:
     Path(sourcepath).touch()
 
@@ -39,10 +25,13 @@ def remove_file(filepath: str) -> None:
     Path(filepath).unlink()
 
 
-def decompose_filename(file: str) -> tuple[str, str]:
-    """Decomposes a filename into its stem and suffix."""
-
-    return Path(file).stem, Path(file).suffix
+def get_filenames(paths: list[str], extensions: tuple[str]) -> list[str]:
+    return [
+        file.as_posix()
+        for path in paths
+        for file in Path(path).iterdir()
+        if file.suffix in extensions
+    ]
 
 
 def _create_default_config(configpath: Path) -> None:

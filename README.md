@@ -110,17 +110,19 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Refactor update query to ignore DBF rows that haven't changed.</li>
       <li>[x] Force SQL -> DBF "synchronization" (read all tables).</li>
       <li>[x] Replace dictionaries with classes during synchronization.</li>
-      <li>[x] Add FIELDS options for filtering read queries.</li>
       <li>[x] Automatic SQL database creation during SQL table creation.</li>
       <li>[x] Refactor project structure with data structures as inputs.</li>
       <li>[x] Unit tests for code validation.</li>
+      <li>[x] Validate dynamic primary key and row_number fields.</li>
+      <li>[x] Operate over the databases through their row number.</li>
       <li>[ ] Row-based sync implementation.</li>
+      <li>[ ] Perform table migration before initial data synchronization.</li>
+      <li>[ ] SQL triggers/procedures for table changes.</li>
+      <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
       <li>[ ] Replace controller with commands during the sync</li>
-      <li>[ ] SQL triggers/procedures for table changes.</li>
+      <li>[ ] Add FIELDS options for filtering read queries.</li>
       <li>[ ] Configuration commands for upload and edit.</li>
-      <li>[ ] Perform table migration before initial data synchronization.</li>
-      <li>[ ] Error and exception logging.</li>
       <li>[ ] Validate the existence of the received field type.</li>
       <li>[ ] Validate KeyErrors for invalid fields.</li>
       <li>[ ] Validate type lengths and names for consistency between DBF and SQL.</li>

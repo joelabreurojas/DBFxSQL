@@ -4,14 +4,14 @@ import os
 import subprocess
 
 from dbfxsql.constants import sample_commands
-from dbfxsql.helpers import file_manager
+from dbfxsql.helpers import formatters, validators
 from dbfxsql.modules.sql import sql_queries
 
 
 def test_create_table() -> None:
     os.system(sample_commands.SQL["create"])
 
-    assert file_manager.path_exists("./data.sql")
+    assert validators.path_exists("./data.sql")
 
 
 def test_insert_row() -> None:
@@ -74,7 +74,7 @@ def test_delete_rows() -> None:
 def test_drop_table() -> None:
     os.system(sample_commands.SQL["drop_table"] + " --yes")
 
-    sourcepath: str = file_manager.add_folderpath("SQL", "data.sql")
+    sourcepath: str = formatters.add_folderpath("SQL", "data.sql")
 
     assert not sql_queries.table_exists(sourcepath, "users")
 
@@ -82,4 +82,4 @@ def test_drop_table() -> None:
 def test_drop_database() -> None:
     os.system(sample_commands.SQL["drop_database"] + " --yes")
 
-    assert not file_manager.path_exists("./data.sql")
+    assert not validators.path_exists("./data.sql")

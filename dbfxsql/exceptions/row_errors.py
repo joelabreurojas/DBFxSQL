@@ -2,8 +2,8 @@ from ..models.error_template import ErrorTemplate
 
 
 class RowNotFound(ErrorTemplate):
-    def __init__(self, condition: str):
-        super().__init__(f"Row not found with: {condition}")
+    def __init__(self, condition: tuple):
+        super().__init__(f"Row not found with: {"".join(condition)}")
 
 
 class RowAlreadyExists(ErrorTemplate):

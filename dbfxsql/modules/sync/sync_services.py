@@ -14,25 +14,6 @@ async def listen(folders: tuple[str]) -> AsyncGenerator[tuple, None]:
         yield formatters.parse_filepaths(changes)
 
 
-def relevant_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
-    """Collects data from the files and returns it as a list of dictionaries."""
-    changes: list = []
-
-    for filename in filenames:
-        origin: SyncTable = None
-        destinies: list = []
-
-        for relation in relations:
-            if filename in relation["files"]:
-                # send origin to save the object and only append the fields
-                origin, destiny = _parse_actors(filename, relation, origin)
-                destinies.append(destiny)
-
-        changes.append({"origin": origin, "destinies": destinies})
-
-    return changes
-
-
 def classify(origin: SyncTable, destiny: SyncTable) -> tuple[list, list, list]:
     """Classifies changes into insert, update and delete operations."""
 
@@ -85,31 +66,7 @@ def operate(insert: list, update: list, delete: list, header: dict) -> None:
         sync_queries.delete(header["file"], header["table"], f"id == {row['id']}")
 
 
-def _parse_actors(filename: str, relation: dict, origin: SyncTable | None) -> tuple:
-    for index, file in enumerate(relation["files"]):
-        if filename == file:
-            if not origin:
-                origin: SyncTable = __create_actor(relation, index)
-
-            else:
-                origin.fields.append(relation["fields"][index])
-
-        else:
-            destiny: SyncTable = __create_actor(relation, index)
-
-    return origin, destiny
-
-
 def _comparator(origin: dict, destiny: dict, fields: tuple) -> dict | None:
     for origin_field, destiny_field in fields:
         if origin[origin_field] != destiny[destiny_field]:
             return origin
-
-
-def __create_actor(relation: dict, index: int) -> SyncTable:
-    file: str = relation["files"][index]
-    table: str = relation["tables"][index]
-    fields: list[str] = [relation["fields"][index]]
-    rows: list[dict] = sync_queries.read(file, table)
-
-    return SyncTable(file=file, table=table, fields=fields, rows=rows)
