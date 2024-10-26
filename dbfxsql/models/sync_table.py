@@ -8,4 +8,3 @@ class SyncTable:
     name: str
     fields: list[str]
     rows: list | None = None
-    indexes: list | None = None
