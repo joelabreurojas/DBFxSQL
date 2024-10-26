@@ -1,9 +1,8 @@
 # Misc storage
-storage/
-pool.txt
-logs.txt
-config.toml
 *.cast
+*.sql
+*.dbf
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
