@@ -91,7 +91,7 @@ This early version of the code demonstrates a basic interaction with the tool.
 - [x] Detect changes in folder paths.
 - [x] Asynchronous file watcher for automatic change sync.
 - [x] Configuration file for specifying relations to compare.
-- [ ] Additional RDBMS support (MSQL Server)
+- [ ] Perform table migration before initial data synchronization.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
@@ -116,7 +116,7 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Validate dynamic primary key and row_number fields.</li>
       <li>[x] Operate over the databases through their row number.</li>
       <li>[ ] Row-based sync implementation.</li>
-      <li>[ ] Perform table migration before initial data synchronization.</li>
+      <li>[ ] Additional RDBMS support (MSQL Server).</li>
       <li>[ ] SQL triggers/procedures for table changes.</li>
       <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
