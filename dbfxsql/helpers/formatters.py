@@ -1,7 +1,7 @@
 import decimal
 from collections.abc import Iterable
 
-from . import file_manager
+from . import file_manager, validators
 from ..constants.data_types import DATA_TYPES
 from ..models.sync_table import SyncTable
 from ..exceptions.field_errors import FieldNotFound
@@ -241,7 +241,7 @@ def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple
         while destiny_index < destiny_range:
             destiny_row: dict = residual_destiny[destiny_index]["fields"]
 
-            if __same_rows(origin_row, destiny_row, fields):
+            if validators.same_rows(origin_row, destiny_row, fields):
                 # New list skipping then existent index
 
                 residual_destiny = (
@@ -258,14 +258,6 @@ def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple
             destiny_index += 1
         origin_index += 1
     return residual_origin, residual_destiny
-
-
-def __same_rows(origin_row: dict, destiny_row: dict, fields: tuple) -> bool:
-    for origin_field, destiny_field in zip(*fields):
-        if origin_row[origin_field] != destiny_row[destiny_field]:
-            return False
-
-    return True
 
 
 def _search_filenames(filename: str, relations: list[dict]) -> str | None:
