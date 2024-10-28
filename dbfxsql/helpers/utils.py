@@ -46,18 +46,15 @@ def only_modified(change: Change, path: str) -> bool:
     return change == Change.modified and path.endswith(allowed_extensions)
 
 
-def notify(insert: list, update: list, delete: list, header: dict) -> None:
-    for row in insert:
-        print(f"Insert in table '{header['table']}': {row}")
+def notify(operations: list, tables: list) -> None:
+    for (insert, update, delete), table in zip(operations, tables):
+        print(f"\nMake changes in: {table.source}")
 
-    for row in update:
-        print(
-            f"""
-            Update in table '{header['table']}'
-            on fields '{header['destiny_fields']}'
-            with row: {row}
-            """
-        )
+        for row in insert:
+            print(f"Insert row: {row["fields"]}")
 
-    for row in delete:
-        print(f"Delete in table '{header['table']}' with id: {row['id']}")
+        for row in update:
+            print(f"Update row: {row["fields"]} with row_number {row["index"]}")
+
+        for row in delete:
+            print(f"Delete row with row_number {row["index"]}")
