@@ -3,12 +3,19 @@ import decimal
 
 
 DBF: dict = {
+    "0": None,
     "C": str,
+    "Y": float,
     "D": datetime.date,
-    "N": decimal.Decimal,  # Numeric
-    "L": bool,
-    "M": str,  # Memo (long text)
+    "T": datetime.datetime,
+    "B": float,
     "F": float,
+    "G": str,
+    "I": int,
+    "L": bool,
+    "M": str,
+    "N": decimal.Decimal,
+    "P": str,
     "@": datetime.datetime,
 }
 
@@ -21,4 +28,3 @@ SQL: dict = {
 }
 
 DATA_TYPES: dict[str, dict] = {"DBF": DBF, "SQL": SQL}
-
