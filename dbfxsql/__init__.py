@@ -11,4 +11,8 @@ import click
     epilog="For more information, visit https://github.com/joelabreurojas/dbfxsql",
 )
 def run():
-    """A CLI tool to manage data between DBF files and SQL databases."""
+    """
+    A CLI tool to manage data between DBF files and SQL databases.
+
+    Check your `~/.config/dbfxsql/config.toml` to set your preferences.
+    """
