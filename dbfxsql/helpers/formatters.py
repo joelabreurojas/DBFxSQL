@@ -34,6 +34,10 @@ def fields_to_dict(fields: Iterable[tuple[str, str]]) -> dict:
     return {field[0]: field[1] for field in fields}
 
 
+def fields_to_tuple(fields: dict) -> tuple:
+    return tuple(fields.items())
+
+
 def assign_types(engine: str, _types: dict[str, str], row: dict[str, str]) -> dict:
     data_type: dict = DATA_TYPES[engine]
 
@@ -107,8 +111,8 @@ def filter_rows(rows: list, condition: tuple) -> tuple[list, list]:
 
 
 def scourgify_types(types: list[dict[str, str]]) -> dict[str, str]:
-    names: list = [type["name"] for type in types]
-    data_structure: list = [type["type"] for type in types]
+    names: list = [_type["name"] for _type in types]
+    data_structure: list = [_type["type"] for _type in types]
 
     return dict(zip(names, data_structure))
 
@@ -154,69 +158,106 @@ def package_tables(filenames: list[str], relations: list[dict]) -> list[dict]:
     return origins, destinies
 
 
-def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> tuple:
+def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> list:
     residual_tables: list = []
 
-    if not origin.rows:
-        return residual_tables
-
     for index, destiny in enumerate(destinies):
-        if not destiny.rows:
-            continue
+        rows: tuple = (origin.rows, destiny.rows)
+        fields: tuple = (origin.fields[index], destiny.fields)
 
-        _origin: SyncTable = SyncTable(
-            engine=origin.engine,
-            source=origin.source,
-            name=origin.name,
-            fields=origin.fields[index],
-            rows=origin.rows,
-        )
+        residual_origin, residual_destiny = _compare_rows(*rows, fields)
 
-        residual_tables.append(_compare_rows(_origin, destiny))
+        residual_origin = _change_fields(residual_origin, destiny.fields)
+        residual_destiny = _depurate_fields(residual_destiny, destiny.fields)
+
+        residual_tables.append((residual_origin, residual_destiny))
 
     return residual_tables
 
 
-def classify_operations(residual_tables: list) -> tuple:
-    return (None,)
+def _change_fields(rows: list, fields: list) -> list[dict]:
+    if not rows:
+        return rows
+
+    for row in rows:
+        row["fields"] = {
+            key: value for key, value in zip(fields, row["fields"].values())
+        }
+
+    return rows
 
 
-def _compare_rows(origin: SyncTable, destiny: SyncTable) -> tuple:
-    fields: tuple = (origin.fields, destiny.fields)
-    residual_destiny: list = []
-    destiny_indexes: list = []
+def _depurate_fields(rows: list, fields: list) -> list[dict]:
+    if not rows:
+        return rows
 
+    for row in rows:
+        row["fields"] = {key: value for key, value in row.items() if key in fields}
+
+    return rows
+
+
+def classify_operations(residual_tables: tuple) -> list:
+    operations: list = []
+
+    for residual_table in residual_tables:
+        origin, destiny = residual_table
+
+        origin_range: int = len(origin)
+        destiny_range: int = len(destiny)
+
+        insert: list = [{"fields": row["fields"]} for row in origin[destiny_range:]]
+
+        delete: list = [{"index": row["index"]} for row in destiny[origin_range:]]
+
+        update: list = [
+            {"index": destiny_row["index"], "fields": origin_row["fields"]}
+            for origin_row, destiny_row in zip(origin, destiny)
+        ]
+
+        operations.append((insert, update, delete))
+
+    return operations
+
+
+def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple:
     residual_origin: list = []
-    origin_indexes: list = []
+    residual_destiny: list = [
+        {"index": index, "fields": fields} for index, fields in enumerate(destiny_rows)
+    ]
 
-    for origin_index, origin_row in enumerate(origin.rows):
-        for destiny_index, destiny_row in enumerate(destiny.rows):
-            if not __same_rows(origin_row, destiny_row, fields):
-                residual_destiny.append(destiny_row)
-                destiny_indexes.append(destiny_index)
+    origin_range: int = len(origin_rows)
+    destiny_range: int = len(destiny_rows)
 
-        residual_origin.append(origin_row)
-        origin_indexes.append(origin_index)
+    origin_index: int = 0
 
-    _origin: SyncTable = SyncTable(
-        engine=origin.engine,
-        source=origin.source,
-        name=origin.name,
-        fields=origin.fields,
-        rows=residual_origin,
-        indexes=origin_indexes,
-    )
+    while origin_index < origin_range:
+        destiny_index: int = 0
+        origin_row: dict = origin_rows[origin_index]
 
-    _destiny: SyncTable = SyncTable(
-        engine=destiny.engine,
-        source=destiny.source,
-        name=destiny.name,
-        fields=destiny.fields,
-        rows=residual_destiny,
-        indexes=destiny_indexes,
-    )
+        if not destiny_range:
+            residual_origin.append({"index": origin_index, "fields": origin_row})
 
-    return _origin, _destiny
+        while destiny_index < destiny_range:
+            destiny_row: dict = residual_destiny[destiny_index]["fields"]
+
+            if __same_rows(origin_row, destiny_row, fields):
+                # New list skipping then existent index
+
+                residual_destiny = (
+                    residual_destiny[:destiny_index]
+                    + residual_destiny[destiny_index + 1 :]
+                )
+
+                destiny_range -= 1
+                break
+
+            if destiny_index == destiny_range - 1:
+                residual_origin.append({"index": origin_index, "fields": origin_row})
+
+            destiny_index += 1
+        origin_index += 1
+    return residual_origin, residual_destiny
 
 
 def __same_rows(origin_row: dict, destiny_row: dict, fields: tuple) -> bool:
@@ -235,6 +276,9 @@ def _search_filenames(filename: str, relations: list[dict]) -> str | None:
 
 def _apply_type_cases(field: str, value: str, _type: str) -> str:
     # Logical case
+    if "N" == _type and value is None:
+        value = "0"
+
     if "L" == _type and ("True" != value != "False"):
         raise ValueNotValid(value, field, "bool")
 
