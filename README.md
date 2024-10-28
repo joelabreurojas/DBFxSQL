@@ -118,6 +118,7 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Row-based sync implementation.</li>
       <li>[ ] Additional RDBMS support (MSQL Server).</li>
       <li>[ ] SQL triggers/procedures for table changes.</li>
+      <li>[ ] Handle starving connections.</li>
       <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
       <li>[ ] Accept conditions over row_number for DBF.</li>
