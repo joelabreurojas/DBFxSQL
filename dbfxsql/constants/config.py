@@ -5,8 +5,11 @@ TEMPLATE: str = """
 DBF = ["."]
 SQL = ["."]
 
+[extensions]
+DBF = [".dbf", ".DBF"]
+SQL = [".sql", ".SQL"]
+
 [[relations]]
-engines = ["DBF", "SQL"]
 sources = ["tmp.dbf", "tmp.sql"]
 tables = ["", "users"]
 fields = [["id", "name"], ["id", "name"]]

@@ -17,12 +17,6 @@ def cli():
 
 @cli.command()
 @click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
-    required=True,
-)
-@click.option(
     "-r",
     "--rdbms",
     type=click.Choice(["SQLite", "SQLServer"], case_sensitive=False),
@@ -52,12 +46,13 @@ def cli():
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def create(
-    engine: str, rdbms: str, source: str, table: str | None, fields: tuple
-) -> None:
+def create(rdbms: str, source: str, table: str | None, fields: tuple) -> None:
     """Create a DBF file/SQL file and table."""
 
     # Use cases
+    if not (engine := utils.check_engine(source)):
+        raise click.UsageError(f"Unknown extension for '{source}'.")
+
     if "DBF" == engine.upper():
         dbf_controller.create_table(engine, source, fields)
 
@@ -72,12 +67,6 @@ def create(
 
 
 @cli.command()
-@click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
-    required=True,
-)
 @click.option(
     "-r",
     "--rdbms",
@@ -107,12 +96,13 @@ def create(
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def insert(
-    engine: str, rdbms: str, source: str, table: str | None, fields: tuple
-) -> None:
+def insert(rdbms: str, source: str, table: str | None, fields: tuple) -> None:
     """Insert a row into a DBF file/SQL table."""
 
     # Use cases
+    if not (engine := utils.check_engine(source)):
+        raise click.UsageError(f"Unknown extension for '{source}'.")
+
     if "DBF" == engine.upper():
         dbf_controller.insert_row(engine, source, fields)
 
@@ -127,12 +117,6 @@ def insert(
 
 
 @cli.command()
-@click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
-    required=True,
-)
 @click.option(
     "-r",
     "--rdbms",
@@ -172,6 +156,9 @@ def read(
     """Read rows from a DBF file/SQL table."""
 
     # Use cases
+    if not (engine := utils.check_engine(source)):
+        raise click.UsageError(f"Unknown extension for '{source}'.")
+
     rows: list = []
 
     if "DBF" == engine.upper():
@@ -190,12 +177,6 @@ def read(
 
 
 @cli.command()
-@click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
-    required=True,
-)
 @click.option(
     "-r",
     "--rdbms",
@@ -245,6 +226,9 @@ def update(
     """Update rows from a DBF file/SQL table."""
 
     # Use cases
+    if not (engine := utils.check_engine(source)):
+        raise click.UsageError(f"Unknown extension for '{source}'.")
+
     if "DBF" == engine.upper():
         dbf_controller.update_rows(engine, source, fields, condition)
 
@@ -259,12 +243,6 @@ def update(
 
 
 @cli.command()
-@click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
-    required=True,
-)
 @click.option(
     "-r",
     "--rdbms",
@@ -295,12 +273,13 @@ def update(
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def delete(
-    engine: str, rdbms: str, source: str, table: str | None, condition: tuple
-) -> None:
+def delete(rdbms: str, source: str, table: str | None, condition: tuple) -> None:
     """Delete rows from an DBF file/SQL table."""
 
     # Use cases
+    if not (engine := utils.check_engine(source)):
+        raise click.UsageError(f"Unknown extension for '{source}'.")
+
     if "DBF" == engine.upper():
         dbf_controller.delete_rows(engine, source, condition)
 
@@ -315,12 +294,6 @@ def delete(
 
 
 @cli.command()
-@click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(["DBF", "SQL"], case_sensitive=False),
-    required=True,
-)
 @click.option(
     "-r",
     "--rdbms",
@@ -344,10 +317,13 @@ def delete(
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def drop(engine: str, rdbms: str, source: str, table: str | None) -> None:
+def drop(rdbms: str, source: str, table: str | None) -> None:
     """Drop a DBF file/SQL file/SQL table."""
 
     # Use cases
+    if not (engine := utils.check_engine(source)):
+        raise click.UsageError(f"Unknown extension for '{source}'.")
+
     if "DBF" == engine.upper():
         dbf_controller.drop_table(engine, source)
 
@@ -368,16 +344,9 @@ def drop(engine: str, rdbms: str, source: str, table: str | None) -> None:
     type=click.Choice(["DBF", "SQL"], case_sensitive=False),
     required=True,
 )
-@click.option(
-    "-e",
-    "--extensions",
-    multiple=True,
-    help="Scopes in the priority folders.",
-    required=True,
-)
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
-def migrate(priority: str, extensions: tuple) -> None:
+def migrate(priority: str) -> None:
     """
     Migrate data between DBF and SQL files.
 
@@ -391,8 +360,8 @@ def migrate(priority: str, extensions: tuple) -> None:
     Examples:
     ---------
 
-    dbfxsql migrate -p DBF -e .dbf -e .DBF -e .dbase
-    dbfxsql migrate -p SQL -e .sql -e .SQL -e .mfd
+    dbfxsql migrate -p DBF
+    dbfxsql migrate -p SQL
     """
 
     with yaspin(color="cyan", timer=True) as spinner:
@@ -401,7 +370,7 @@ def migrate(priority: str, extensions: tuple) -> None:
             setup: dict = sync_controller.init()
 
             spinner.text = "Migrating..."
-            sync_controller.migrate(priority, extensions, setup)
+            sync_controller.migrate(priority, setup)
 
             spinner.ok("DONE")
 
@@ -422,7 +391,10 @@ def sync():
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
-            setup: list[list[dict]] = sync_controller.init()
+            setup: dict = sync_controller.init()
+
+            spinner.text = "Migrating..."
+            sync_controller.migrate("DBF", [".dbf", ".DBF"], setup)
 
             spinner.text = "Listening..."
             asyncio.run(sync_controller.synchronize(setup))
