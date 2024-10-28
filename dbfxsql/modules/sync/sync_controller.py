@@ -1,7 +1,6 @@
 import logging
-from pprint import pprint
 
-from . import sync_queries
+from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
 from dbfxsql.helpers import file_manager, formatters
 
@@ -20,15 +19,15 @@ def migrate(priority: str, extensions: tuple, setup: dict) -> None:
     filenames = formatters.relevant_filenames(filenames, relations)
 
     origins, destinies = formatters.package_tables(filenames, relations)
-
     origin, destinies = _depurate_tables(origins, destinies)
 
-    residual_tables: list = formatters.compare_tables(origin, destinies)
+    residual_tables: tuple = formatters.compare_tables(origin, destinies)
+    operations: list = formatters.classify_operations(residual_tables)
 
-    formatters.classify_operations(residual_tables)
+    # Operations to be executed in the correspond source
+    # utils.notify(operations, destinies)
 
-    print("\n")
-    pprint(residual_tables)
+    _execute_operations(operations, destinies)
 
 
 async def synchronize(setup: dict) -> None:
@@ -55,17 +54,8 @@ async def synchronize(setup: dict) -> None:
     # sync_services.operate(insert, update, delete, header)
 
 
-def _parse_header(origin: SyncTable, destiny: SyncTable) -> dict:
-    return {
-        "file": destiny.file,
-        "table": destiny.table,
-        "origin_fields": origin.fields[0].split(", "),
-        "destiny_fields": destiny.fields[0],
-    }
-
-
 def _depurate_tables(origins: list[SyncTable], destinies: list[SyncTable]) -> tuple:
-    rows: list[dict] = sync_queries.read(
+    rows: list[dict] = sync_connection.read(
         origins[0].engine, origins[0].source, origins[0].name
     )
     origin: SyncTable = SyncTable(
@@ -79,7 +69,7 @@ def _depurate_tables(origins: list[SyncTable], destinies: list[SyncTable]) -> tu
     _destinies: list = []
 
     for destiny in destinies:
-        rows = sync_queries.read(destiny.engine, destiny.source, destiny.name)
+        rows = sync_connection.read(destiny.engine, destiny.source, destiny.name)
 
         destiny: SyncTable = SyncTable(
             engine=destiny.engine,
@@ -92,3 +82,31 @@ def _depurate_tables(origins: list[SyncTable], destinies: list[SyncTable]) -> tu
         _destinies.append(destiny)
 
     return origin, _destinies
+
+
+def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
+    for (inserts, updates, deletes), destiny in zip(operations, destinies):
+        for insert in inserts:
+            sync_connection.insert(
+                destiny.engine,
+                destiny.source,
+                destiny.name,
+                formatters.fields_to_tuple(insert["fields"]),
+            )
+
+        for update in updates:
+            sync_connection.update(
+                destiny.engine,
+                destiny.source,
+                destiny.name,
+                formatters.fields_to_tuple(update["fields"]),
+                update["index"],
+            )
+
+        for delete in deletes[::-1]:
+            sync_connection.delete(
+                destiny.engine,
+                destiny.source,
+                destiny.name,
+                delete["index"],
+            )
