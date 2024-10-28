@@ -353,9 +353,6 @@ def migrate(priority: str) -> None:
     Expects a priority folder where the files will be migrated to the other
     and a list of extensions.
 
-    This read `~/.config/dbfxsql/config.toml` with the necessary information
-    to handle data between the engines.
-
     \b
     Examples:
     ---------
@@ -382,12 +379,7 @@ def migrate(priority: str) -> None:
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 def sync():
-    """
-    Synchronize data between DBF and SQL files.
-
-    This read `~/.config/dbfxsql/config.toml` with the necessary information
-    to handle data between the engines.
-    """
+    """Synchronize data between DBF and SQL files."""
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
