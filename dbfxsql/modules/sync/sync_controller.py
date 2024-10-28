@@ -1,8 +1,11 @@
 import logging
+from collections.abc import AsyncGenerator
 
 from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
-from dbfxsql.helpers import file_manager, formatters
+from dbfxsql.helpers import file_manager, formatters, utils
+
+from watchfiles import awatch
 
 
 def init() -> dict:
@@ -11,13 +14,14 @@ def init() -> dict:
     return file_manager.load_config()
 
 
-def migrate(priority: str, extensions: tuple, setup: dict) -> None:
+def collect_files(setup: dict, priority: str) -> tuple:
     folders: list[str] = setup["folderpaths"][priority]
-    filenames: list[str] = file_manager.get_filenames(folders, extensions)
+    extensions: list[str] = setup["extensions"][priority]
 
-    relations: list[dict] = setup["relations"]
-    filenames = formatters.relevant_filenames(filenames, relations)
+    return file_manager.get_filenames(folders, extensions)
 
+
+def migrate(filenames: list, relations: dict) -> None:
     origins, destinies = formatters.package_tables(filenames, relations)
     origin, destinies = _depurate_tables(origins, destinies)
 
@@ -30,28 +34,12 @@ def migrate(priority: str, extensions: tuple, setup: dict) -> None:
     _execute_operations(operations, destinies)
 
 
-async def synchronize(setup: dict) -> None:
-    pass
-    # folders: tuple[str] = setup["folders"]
-    # relations: list[dict] = setup["relations"]
+async def synchronize(setup: dict, priority: str) -> None:
+    folders: list[str] = setup["folderpaths"][priority]
+    relations: list[dict] = setup["relations"]
 
-    # async for filenames in sync_services.listen(folders):
-    # for change in sync_services.relevant_changes(filenames, relations):
-    # origin: SyncTable = change["origin"]
-
-    # for index, destiny in enumerate(change["destinies"]):
-    # copy with only the correspond fie
-    # _origin: SyncTable = utils.clone_actor(origin, index)
-
-    # insert, update, delete = sync_services.classify(_origin, destiny)
-
-    # data to know where do the changes
-
-    # header: dict = _parse_header(_origin, destiny)
-
-    # utils.notify(insert, update, delete, header)
-
-    # sync_services.operate(insert, update, delete, header)
+    async for filenames in _listen(folders):
+        migrate(filenames, relations)
 
 
 def _depurate_tables(origins: list[SyncTable], destinies: list[SyncTable]) -> tuple:
@@ -110,3 +98,10 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
                 destiny.name,
                 delete["index"],
             )
+
+
+async def _listen(folders: tuple[str]) -> AsyncGenerator[tuple, None]:
+    """Asynchronously listens for file changes and triggers the runner function."""
+
+    async for changes in awatch(*folders, watch_filter=utils.only_modified):
+        yield formatters.parse_filepaths(changes)

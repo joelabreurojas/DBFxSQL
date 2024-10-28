@@ -147,7 +147,6 @@ def insert(rdbms: str, source: str, table: str | None, fields: tuple) -> None:
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def read(
-    engine: str,
     rdbms: str,
     source: str,
     table: str | None,
@@ -216,7 +215,6 @@ def read(
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def update(
-    engine: str,
     rdbms: str,
     source: str,
     table: str | None,
@@ -365,9 +363,11 @@ def migrate(priority: str) -> None:
         try:
             spinner.text = "Initializing..."
             setup: dict = sync_controller.init()
+            relations: list = setup["relations"]
+            filenames: list = sync_controller.collect_files(setup, priority)
 
             spinner.text = "Migrating..."
-            sync_controller.migrate(priority, setup)
+            sync_controller.migrate(filenames, relations)
 
             spinner.ok("DONE")
 
@@ -380,16 +380,20 @@ def migrate(priority: str) -> None:
 @click.help_option("-h", "--help")
 def sync():
     """Synchronize data between DBF and SQL files."""
+    priority: str = "DBF"
+
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
             setup: dict = sync_controller.init()
+            relations: list = setup["relations"]
+            filenames: list = sync_controller.collect_files(setup, priority)
 
             spinner.text = "Migrating..."
-            sync_controller.migrate("DBF", [".dbf", ".DBF"], setup)
+            sync_controller.migrate(filenames, relations)
 
             spinner.text = "Listening..."
-            asyncio.run(sync_controller.synchronize(setup))
+            asyncio.run(sync_controller.synchronize(setup, priority))
 
         except KeyboardInterrupt:
             spinner.ok("END")

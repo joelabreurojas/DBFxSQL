@@ -1,7 +1,7 @@
 import decimal
 from collections.abc import Iterable
 
-from . import file_manager, validators
+from . import file_manager, validators, utils
 from ..constants.data_types import DATA_TYPES
 from ..models.sync_table import SyncTable
 from ..exceptions.field_errors import FieldNotFound
@@ -149,7 +149,7 @@ def package_tables(filenames: list[str], relations: list[dict]) -> list[dict]:
     for filename in filenames:
         for relation in relations:
             if filename in relation["sources"]:
-                tables = _parse_tables(relation, filename)
+                tables = _parse_tables(relation)
                 origin, destiny = _define_tables(tables, filename)
 
                 origins.append(origin)
@@ -195,6 +195,19 @@ def _depurate_fields(rows: list, fields: list) -> list[dict]:
         row["fields"] = {key: value for key, value in row.items() if key in fields}
 
     return rows
+
+
+def parse_filepaths(changes: list[set]) -> list:
+    """Retrieves the modified file from the environment variables."""
+
+    filenames: list = []
+
+    for change in changes:
+        filepath: str = change[-1]
+        name, extension = decompose_filename(filepath)
+        filenames.append(f"{name}{extension}")
+
+    return filenames
 
 
 def classify_operations(residual_tables: tuple) -> list:
@@ -297,12 +310,12 @@ def _parse_condition(condition: tuple[str, str, str]) -> tuple:
     return field, operator, value
 
 
-def _parse_tables(relation: dict, filename: str) -> list[SyncTable, SyncTable]:
+def _parse_tables(relation: dict) -> list[SyncTable, SyncTable]:
     tables: list[SyncTable] = []
 
     for index, _ in enumerate(relation["sources"]):
         table: SyncTable = SyncTable(
-            engine=relation["engines"][index],
+            engine=utils.check_engine(relation["sources"][index]),
             source=relation["sources"][index],
             name=relation["tables"][index],
             fields=relation["fields"][index],
