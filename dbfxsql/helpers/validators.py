@@ -36,3 +36,11 @@ def only_empty_records(rows: list) -> list:
         return []
 
     return rows
+
+
+def same_rows(origin_row: dict, destiny_row: dict, fields: tuple) -> bool:
+    for origin_field, destiny_field in zip(*fields):
+        if origin_row[origin_field] != destiny_row[destiny_field]:
+            return False
+
+    return True
