@@ -120,7 +120,7 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[ ] SQL triggers/procedures for table changes.</li>
       <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
-      <li>[ ] Replace controller with commands during the sync</li>
+      <li>[ ] Accept conditions over row_number for DBF.</li>
       <li>[ ] Add FIELDS options for filtering read queries.</li>
       <li>[ ] Configuration commands for upload and edit.</li>
       <li>[ ] Validate the existence of the received field type.</li>
