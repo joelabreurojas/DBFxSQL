@@ -91,7 +91,7 @@ This early version of the code demonstrates a basic interaction with the tool.
 - [x] Detect changes in folder paths.
 - [x] Asynchronous file watcher for automatic change sync.
 - [x] Configuration file for specifying relations to compare.
-- [ ] Perform table migration before initial data synchronization.
+- [x] Perform table migration before initial data synchronization.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
