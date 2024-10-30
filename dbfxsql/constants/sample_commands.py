@@ -5,6 +5,7 @@ DBF: dict[str, str] = {
     "read": "dbfxsql read -s data.dbf -c id == 1",
     "update": "dbfxsql update -s data.dbf -f name 'Jane Doe' -c id == 1",
     "delete": "dbfxsql delete -s data.dbf -c id == 1",
+    "migrate": "dbfxsql migrate -p SQL",
 }
 
 
@@ -16,4 +17,5 @@ SQL: dict[str, str] = {
     "read": "dbfxsql read -s data.sql -t users -c id == 1",
     "update": "dbfxsql update -s data.sql -t users -f name 'Jane Doe' -c id == 1",
     "delete": "dbfxsql delete -s data.sql -t users -c id == 1",
+    "migrate": "dbfxsql migrate -p SQL",
 }
