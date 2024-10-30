@@ -344,19 +344,13 @@ def drop(rdbms: str, source: str, table: str | None) -> None:
 )
 @click.version_option(config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
+@utils.embed_examples
 def migrate(priority: str) -> None:
     """
     Migrate data between DBF and SQL files.
 
     Expects a priority folder where the files will be migrated to the other
     and a list of extensions.
-
-    \b
-    Examples:
-    ---------
-
-    dbfxsql migrate -p DBF
-    dbfxsql migrate -p SQL
     """
 
     with yaspin(color="cyan", timer=True) as spinner:
