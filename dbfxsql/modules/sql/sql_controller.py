@@ -54,9 +54,17 @@ def read_rows(
     if not validators.path_exists(sourcepath):
         raise SourceNotFound(sourcepath)
 
+    if not condition:
+        return sql_queries.read(sourcepath, table)
+
+    types: dict = sql_queries.fetch_types(sourcepath, table)
+    types = formatters.scourgify_types(types)
+
+    condition = formatters.quote_values(types, condition)
+
     rows: list[dict] = sql_queries.read(sourcepath, table, condition)
 
-    if condition and not formatters.depurate_empty_rows(rows):
+    if not formatters.depurate_empty_rows(rows):
         raise RowNotFound(condition)
 
     return rows
@@ -73,6 +81,8 @@ def update_rows(
     # assign types to each row's value
     types: dict = sql_queries.fetch_types(sourcepath, table)
     types = formatters.scourgify_types(types)
+
+    condition = formatters.quote_values(types, condition)
 
     row: dict = formatters.fields_to_dict(fields)
     row = formatters.assign_types(engine, types, row)
@@ -103,6 +113,11 @@ def delete_rows(engine: str, source: str, table: str, condition: tuple) -> None:
 
     if not _row_exists(sourcepath, table, condition):
         raise RowNotFound(condition)
+
+    types: dict = sql_queries.fetch_types(sourcepath, table)
+    types = formatters.scourgify_types(types)
+
+    condition = formatters.quote_values(types, condition)
 
     sql_queries.delete(sourcepath, table, condition)
 
