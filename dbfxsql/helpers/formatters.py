@@ -87,6 +87,24 @@ def scourgify_rows(rows: list[dict]) -> list[dict]:
     return [dict(zip(lower_fields, row.values())) for row in rows]
 
 
+def quote_values(types: dict[str, str], condition: tuple) -> tuple:
+    field, operator, value = condition
+
+    if field == "row_number":
+        return field, operator, value
+
+    if field not in types:
+        raise FieldNotFound(field)
+
+    _type: str = types[field]
+
+    # SQL
+    if "TEXT" == _type:
+        value = f"'{value}'"
+
+    return field, operator, value
+
+
 def filter_rows(rows: list, condition: tuple) -> tuple[list, list]:
     filter: str = ""
     _rows: list = []
@@ -301,7 +319,7 @@ def _parse_condition(condition: tuple[str, str, str]) -> tuple:
         operator = "=="
 
     try:
-        if "rowid" == field.lower() or "row_number" == field.lower():
+        if "row_number" == field.lower():
             value = int(value) - 1
 
     except ValueError:

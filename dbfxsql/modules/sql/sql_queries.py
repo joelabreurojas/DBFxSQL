@@ -24,7 +24,7 @@ def insert(sourcepath: str, table: str, row: dict, fields: tuple[str, str]) -> N
     sql_connection.fetch_none(sourcepath, query, parameters)
 
 
-def read(sourcepath: str, table: str, condition: tuple | None) -> list[dict]:
+def read(sourcepath: str, table: str, condition: tuple | None = None) -> list[dict]:
     if not table_exists(sourcepath, table):
         raise TableNotFound(table)
 
