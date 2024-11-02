@@ -99,8 +99,7 @@ def update_rows(
     if not _row_exists(sourcepath, table, condition):
         raise RowNotFound(condition)
 
-    fields: tuple[str, str] = formatters.deglose_fields(row)
-    _fields: str = formatters.merge_fields(fields, sep=" = ")
+    _fields: str = formatters.merge_fields(row)
 
     sql_queries.update(sourcepath, table, row, _fields, condition)
 
