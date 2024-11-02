@@ -69,10 +69,8 @@ def deglose_fields(row: dict) -> tuple:
     return field_names, values
 
 
-def merge_fields(fields: tuple[str, str], sep: str) -> str:
-    field_names, values = fields
-
-    return sep.join([field_names, values])
+def merge_fields(row: dict) -> str:
+    return ", ".join([f"{key} = :{key}" for key in row.keys()])
 
 
 def scourgify_rows(rows: list[dict]) -> list[dict]:
