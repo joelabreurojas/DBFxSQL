@@ -50,16 +50,17 @@ def only_modified(change: Change, path: str) -> bool:
 
 
 def notify(operations: list, tables: list) -> None:
-    for (insert, update, delete), table in zip(operations, tables):
-        print(f"\nMake changes in: {table.source}")
+    for operation, table in zip(operations, tables):
+        message: str = f"\nMake changes in: {table.source}"
+        print(message if not table.name else message + f" > {table.name}")
 
-        for row in insert:
+        for row in operation["insert"]:
             print(f"Insert row: {row["fields"]}")
 
-        for row in update:
+        for row in operation["update"]:
             print(f"Update row: {row["fields"]} with row_number {row["index"]}")
 
-        for row in delete:
+        for row in operation["delete"]:
             print(f"Delete row with row_number {row["index"]}")
 
 

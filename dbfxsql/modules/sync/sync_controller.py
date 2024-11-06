@@ -22,16 +22,18 @@ def collect_files(setup: dict, priority: str) -> tuple:
 
 
 def migrate(filenames: list, relations: dict) -> None:
-    origins, destinies = formatters.package_tables(filenames, relations)
-    origin, destinies = _depurate_tables(origins, destinies)
+    changes: list[dict] = formatters.package_changes(filenames, relations)
 
-    residual_tables: tuple = formatters.compare_tables(origin, destinies)
-    operations: list = formatters.classify_operations(residual_tables)
+    for tables in changes:
+        origin, destinies = _assing_rows(tables["origin"], tables["destinies"])
 
-    # Operations to be executed in the correspond source
-    # utils.notify(operations, destinies)
+        residual_tables: list = formatters.compare_tables(origin, destinies)
+        operations: list = formatters.classify_operations(residual_tables)
 
-    _execute_operations(operations, destinies)
+        # Operations to be executed in the correspond source
+        # utils.notify(operations, destinies)
+
+        _execute_operations(operations, destinies)
 
 
 async def synchronize(setup: dict, priority: str) -> None:
@@ -42,15 +44,14 @@ async def synchronize(setup: dict, priority: str) -> None:
         migrate(filenames, relations)
 
 
-def _depurate_tables(origins: list[SyncTable], destinies: list[SyncTable]) -> tuple:
-    rows: list[dict] = sync_connection.read(
-        origins[0].engine, origins[0].source, origins[0].name
-    )
-    origin: SyncTable = SyncTable(
-        engine=origins[0].engine,
-        source=origins[0].source,
-        name=origins[0].name,
-        fields=[origin.fields for origin in origins],
+def _assing_rows(origin: SyncTable, destinies: list[SyncTable]) -> tuple:
+    rows: list[dict] = sync_connection.read(origin.engine, origin.source, origin.name)
+
+    _origin: SyncTable = SyncTable(
+        engine=origin.engine,
+        source=origin.source,
+        name=origin.name,
+        fields=origin.fields,
         rows=formatters.depurate_empty_rows(rows),
     )
 
@@ -69,12 +70,12 @@ def _depurate_tables(origins: list[SyncTable], destinies: list[SyncTable]) -> tu
 
         _destinies.append(destiny)
 
-    return origin, _destinies
+    return _origin, _destinies
 
 
 def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
-    for (inserts, updates, deletes), destiny in zip(operations, destinies):
-        for insert in inserts:
+    for operation, destiny in zip(operations, destinies):
+        for insert in operation["insert"]:
             sync_connection.insert(
                 destiny.engine,
                 destiny.source,
@@ -82,7 +83,7 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
                 formatters.fields_to_tuple(insert["fields"]),
             )
 
-        for update in updates:
+        for update in operation["update"]:
             sync_connection.update(
                 destiny.engine,
                 destiny.source,
@@ -91,7 +92,7 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
                 update["index"],
             )
 
-        for delete in deletes[::-1]:
+        for delete in operation["delete"][::-1]:
             sync_connection.delete(
                 destiny.engine,
                 destiny.source,
