@@ -10,7 +10,7 @@ from dbfxsql.helpers import validators
 def test_create_table() -> None:
     os.system(sample_commands.DBF["create"])
 
-    assert validators.path_exists("./data.dbf")
+    assert validators.path_exists("./users.dbf")
 
 
 def test_insert_row() -> None:
@@ -62,7 +62,7 @@ def test_delete_rows() -> None:
     command: str = sample_commands.DBF["read"]
 
     try:
-        command = "dbfxsql read -e DBF -s data.dbf"
+        command = "dbfxsql read -e DBF -s users.dbf"
         output: str = subprocess.check_output(command, shell=True, text=True)
         table: str = "+----+------+\n| id | name |\n+----+------+\n|    |      |\n+----+------+\n\n"
         assert output == table
@@ -74,4 +74,4 @@ def test_delete_rows() -> None:
 def test_drop_table() -> None:
     os.system(sample_commands.DBF["drop"] + " --yes")
 
-    assert not validators.path_exists("./data.dbf")
+    assert not validators.path_exists("./users.dbf")
