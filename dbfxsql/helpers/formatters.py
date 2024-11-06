@@ -155,62 +155,59 @@ def relevant_filenames(filenames: list[str], relations: list[dict]) -> list[str]
     return relevant_filenames
 
 
-def package_tables(filenames: list[str], relations: list[dict]) -> list[dict]:
-    origins: list = []
-    destinies: list = []
-
-    origin: SyncTable = None
-    destiny: SyncTable = None
+def package_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
+    changes: list = []
 
     for filename in filenames:
+        origin_fields: list = []
+        destinies: list = []
+
         for relation in relations:
             if filename in relation["sources"]:
-                tables = _parse_tables(relation)
+                tables: list[SyncTable, SyncTable] = _parse_tables(relation)
                 origin, destiny = _define_tables(tables, filename)
 
-                origins.append(origin)
-                destinies.append(destiny)
+                if origin and destiny:
+                    origin_fields.append(origin.fields)
+                    destinies.append(destiny)
 
-    return origins, destinies
+        if origin and destinies:
+            origin = SyncTable(
+                engine=origin.engine,
+                source=origin.source,
+                name=origin.name,
+                fields=origin_fields,
+            )
+
+            changes.append({"origin": origin, "destinies": destinies})
+
+    return changes
 
 
 def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> list:
     residual_tables: list = []
 
-    for index, destiny in enumerate(destinies):
+    for origin_fields, destiny in zip(origin.fields, destinies):
+        fields: tuple = (origin_fields, destiny.fields)
         rows: tuple = (origin.rows, destiny.rows)
-        fields: tuple = (origin.fields[index], destiny.fields)
 
         residual_origin, residual_destiny = _compare_rows(*rows, fields)
 
-        residual_origin = _change_fields(residual_origin, destiny.fields)
-        residual_destiny = _depurate_fields(residual_destiny, destiny.fields)
+        for residual in residual_origin:
+            residual["fields"] = _depurate_fields(residual["fields"], origin_fields)
+            residual["fields"] = _change_fields(residual["fields"], destiny.fields)
 
         residual_tables.append((residual_origin, residual_destiny))
 
     return residual_tables
 
 
-def _change_fields(rows: list, fields: list) -> list[dict]:
-    if not rows:
-        return rows
-
-    for row in rows:
-        row["fields"] = {
-            key: value for key, value in zip(fields, row["fields"].values())
-        }
-
-    return rows
+def _depurate_fields(row: list, fields: list) -> list[dict]:
+    return {key: value for key, value in row.items() if key in fields}
 
 
-def _depurate_fields(rows: list, fields: list) -> list[dict]:
-    if not rows:
-        return rows
-
-    for row in rows:
-        row["fields"] = {key: value for key, value in row.items() if key in fields}
-
-    return rows
+def _change_fields(row: list, fields: list) -> list[dict]:
+    return {key: value for key, value in zip(fields, row.values())}
 
 
 def parse_filepaths(changes: list[set]) -> list:
@@ -244,7 +241,7 @@ def classify_operations(residual_tables: tuple) -> list:
             for origin_row, destiny_row in zip(origin, destiny)
         ]
 
-        operations.append((insert, update, delete))
+        operations.append({"insert": insert, "update": update, "delete": delete})
 
     return operations
 
@@ -286,6 +283,7 @@ def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple
 
             destiny_index += 1
         origin_index += 1
+
     return residual_origin, residual_destiny
 
 
@@ -327,7 +325,7 @@ def _parse_condition(condition: tuple[str, str, str]) -> tuple:
 
 
 def _parse_tables(relation: dict) -> list[SyncTable, SyncTable]:
-    tables: list[SyncTable] = []
+    tables: list = []
 
     for index, _ in enumerate(relation["sources"]):
         table: SyncTable = SyncTable(
