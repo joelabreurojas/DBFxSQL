@@ -10,7 +10,7 @@ DBF = [".dbf", ".DBF"]
 SQL = [".sql", ".SQL"]
 
 [[relations]]
-sources = ["tmp.dbf", "tmp.sql"]
+sources = ["users.dbf", "company.sql"]
 tables = ["", "users"]
 fields = [["id", "name"], ["id", "name"]]
 """
