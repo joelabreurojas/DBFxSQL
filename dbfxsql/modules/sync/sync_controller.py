@@ -25,7 +25,8 @@ def migrate(filenames: list, relations: dict) -> None:
     changes: list[dict] = formatters.package_changes(filenames, relations)
 
     for tables in changes:
-        origin, destinies = _assing_rows(tables["origin"], tables["destinies"])
+        origin: SyncTable = _assing_rows([tables["origin"]])[0]
+        destinies: list[SyncTable] = _assing_rows(tables["destinies"])
 
         residual_tables: list = formatters.compare_tables(origin, destinies)
         operations: list = formatters.classify_operations(residual_tables)
@@ -44,33 +45,23 @@ async def synchronize(setup: dict, priority: str) -> None:
         migrate(filenames, relations)
 
 
-def _assing_rows(origin: SyncTable, destinies: list[SyncTable]) -> tuple:
-    rows: list[dict] = sync_connection.read(origin.engine, origin.source, origin.name)
+def _assing_rows(tables: list[SyncTable]) -> list[SyncTable]:
+    _table: list = []
 
-    _origin: SyncTable = SyncTable(
-        engine=origin.engine,
-        source=origin.source,
-        name=origin.name,
-        fields=origin.fields,
-        rows=formatters.depurate_empty_rows(rows),
-    )
-
-    _destinies: list = []
-
-    for destiny in destinies:
-        rows = sync_connection.read(destiny.engine, destiny.source, destiny.name)
+    for table in tables:
+        rows: list[dict] = sync_connection.read(table.engine, table.source, table.name)
 
         destiny: SyncTable = SyncTable(
-            engine=destiny.engine,
-            source=destiny.source,
-            name=destiny.name,
-            fields=destiny.fields,
+            engine=table.engine,
+            source=table.source,
+            name=table.name,
+            fields=table.fields,
             rows=formatters.depurate_empty_rows(rows),
         )
 
-        _destinies.append(destiny)
+        _table.append(destiny)
 
-    return _origin, _destinies
+    return _table
 
 
 def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
