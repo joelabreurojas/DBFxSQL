@@ -159,29 +159,47 @@ def package_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
     changes: list = []
 
     for filename in filenames:
-        origin_fields: list = []
-        destinies: list = []
+        origin_tables: dict = _parse_origin(filename, relations)
 
-        for relation in relations:
-            if filename in relation["sources"]:
-                tables: list[SyncTable, SyncTable] = _parse_tables(relation)
-                origin, destiny = _define_tables(tables, filename)
+        for name in origin_tables.keys():
+            origin_data: SyncTable = origin_tables[name]["data"]
+            origin_fields: list = origin_tables[name]["fields"]
+            destinies: list = origin_tables[name]["destinies"]
 
-                if origin and destiny:
-                    origin_fields.append(origin.fields)
-                    destinies.append(destiny)
-
-        if origin and destinies:
-            origin = SyncTable(
-                engine=origin.engine,
-                source=origin.source,
-                name=origin.name,
+            origin: SyncTable = SyncTable(
+                engine=origin_data.engine,
+                source=origin_data.source,
+                name=origin_data.name,
                 fields=origin_fields,
             )
 
             changes.append({"origin": origin, "destinies": destinies})
 
     return changes
+
+
+def _parse_origin(filename: str, relations: list[dict]) -> dict:
+    origin_tables: dict = {}
+
+    for relation in relations:
+        if filename in relation["sources"]:
+            tables: list[SyncTable, SyncTable] = _parse_tables(relation)
+            origin, destiny = _define_tables(tables, filename)
+
+            if not destiny:
+                continue
+
+            if origin.name in origin_tables.keys():
+                origin_tables[origin.name]["fields"].append(origin.fields)
+                origin_tables[origin.name]["destinies"].append(destiny)
+            else:
+                origin_tables[origin.name] = {
+                    "data": origin,
+                    "fields": [origin.fields],
+                    "destinies": [destiny],
+                }
+
+    return origin_tables
 
 
 def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> list:
