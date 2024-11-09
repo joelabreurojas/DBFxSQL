@@ -121,6 +121,7 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[ ] Handle starving connections.</li>
       <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
+      <li>[ ] Group origin tables by destiny tables to optimize read queries when migrating.</li>
       <li>[ ] Accept conditions over row_number for DBF.</li>
       <li>[ ] Add FIELDS options for filtering read queries.</li>
       <li>[ ] Configuration commands for upload and edit.</li>
