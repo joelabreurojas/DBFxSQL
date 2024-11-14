@@ -1,4 +1,4 @@
-# dbfxsql
+# DBFxSQL
 
 
 ### ✨ Overview
@@ -18,7 +18,7 @@ python --version
 2. Clone the repository:
 
 ```bash
-git clone https://github.com/joelabreurojas/dbfxsql.git
+git clone https://github.com/joelabreurojas/DBFxSQL.git
 ```
 
 3. Install Poetry (if not alredy installed)
@@ -30,7 +30,7 @@ pip install poetry
 4. Set up the environment:
 
 ```bash
-cd dbfxsql
+cd DBFxSQL
 poetry shell
 poetry install
 ```
@@ -49,13 +49,13 @@ python run.py # python -m dbfxsql
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/j4breu/dbfxsql.git
+git clone https://github.com/joelabreurojas/DBFxSQL.git
 ```
 
 2. Install the project as a Python library:
 
 ```bash
-cd dbfxsql
+cd DBFxSQL
 pip install .
 ````
 

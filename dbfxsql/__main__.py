@@ -1,4 +1,4 @@
-"""Alterative entry point for dbfxsql, with: python -m dbfxsql."""
+"""Alterative entry point for DBFxSQL, with: python -m dbfxsql."""
 
 from . import run
 
