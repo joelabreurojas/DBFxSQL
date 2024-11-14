@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dbfxsql"
+name = "DBFxSQL"
 version = "0.1.0"
 description = "A CLI tool to manage data between DBF files and SQL databases."
 authors = ["Joel Abreu <joelabreurojas@gmail.com>"]

@@ -1,4 +1,4 @@
-PATH: str = "~/.config/dbfxsql/config.toml"
+PATH: str = "~/.config/DBFxSQL/config.toml"
 
 TEMPLATE: str = """
 [folderpaths]
