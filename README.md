@@ -9,7 +9,7 @@ A tool that enables bi-directional data synchronization between [DBF](https://en
 
 ### 🔌 Installation
 
-1. Check your Python version, we use `python` > `3.11`:
+1. Check your Python version, we use `python` > `^3.12`:
 
 ```bash
 python --version
