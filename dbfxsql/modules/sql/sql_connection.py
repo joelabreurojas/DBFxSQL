@@ -24,7 +24,7 @@ def fetch_one(sourcepath: str, query: str) -> list[dict] | None:
     with _get_cursor(sourcepath) as cursor:
         cursor.execute(query)
 
-        fields = [description[0] for description in cursor.description]
+        fields: list[str] = [description[0] for description in cursor.description]
 
         if row := cursor.fetchone():
             return [dict(zip(fields, row))]
