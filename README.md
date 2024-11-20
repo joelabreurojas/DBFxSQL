@@ -85,40 +85,17 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
-- [x] CRUD operations for both DBF and SQL databases.
-- [x] Bi-directional data transfer between DBF and SQL.
-- [x] Command-Line Interface (CLI) for managing DBF and SQL tasks.
-- [x] Detect changes in folder paths.
-- [x] Asynchronous file watcher for automatic change sync.
-- [x] Configuration file for specifying relations to compare.
-- [x] Perform table migration before initial data synchronization.
+- [ ] Additional RDBMS support (MSSQL Server).
+- [ ] SQL Server triggers/procedures for table changes.
+- [ ] Handle starving connections.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[x] Dynamic input parameters and database fields handling</li>
-      <li>[x] Automatic data type assignment for input values.</li>
-      <li>[x] <s>DBF field addition and incremental ID support</s>.</li>
-      <li>[x] Retrieve database folder paths from a `.env` file.</li>
-      <li>[x] Share a project overview video.</li>
-      <li>[x] Detect changes in folder paths.</li>
-      <li>[x] Merge DBF/SQL commands into a more friendly CLI format.</li>
-      <li>[x] Explain each single command in the CLI documentation.</li>
-      <li>[x] Get the rows of all relations in the config file.</li>
-      <li>[x] Optimize read queries saving origin rows for future comparations.</li>
-      <li>[x] Filtering rows for optimized data changesets.</li>
-      <li>[x] Refactor update query to ignore DBF rows that haven't changed.</li>
-      <li>[x] Force SQL -> DBF "synchronization" (read all tables).</li>
-      <li>[x] Replace dictionaries with classes during synchronization.</li>
-      <li>[x] Automatic SQL database creation during SQL table creation.</li>
-      <li>[x] Refactor project structure with data structures as inputs.</li>
-      <li>[x] Unit tests for code validation.</li>
-      <li>[x] Validate dynamic primary key and row_number fields.</li>
-      <li>[x] Operate over the databases through their row number.</li>
-      <li>[x] Row-based sync implementation.</li>
-      <li>[ ] Additional RDBMS support (MSQL Server).</li>
-      <li>[ ] SQL triggers/procedures for table changes.</li>
-      <li>[ ] Handle starving connections.</li>
+      <li>[ ] CRUD operations for SQL Server.</li>
+      <li>[ ] Manipulate migration by primary key in SQL Server.</li>
+      <li>[ ] Update engines terminology (dBase, SQLite, SQLServer).</li>
+      <li>[ ] Handle '==' and dict parameters in SQL Server.</li>
       <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
       <li>[ ] Group origin tables by destiny tables to optimize read queries when migrating.</li>
@@ -158,3 +135,4 @@ Special thanks to the following projects for making this tool possible:
 - [DBF library](https://github.com/ethanfurman/dbf/tree/master/dbf) - Pure Python DBF reader/writer by [Ethan Furman](https://github.com/ethanfurman)
 - [Watchfiles library](https://watchfiles.helpmanual.io) - Simple, modern and fast file watching and code reload in Python by [Samuel Colvin](https://github.com/samuelcolvin)
 - [Click library](https://click.palletsprojects.com/en/) - A Python command line interface toolkit by [Pallets Organization](https://github.com/pallets)
+
