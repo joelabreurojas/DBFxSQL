@@ -92,6 +92,8 @@ This early version of the code demonstrates a basic interaction with the tool.
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
+      <li>[ ] Adapt configuration by engines.</li>
+      <li>[ ] Classify engine to use by extension and path during migration.</li>
       <li>[ ] CRUD operations for MSSQL.</li>
       <li>[ ] Manipulate migration by primary key in MSSQL.</li>
       <li>[ ] Update engines terminology (dBase, SQLite, MSSQL).</li>
@@ -105,6 +107,8 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[ ] Validate the existence of the received field type.</li>
       <li>[ ] Validate KeyErrors for invalid fields.</li>
       <li>[ ] Validate type lengths and names for consistency between DBF and SQL.</li>
+      <li>[ ] Validate the data migration to a the same table.</li>
+      <li>[ ] Automatically generate the path to use in MSSQL between differents OS.</li>
       <li>[ ] Support for relationships between +2 tables in the config file.</li>
       <li>[ ] Comprehensive project documentation.</li>
       <li>[ ] Implementation of CQRS (Command Query Responsibility Segregation) patterns.</li>
