@@ -1,8 +1,8 @@
 import datetime
 import decimal
+import uuid
 
-
-DBF: dict = {
+DBASE: dict[str, type] = {
     "0": None,
     "C": str,
     "Y": float,
@@ -19,7 +19,7 @@ DBF: dict = {
     "@": datetime.datetime,
 }
 
-SQL: dict = {
+SQLITE: dict[str, type] = {
     "NULL": None,
     "INTEGER": int,
     "REAL": float,
@@ -27,4 +27,33 @@ SQL: dict = {
     "BLOB": bytes,  # Binary data
 }
 
-DATA_TYPES: dict[str, dict] = {"DBF": DBF, "SQL": SQL}
+SQLSERVER: dict[str, type] = {
+    "BIT": bool,
+    "TINYINT": int,
+    "SMALLINT": int,
+    "INT": int,
+    "BIGINT": int,
+    "DECIMAL": decimal.Decimal,
+    "NUMERIC": decimal.Decimal,
+    "FLOAT": float,
+    "REAL": float,
+    "MONEY": decimal.Decimal,
+    "SMALLMONEY": decimal.Decimal,
+    "DATETIME": datetime.datetime,
+    "SMALLDATETIME": datetime.datetime,
+    "DATE": datetime.date,
+    "TIME": datetime.time,
+    "CHAR": str,
+    "NCHAR": str,
+    "VARCHAR": str,
+    "NVARCHAR": str,
+    "TEXT": str,
+    "NTEXT": str,
+    "BINARY": bytes,
+    "VARBINARY": bytes,
+    "IMAGE": bytes,
+    "UNIQUEIDENTIFIER": uuid.UUID,
+}
+
+DATA_TYPES: dict[str, dict] = {"dBase": DBASE, "SQLite": SQLITE, "SQLServer": SQLSERVER}
+
