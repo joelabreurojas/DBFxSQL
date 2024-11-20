@@ -86,16 +86,16 @@ This early version of the code demonstrates a basic interaction with the tool.
 
 **Required:**
 - [ ] Additional RDBMS support (MSSQL Server).
-- [ ] SQL Server triggers/procedures for table changes.
+- [ ] MSSQL triggers/procedures for table changes.
 - [ ] Handle starving connections.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[ ] CRUD operations for SQL Server.</li>
-      <li>[ ] Manipulate migration by primary key in SQL Server.</li>
-      <li>[ ] Update engines terminology (dBase, SQLite, SQLServer).</li>
-      <li>[ ] Handle '==' and dict parameters in SQL Server.</li>
+      <li>[ ] CRUD operations for MSSQL.</li>
+      <li>[ ] Manipulate migration by primary key in MSSQL.</li>
+      <li>[ ] Update engines terminology (dBase, SQLite, MSSQL).</li>
+      <li>[ ] Handle '==' and dict parameters in MSSQL.</li>
       <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
       <li>[ ] Group origin tables by destiny tables to optimize read queries when migrating.</li>

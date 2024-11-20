@@ -27,7 +27,7 @@ SQLITE: dict[str, type] = {
     "BLOB": bytes,  # Binary data
 }
 
-SQLSERVER: dict[str, type] = {
+MSSQL: dict[str, type] = {
     "BIT": bool,
     "TINYINT": int,
     "SMALLINT": int,
@@ -55,5 +55,5 @@ SQLSERVER: dict[str, type] = {
     "UNIQUEIDENTIFIER": uuid.UUID,
 }
 
-DATA_TYPES: dict[str, dict] = {"dBase": DBASE, "SQLite": SQLITE, "SQLServer": SQLSERVER}
+DATA_TYPES: dict[str, dict] = {"dBase": DBASE, "SQLite": SQLITE, "MSSQL": MSSQL}
 
