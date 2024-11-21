@@ -92,7 +92,7 @@ This early version of the code demonstrates a basic interaction with the tool.
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[ ] Adapt configuration by engines.</li>
+      <li>[x] Adapt configuration by engines.</li>
       <li>[ ] Classify engine to use by extension and path during migration.</li>
       <li>[ ] CRUD operations for MSSQL.</li>
       <li>[ ] Manipulate migration by primary key in MSSQL.</li>
