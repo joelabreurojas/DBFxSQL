@@ -18,7 +18,8 @@ def decompose_filename(file: str) -> tuple[str, str]:
 
 def add_folderpath(engine: str, source: str) -> str:
     """Adds the folderpath to the source depending on the engine."""
-    folderpath: str = file_manager.load_config()["folderpaths"][engine][0]
+    engines: str = file_manager.load_config()["engines"]
+    folderpath: str = engines[engine]["folderpaths"][0]
 
     if not folderpath.endswith("/"):
         folderpath += "/"
