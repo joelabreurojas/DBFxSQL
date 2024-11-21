@@ -6,6 +6,7 @@ import subprocess
 from dbfxsql.constants import sample_commands
 from dbfxsql.helpers import formatters, validators
 from dbfxsql.modules.sql import sql_queries
+from dbfxsql.helpers.utils import check_engine
 
 
 def test_create_table() -> None:
@@ -74,7 +75,9 @@ def test_delete_rows() -> None:
 def test_drop_table() -> None:
     os.system(sample_commands.SQL["drop_table"] + " --yes")
 
-    sourcepath: str = formatters.add_folderpath("SQL", "company.sql")
+    source: str = "company.sql"
+    engine: str = check_engine(source)
+    sourcepath: str = formatters.add_folderpath(engine, source)
 
     assert not sql_queries.table_exists(sourcepath, "users")
 
