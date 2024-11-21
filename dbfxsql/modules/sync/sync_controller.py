@@ -38,7 +38,9 @@ def migrate(filenames: list, relations: dict) -> None:
 
 
 async def synchronize(setup: dict, priority: str) -> None:
-    folders: list[str] = setup["folderpaths"][priority]
+    folders: list[str] = list(
+        set(path for folder in setup["folderpaths"].values() for path in folder)
+    )
     relations: list[dict] = setup["relations"]
 
     async for filenames in _listen(folders):
