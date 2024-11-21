@@ -270,9 +270,10 @@ def drop(source: str, table: str | None) -> None:
 
     elif "SQLite" == engine or "MSSQL" == engine:
         if not table:
-            raise click.UsageError("Missing option '-t' / '--table' for SQL.")
+            sql_controller.drop_database(engine, source)
 
-        sql_controller.drop_table(engine, source, table)
+        else:
+            sql_controller.drop_table(engine, source, table)
 
 
 @cli.command()
