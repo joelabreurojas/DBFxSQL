@@ -15,4 +15,4 @@ tables = ["", "users"]
 fields = [["id", "name"], ["id", "name"]]
 """
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
