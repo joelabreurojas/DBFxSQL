@@ -65,16 +65,14 @@ def notify(operations: list, tables: list) -> None:
                 print(f"Delete row with row_number {row["index"]}")
 
 
-def check_engine(source: str) -> str:
-    engine: str = ""
+def check_engine(source: str) -> str | None:
     extension: str = formatters.decompose_filename(source)[1]
+    engines: dict = file_manager.load_config()["engines"]
 
-    extensions: dict = file_manager.load_config()["extensions"]
+    for engine_name, engine_config in engines.items():
+        if extension in engine_config["extensions"]:
+            return engine_name
 
-    if extension in extensions["DBF"]:
-        engine = "DBF"
 
-    elif extension in extensions["SQL"]:
-        engine = "SQL"
-
-    return engine
+if __name__ == "__main__":
+    print(check_engine("users."))
