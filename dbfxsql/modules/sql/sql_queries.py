@@ -46,9 +46,7 @@ def read(sourcepath: str, table: str, condition: tuple | None = None) -> list[di
             WHERE rowid IN (SELECT rowid FROM numbered_rows WHERE {"".join(condition)})
             """
 
-        if "==" == operator and (
-            primary_key == field_name or "row_number" == field_name
-        ):
+        if operator == "=" and field_name in [primary_key, "row_number"]:
             return sql_connection.fetch_one(sourcepath, query)
 
     return sql_connection.fetch_all(sourcepath, query)

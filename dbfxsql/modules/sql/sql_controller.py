@@ -36,7 +36,7 @@ def insert_row(engine: str, source: str, table: str, fields: Iterable[tuple]) ->
     primary_key: str = sql_queries.fetch_primary_key(sourcepath, table)
 
     if primary_key := validators.field_name_in(fields, primary_key):
-        condition: str = f"{primary_key} == {row[primary_key]}"
+        condition: str = f"{primary_key} = {row[primary_key]}"
 
         if _row_exists(sourcepath, table, condition):
             raise RowAlreadyExists(row[primary_key])
@@ -60,7 +60,7 @@ def read_rows(
     types: dict = sql_queries.fetch_types(sourcepath, table)
     types = formatters.scourgify_types(types)
 
-    condition = formatters.quote_values(types, condition)
+    condition = formatters.quote_values(engine, types, condition)
 
     rows: list[dict] = sql_queries.read(sourcepath, table, condition)
 
@@ -82,7 +82,7 @@ def update_rows(
     types: dict = sql_queries.fetch_types(sourcepath, table)
     types = formatters.scourgify_types(types)
 
-    condition = formatters.quote_values(types, condition)
+    condition = formatters.quote_values(engine, types, condition)
 
     row: dict = formatters.fields_to_dict(fields)
     row = formatters.assign_types(engine, types, row)
@@ -91,7 +91,7 @@ def update_rows(
     primary_key: str = sql_queries.fetch_primary_key(sourcepath, table)
 
     if primary_key := validators.field_name_in(fields, primary_key):
-        _condition: str = f"{primary_key} == {row[primary_key]}"
+        _condition: str = f"{primary_key} = {row[primary_key]}"
 
         if _row_exists(sourcepath, table, _condition):
             raise RowAlreadyExists(row[primary_key])
@@ -116,7 +116,7 @@ def delete_rows(engine: str, source: str, table: str, condition: tuple) -> None:
     types: dict = sql_queries.fetch_types(sourcepath, table)
     types = formatters.scourgify_types(types)
 
-    condition = formatters.quote_values(types, condition)
+    condition = formatters.quote_values(engine, types, condition)
 
     sql_queries.delete(sourcepath, table, condition)
 

@@ -86,7 +86,7 @@ def scourgify_rows(rows: list[dict]) -> list[dict]:
     return [dict(zip(lower_fields, row.values())) for row in rows]
 
 
-def quote_values(types: dict[str, str], condition: tuple) -> tuple:
+def quote_values(engine: str, types: dict[str, str], condition: tuple) -> tuple:
     field, operator, value = condition
 
     if field == "row_number":
@@ -95,10 +95,13 @@ def quote_values(types: dict[str, str], condition: tuple) -> tuple:
     if field not in types:
         raise FieldNotFound(field)
 
+    if "==" == operator:
+        operator = "="
+
     _type: str = types[field]
 
     # SQL
-    if "TEXT" == _type:
+    if DATA_TYPES[engine][_type] is str:
         value = f"'{value}'"
 
     return field, operator, value
