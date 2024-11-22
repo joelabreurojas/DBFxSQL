@@ -52,7 +52,7 @@ def create(source: str, table: str | None, fields: tuple) -> None:
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
-    elif "SQLite" == engine or "MSSQL" == engine:
+    else:
         sql_controller.create_table(engine, source, table, fields)
 
 
@@ -93,7 +93,7 @@ def insert(source: str, table: str | None, fields: tuple) -> None:
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
-    elif "SQLite" == engine or "MSSQL" == engine:
+    else:
         sql_controller.insert_row(engine, source, table, fields)
 
 
@@ -139,7 +139,7 @@ def read(
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
-    elif "SQLite" == engine or "MSSQL" == engine:
+    else:
         rows = sql_controller.read_rows(engine, source, table, condition)
 
     utils.show_table(rows)
@@ -195,7 +195,7 @@ def update(
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
-    elif "SQLite" == engine or "MSSQL" == engine:
+    else:
         sql_controller.update_rows(engine, source, table, fields, condition)
 
 
@@ -236,7 +236,7 @@ def delete(source: str, table: str | None, condition: tuple) -> None:
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
-    elif "SQLite" == engine or "MSSQL" == engine:
+    else:
         sql_controller.delete_rows(engine, source, table, condition)
 
 
@@ -268,12 +268,11 @@ def drop(source: str, table: str | None) -> None:
     if "dBase" == engine:
         dbf_controller.drop_table(engine, source)
 
-    elif "SQLite" == engine or "MSSQL" == engine:
-        if not table:
-            sql_controller.drop_database(engine, source)
+    elif not table:
+        sql_controller.drop_database(engine, source)
 
-        else:
-            sql_controller.drop_table(engine, source, table)
+    else:
+        sql_controller.drop_table(engine, source, table)
 
 
 @cli.command()
