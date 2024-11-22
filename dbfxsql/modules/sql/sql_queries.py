@@ -84,7 +84,7 @@ def delete(sourcepath: str, table: str, condition: tuple) -> None:
     query: str = f"DELETE FROM {table} WHERE {"".join(condition)}"
     field_name, operator, *_ = condition
 
-    if "row_number" in condition[0]:
+    if "row_number" == condition[0]:
         query = f"""
         WITH numbered_rows AS (
             SELECT rowid, ROW_NUMBER() OVER (ORDER BY rowid) AS row_number 
