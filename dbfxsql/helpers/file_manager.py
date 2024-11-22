@@ -1,12 +1,12 @@
 import tomllib
 
-from ..constants import config
+from ..constants import default_config
 
 from pathlib import Path
 
 
 def load_config() -> dict:
-    configpath: Path = Path(config.PATH).expanduser()
+    configpath: Path = Path(default_config.PATH).expanduser()
 
     if not configpath.exists():
         _create_default_config(configpath)
@@ -39,4 +39,4 @@ def _create_default_config(configpath: Path) -> None:
     configpath.touch()
 
     with open(configpath.as_posix(), "w") as configfile:
-        configfile.write(config.TEMPLATE[1:])  # remove the first newline
+        configfile.write(default_config.TEMPLATE[1:])  # remove the first newline

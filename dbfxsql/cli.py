@@ -1,4 +1,4 @@
-from .constants import config
+from .constants import default_config
 from .models.order_commands import OrderCommands
 from .modules import dbf_controller, sql_controller, sync_controller
 from .helpers import utils
@@ -9,7 +9,7 @@ from yaspin import yaspin
 
 
 @click.group(cls=OrderCommands)
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 def cli():
     """This script helps with the initialization of the tool."""
@@ -36,7 +36,7 @@ def cli():
     help="Fields with their types.",
     required=True,
 )
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def create(source: str, table: str | None, fields: tuple) -> None:
@@ -77,7 +77,7 @@ def create(source: str, table: str | None, fields: tuple) -> None:
     help="Fields with their values.",
     required=True,
 )
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def insert(source: str, table: str | None, fields: tuple) -> None:
@@ -117,7 +117,7 @@ def insert(source: str, table: str | None, fields: tuple) -> None:
     metavar="TEXT TEXT TEXT",
     help="Field, operator and value.",
 )
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def read(
@@ -174,7 +174,7 @@ def read(
     help="Field, operator and value.",
     required=True,
 )
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def update(
@@ -220,7 +220,7 @@ def update(
     help="Field, operator and value.",
     required=True,
 )
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def delete(source: str, table: str | None, condition: tuple) -> None:
@@ -255,7 +255,7 @@ def delete(source: str, table: str | None, condition: tuple) -> None:
 @click.confirmation_option(
     prompt="Are you sure you want to drop?", help="Confirm the operation."
 )
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def drop(source: str, table: str | None) -> None:
@@ -284,7 +284,7 @@ def drop(source: str, table: str | None) -> None:
     default="dBase",
     show_default=True,
 )
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 @utils.embed_examples
 def migrate(engine: str) -> None:
@@ -319,7 +319,7 @@ def migrate(engine: str) -> None:
     default="dBase",
     show_default=True,
 )
-@click.version_option(config.VERSION, "-v", "--version")
+@click.version_option(default_config.VERSION, "-v", "--version")
 @click.help_option("-h", "--help")
 def sync(engine: str) -> None:
     """
