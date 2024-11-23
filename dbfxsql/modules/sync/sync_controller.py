@@ -15,7 +15,7 @@ def init() -> dict:
 
 
 def collect_files(setup: dict, priority: str) -> tuple:
-    folders: list[str] = setup["folderpaths"][priority]
+    folders: list[str] = list(set(path for path in setup["folderpaths"][priority]))
     extensions: list[str] = setup["extensions"][priority]
 
     return file_manager.get_filenames(folders, extensions)
