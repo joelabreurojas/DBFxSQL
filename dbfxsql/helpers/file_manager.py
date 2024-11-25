@@ -17,8 +17,8 @@ def load_config() -> dict:
     return toml_data
 
 
-def new_file(sourcepath: str) -> None:
-    Path(sourcepath).touch()
+def new_file(filepath: str) -> None:
+    Path(filepath).touch()
 
 
 def remove_file(filepath: str) -> None:

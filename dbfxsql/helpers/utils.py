@@ -65,8 +65,8 @@ def notify(operations: list, tables: list) -> None:
                 print(f"Delete row with row_number {row["index"]}")
 
 
-def check_engine(source: str) -> str | None:
-    extension: str = formatters.decompose_filename(source)[1]
+def check_engine(filename: str) -> str | None:
+    extension: str = formatters.decompose_file(filename)[1]
     engines: dict = file_manager.load_config()["engines"]
 
     for engine_name, engine_config in engines.items():

@@ -3,8 +3,8 @@ from collections.abc import Iterable
 from pathlib import Path
 
 
-def path_exists(sourcepath: str) -> None:
-    return Path(sourcepath).exists()
+def path_exists(filepath: str) -> None:
+    return Path(filepath).exists()
 
 
 def field_name_in(fields: Iterable[tuple], field_name: str) -> str:

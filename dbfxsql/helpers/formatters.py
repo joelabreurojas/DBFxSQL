@@ -10,21 +10,21 @@ from ..exceptions.value_errors import ValueNotValid
 from pathlib import Path
 
 
-def decompose_filename(file: str) -> tuple[str, str]:
-    """Decomposes a filename into its stem and suffix."""
+def decompose_file(filename: str) -> tuple[str, str]:
+    """Decomposes a file into its stem and suffix."""
 
-    return Path(file).stem, Path(file).suffix
+    return Path(filename).stem, Path(filename).suffix
 
 
-def add_folderpath(engine: str, source: str) -> str:
-    """Adds the folderpath to the source depending on the engine."""
+def add_folderpath(engine: str, filename: str) -> str:
+    """Adds the folderpath to the filename depending on the engine."""
     engines: str = file_manager.load_config()["engines"]
     folderpath: str = engines[engine]["folderpaths"][0]
 
     if not folderpath.endswith("/"):
         folderpath += "/"
 
-    return folderpath + source
+    return folderpath + filename
 
 
 def fields_to_str(fields: Iterable[tuple[str, str]], sep: str = ", ") -> str:
