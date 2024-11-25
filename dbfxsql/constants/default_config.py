@@ -19,5 +19,3 @@ sources = ["users.dbf", "company.sql"]
 tables = ["", "users"]
 fields = [["id", "name"], ["id", "name"]]
 """
-
-VERSION = "0.2.0"
