@@ -72,7 +72,3 @@ def check_engine(source: str) -> str | None:
     for engine_name, engine_config in engines.items():
         if extension in engine_config["extensions"]:
             return engine_name
-
-
-if __name__ == "__main__":
-    print(check_engine("users."))

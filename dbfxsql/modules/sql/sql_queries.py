@@ -61,7 +61,7 @@ def update(
     query: str = f"UPDATE {table} SET {fields} WHERE {"".join(condition)}"
     parameters: dict = {**row}
 
-    field_name, operator, *_ = condition
+    field_name, *_ = condition
 
     if "row_number" == field_name:
         query = f"""
@@ -82,9 +82,10 @@ def delete(sourcepath: str, table: str, condition: tuple) -> None:
         raise TableNotFound(table)
 
     query: str = f"DELETE FROM {table} WHERE {"".join(condition)}"
-    field_name, operator, *_ = condition
 
-    if "row_number" == condition[0]:
+    field_name, *_ = condition
+
+    if "row_number" == field_name:
         query = f"""
         WITH numbered_rows AS (
             SELECT rowid, ROW_NUMBER() OVER (ORDER BY rowid) AS row_number 
@@ -124,7 +125,7 @@ def fetch_row(sourcepath: str, table: str, condition: tuple) -> dict:
         raise TableNotFound(table)
 
     query: str = f"SELECT COUNT(1) FROM {table} WHERE {"".join(condition)}"
-    field_name, operator, *_ = condition
+    field_name, *_ = condition
 
     if "row_number" == field_name:
         query = f"""
