@@ -39,24 +39,24 @@ def fields_to_tuple(fields: dict) -> tuple:
     return tuple(fields.items())
 
 
-def assign_types(engine: str, _types: dict[str, str], row: dict[str, str]) -> dict:
+def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> dict:
     data_type: dict = DATA_TYPES[engine]
 
     field_names: list[str] = [field.lower() for field in row.keys()]
-    type_names: list[str] = [_type.lower() for _type in _types.keys()]
+    type_names: list[str] = [type_.lower() for type_ in types_.keys()]
 
     for field in field_names:
         if field not in type_names:
             raise FieldNotFound(field)
 
-        _type: str = _types[field]
-        value: str = _apply_type_cases(field, row[field], _type)
+        type_: str = types_[field]
+        value: str = _apply_type_cases(field, row[field], type_)
 
         try:
-            row[field] = data_type[_type](value)
+            row[field] = data_type[type_](value)
 
         except (ValueError, AttributeError, decimal.InvalidOperation):
-            raise ValueNotValid(field, value, _type)
+            raise ValueNotValid(field, value, type_)
 
     return row
 
@@ -98,18 +98,18 @@ def quote_values(engine: str, types: dict[str, str], condition: tuple) -> tuple:
     if "==" == operator:
         operator = "="
 
-    _type: str = types[field]
+    type_: str = types[field]
 
     # SQL
-    if DATA_TYPES[engine][_type] is str:
+    if DATA_TYPES[engine][type_] is str:
         value = f"'{value}'"
 
     return field, operator, value
 
 
-def filter_rows(rows: list, condition: tuple) -> tuple[list, list]:
+def filter_rows(rows_: list, condition: tuple) -> tuple[list, list]:
     filter: str = ""
-    _rows: list = []
+    rows: list = []
     indexes: list = []
 
     field, operator, value = _parse_condition(condition)
@@ -117,22 +117,22 @@ def filter_rows(rows: list, condition: tuple) -> tuple[list, list]:
     if "==" == operator and "row_number" == field:
         return [rows[value]], [value]
 
-    for index, row in enumerate(rows):
+    for index, row in enumerate(rows_):
         if isinstance(row[field], str):
             filter = f"'{row[field]}'{operator}'{value}'"
         else:
             filter = f"{row[field]}{operator}{value}"
 
         if eval(filter):
-            _rows.append(row)
+            rows.append(row)
             indexes.append(index)
 
-    return _rows, indexes
+    return rows, indexes
 
 
 def scourgify_types(types: list[dict[str, str]]) -> dict[str, str]:
-    names: list = [_type["name"] for _type in types]
-    data_structure: list = [_type["type"] for _type in types]
+    names: list = [type_["name"] for type_ in types]
+    data_structure: list = [type_["type"] for type_ in types]
 
     return dict(zip(names, data_structure))
 
@@ -315,16 +315,16 @@ def _search_filenames(filename: str, relations: list[dict]) -> str | None:
             return filename
 
 
-def _apply_type_cases(field: str, value: str, _type: str) -> str:
+def _apply_type_cases(field: str, value: str, type_: str) -> str:
     # Logical case
-    if "N" == _type and value is None:
+    if "N" == type_ and value is None:
         value = "0"
 
-    if "L" == _type and ("True" != value != "False"):
+    if "L" == type_ and ("True" != value != "False"):
         raise ValueNotValid(value, field, "bool")
 
     # Date/Datetime case
-    if "D" == _type or "@" == _type:
+    if "D" == type_ or "@" == type_:
         value.replace("/", "-")
 
     return value

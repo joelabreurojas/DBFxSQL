@@ -25,7 +25,7 @@ def insert(
 
 
 def read(
-    engine: str, filepath: str, table: str, condition: tuple | None = None
+    engine: str, filepath: str, table: str, condition_: tuple | None = None
 ) -> list[dict]:
     command: str = "read"
 
@@ -35,14 +35,14 @@ def read(
 
         return sql_connection.fetch_all(engine, filepath, query)
 
-    field_name, operator, *_ = condition
+    field_name, operator, *_ = condition_
     command += "_by_condition" if "row_number" != field_name else "_by_row_number"
 
-    _condition: str = "".join(condition)
+    condition: str = "".join(condition_)
     primary_key: str = fetch_primary_key(engine, filepath, table)
 
     query: str = load_query(engine, command)
-    query = query.format(table=table, condition=_condition, primary_key=primary_key)
+    query = query.format(table=table, condition=condition, primary_key=primary_key)
 
     if operator == "=" and field_name in ["row_number", primary_key]:
         return sql_connection.fetch_one(engine, filepath, query)

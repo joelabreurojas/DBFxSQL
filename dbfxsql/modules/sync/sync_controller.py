@@ -47,10 +47,10 @@ async def synchronize(setup: dict, priority: str) -> None:
         migrate(filenames, relations)
 
 
-def _assing_rows(tables: list[SyncTable]) -> list[SyncTable]:
-    _table: list = []
+def _assing_rows(tables_: list[SyncTable]) -> list[SyncTable]:
+    tables: list = []
 
-    for table in tables:
+    for table in tables_:
         rows: list[dict] = sync_connection.read(table.engine, table.source, table.name)
 
         destiny: SyncTable = SyncTable(
@@ -61,9 +61,9 @@ def _assing_rows(tables: list[SyncTable]) -> list[SyncTable]:
             rows=formatters.depurate_empty_rows(rows),
         )
 
-        _table.append(destiny)
+        tables.append(destiny)
 
-    return _table
+    return tables
 
 
 def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:

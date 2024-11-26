@@ -7,20 +7,20 @@ def path_exists(filepath: str) -> None:
     return Path(filepath).exists()
 
 
-def field_name_in(fields: Iterable[tuple], field_name: str) -> str:
+def field_name_in(fields: Iterable[tuple], field_name_: str) -> str:
     for field in fields:
-        _field_name: str = field[0]
+        field_name: str = field[0]
 
-        if field_name.lower() == _field_name.lower():
-            return _field_name
+        if field_name_.lower() == field_name.lower():
+            return field_name
 
 
-def values_are_different(rows: list[dict], row: dict) -> bool:
+def values_are_different(rows: list[dict], row_: dict) -> bool:
     """Checks if a list of rows are different from a given row."""
 
-    for _row in rows:
-        for key, value in row.items():
-            if value != _row[key]:
+    for row in rows:
+        for key, value in row_.items():
+            if value != row[key]:
                 return True
 
     return False

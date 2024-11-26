@@ -22,12 +22,12 @@ def read(filepath: str) -> list[dict]:
     return rows if rows else [{field: "" for field in field_names}]
 
 
-def update(filepath: str, row: dict, indexes: list[int]) -> None:
+def update(filepath: str, row_: dict, indexes: list[int]) -> None:
     with get_table(filepath) as table:
         for index in indexes:
-            with table[index] as _row:
-                for key, value in row.items():
-                    setattr(_row, key, value)
+            with table[index] as row:
+                for key, value in row_.items():
+                    setattr(row, key, value)
 
 
 def delete(filepath: str, indexes: list[int]) -> None:

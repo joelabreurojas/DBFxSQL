@@ -7,19 +7,19 @@ from dbfxsql.exceptions.field_errors import FieldReserved
 from dbfxsql.exceptions.row_errors import RowNotFound
 
 
-def create_table(engine: str, filename: str, fields: Iterable[tuple]) -> None:
+def create_table(engine: str, filename: str, fields_: Iterable[tuple]) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if validators.path_exists(filepath):
         raise SourceAlreadyExists(filename)
 
-    if row_number := validators.field_name_in(fields, "row_number"):
+    if row_number := validators.field_name_in(fields_, "row_number"):
         raise FieldReserved(row_number)
 
-    _fields: str = formatters.fields_to_str(fields, sep="; ")
+    fields: str = formatters.fields_to_str(fields_, sep="; ")
 
     file_manager.new_file(filepath)
-    dbf_queries.create(filepath, _fields)
+    dbf_queries.create(filepath, fields)
 
 
 def insert_row(engine: str, filename: str, fields: Iterable[tuple]) -> None:

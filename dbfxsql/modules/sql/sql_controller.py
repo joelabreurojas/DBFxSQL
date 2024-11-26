@@ -9,7 +9,7 @@ from dbfxsql.exceptions.table_errors import TableAlreadyExists, TableNotFound
 
 
 def create_table(
-    engine: str, filename: str, table: str, fields: Iterable[tuple]
+    engine: str, filename: str, table: str, fields_: Iterable[tuple]
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -19,15 +19,17 @@ def create_table(
     if sql_queries.table_exists(engine, filepath, table):
         raise TableAlreadyExists(table)
 
-    if row_number := validators.field_name_in(fields, "row_number"):
+    if row_number := validators.field_name_in(fields_, "row_number"):
         raise FieldReserved(row_number)
 
-    _fields: str = formatters.fields_to_str(fields)
+    fields: str = formatters.fields_to_str(fields_)
 
-    sql_queries.create(engine, filepath, table, _fields)
+    sql_queries.create(engine, filepath, table, fields)
 
 
-def insert_row(engine: str, filename: str, table: str, fields: Iterable[tuple]) -> None:
+def insert_row(
+    engine: str, filename: str, table: str, fields_: Iterable[tuple]
+) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if not validators.path_exists(filepath):
@@ -39,20 +41,20 @@ def insert_row(engine: str, filename: str, table: str, fields: Iterable[tuple]) 
     types: dict = sql_queries.fetch_types(engine, filepath, table)
     types = formatters.scourgify_types(types)
 
-    row: dict = formatters.fields_to_dict(fields)
+    row: dict = formatters.fields_to_dict(fields_)
     row = formatters.assign_types(engine, types, row)
 
     primary_key: str = sql_queries.fetch_primary_key(engine, filepath, table)
 
-    if primary_key := validators.field_name_in(fields, primary_key):
+    if primary_key := validators.field_name_in(fields_, primary_key):
         condition: str = f"{primary_key} = {row[primary_key]}"
 
         if _row_exists(engine, filepath, table, condition):
             raise RowAlreadyExists(row[primary_key])
 
-    _fields: tuple[str, str] = formatters.deglose_fields(row)
+    fields: tuple[str, str] = formatters.deglose_fields(row)
 
-    sql_queries.insert(engine, filepath, table, row, _fields)
+    sql_queries.insert(engine, filepath, table, row, fields)
 
 
 def read_rows(
@@ -83,7 +85,7 @@ def read_rows(
 
 
 def update_rows(
-    engine: str, filename: str, table: str, fields: Iterable[tuple], condition: tuple
+    engine: str, filename: str, table: str, fields_: Iterable[tuple], condition: tuple
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -99,24 +101,24 @@ def update_rows(
 
     condition = formatters.quote_values(engine, types, condition)
 
-    row: dict = formatters.fields_to_dict(fields)
+    row: dict = formatters.fields_to_dict(fields_)
     row = formatters.assign_types(engine, types, row)
 
     # check if other row have the same pk
     primary_key: str = sql_queries.fetch_primary_key(engine, filepath, table)
 
-    if primary_key := validators.field_name_in(fields, primary_key):
-        _condition: str = f"{primary_key} = {row[primary_key]}"
+    if primary_key := validators.field_name_in(fields_, primary_key):
+        condition_: str = f"{primary_key} = {row[primary_key]}"
 
-        if _row_exists(engine, filepath, table, _condition):
+        if _row_exists(engine, filepath, table, condition_):
             raise RowAlreadyExists(row[primary_key])
 
     if not _row_exists(engine, filepath, table, condition):
         raise RowNotFound(condition)
 
-    _fields: str = formatters.merge_fields(row)
+    fields: str = formatters.merge_fields(row)
 
-    sql_queries.update(engine, filepath, table, row, _fields, condition)
+    sql_queries.update(engine, filepath, table, row, fields, condition)
 
 
 def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> None:
