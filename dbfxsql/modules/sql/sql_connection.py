@@ -1,8 +1,8 @@
 """Communications with the SQL database"""
 
-import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
+from dbfxsql.constants.sql_libraries import SQL
 
 
 def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
@@ -40,11 +40,11 @@ def fetch_none(
 
 
 @contextmanager
-def _get_cursor(engine: str, filepath: str) -> Generator[sqlite3.Cursor]:
+def _get_cursor(engine: str, filepath: str) -> Generator:
     """Provides a context manager for establishing and closing a database connection."""
 
-    connection: sqlite3.Connection = sqlite3.connect(filepath)
-    cursor: sqlite3.Cursor = connection.cursor()
+    connection: SQL[engine].Connection = SQL[engine].connect(filepath)
+    cursor: SQL[engine].Cursor = connection.cursor()
 
     try:
         yield cursor
