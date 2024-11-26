@@ -79,7 +79,7 @@ def test_drop_table() -> None:
     engine: str = check_engine(filename)
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    assert not sql_queries.table_exists(filepath, "users")
+    assert not sql_queries.table_exists(engine, filepath, table="users")
 
 
 def test_drop_database() -> None:

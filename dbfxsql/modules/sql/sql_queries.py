@@ -4,16 +4,18 @@ from . import sql_connection
 from dbfxsql.exceptions.table_errors import TableAlreadyExists, TableNotFound
 
 
-def create(filepath: str, table: str, fields: str) -> None:
-    if table_exists(filepath, table):
+def create(engine: str, filepath: str, table: str, fields: str) -> None:
+    if table_exists(engine, filepath, table):
         raise TableAlreadyExists(table)
 
     query: str = f"CREATE TABLE IF NOT EXISTS {table} ({fields})"
-    sql_connection.fetch_none(filepath, query)
+    sql_connection.fetch_none(engine, filepath, query)
 
 
-def insert(filepath: str, table: str, row: dict, fields: tuple[str, str]) -> None:
-    if not table_exists(filepath, table):
+def insert(
+    engine: str, filepath: str, table: str, row: dict, fields: tuple[str, str]
+) -> None:
+    if not table_exists(engine, filepath, table):
         raise TableNotFound(table)
 
     field_names, values = fields
@@ -21,11 +23,13 @@ def insert(filepath: str, table: str, row: dict, fields: tuple[str, str]) -> Non
     query: str = f"INSERT INTO {table} ({field_names}) VALUES ({values})"
     parameters: dict = {**row}
 
-    sql_connection.fetch_none(filepath, query, parameters)
+    sql_connection.fetch_none(engine, filepath, query, parameters)
 
 
-def read(filepath: str, table: str, condition: tuple | None = None) -> list[dict]:
-    if not table_exists(filepath, table):
+def read(
+    engine: str, filepath: str, table: str, condition: tuple | None = None
+) -> list[dict]:
+    if not table_exists(engine, filepath, table):
         raise TableNotFound(table)
 
     query: str = f"SELECT * FROM {table}"
@@ -34,7 +38,7 @@ def read(filepath: str, table: str, condition: tuple | None = None) -> list[dict
         query += f" WHERE {"".join(condition)}"
 
         field_name, operator, *_ = condition
-        primary_key: str = fetch_primary_key(filepath, table)
+        primary_key: str = fetch_primary_key(engine, filepath, table)
 
         if "row_number" == field_name:
             query = f"""
@@ -47,12 +51,14 @@ def read(filepath: str, table: str, condition: tuple | None = None) -> list[dict
             """
 
         if operator == "=" and field_name in [primary_key, "row_number"]:
-            return sql_connection.fetch_one(filepath, query)
+            return sql_connection.fetch_one(engine, filepath, query)
 
-    return sql_connection.fetch_all(filepath, query)
+    return sql_connection.fetch_all(engine, filepath, query)
 
 
-def update(filepath: str, table: str, row: dict, fields: str, condition: tuple) -> None:
+def update(
+    engine: str, filepath: str, table: str, row: dict, fields: str, condition: tuple
+) -> None:
     if not table_exists(filepath, table):
         raise TableNotFound(table)
 
@@ -72,10 +78,10 @@ def update(filepath: str, table: str, row: dict, fields: str, condition: tuple) 
         WHERE rowid IN (SELECT rowid FROM numbered_rows WHERE {"".join(condition)})
         """
 
-    sql_connection.fetch_none(filepath, query, parameters)
+    sql_connection.fetch_none(engine, filepath, query, parameters)
 
 
-def delete(filepath: str, table: str, condition: tuple) -> None:
+def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
     if not table_exists(filepath, table):
         raise TableNotFound(table)
 
@@ -93,32 +99,32 @@ def delete(filepath: str, table: str, condition: tuple) -> None:
         WHERE rowid IN (SELECT rowid FROM numbered_rows WHERE {"".join(condition)})
         """
 
-    sql_connection.fetch_none(filepath, query)
+    sql_connection.fetch_none(engine, filepath, query)
 
 
-def drop(filepath: str, table: str) -> None:
-    if not table_exists(filepath, table):
+def drop(engine: str, filepath: str, table: str) -> None:
+    if not table_exists(engine, filepath, table):
         raise TableNotFound(table)
 
     query: str = f"DROP TABLE IF EXISTS {table}"
-    sql_connection.fetch_none(filepath, query)
+    sql_connection.fetch_none(engine, filepath, query)
 
 
-def fetch_types(filepath: str, table: str) -> dict[str, str]:
+def fetch_types(engine: str, filepath: str, table: str) -> dict[str, str]:
     query: str = f"SELECT name, type FROM pragma_table_info('{table}')"
 
-    return sql_connection.fetch_all(filepath, query)
+    return sql_connection.fetch_all(engine, filepath, query)
 
 
-def fetch_primary_key(filepath: str, table: str) -> str:
+def fetch_primary_key(engine: str, filepath: str, table: str) -> str:
     query: str = f"SELECT name FROM pragma_table_info('{table}') WHERE pk = 1"
 
-    primary_key: list | None = sql_connection.fetch_one(filepath, query)
+    primary_key: list | None = sql_connection.fetch_one(engine, filepath, query)
 
     return "" if not primary_key else primary_key[0]["name"]
 
 
-def fetch_row(filepath: str, table: str, condition: tuple) -> dict:
+def fetch_row(engine: str, filepath: str, table: str, condition: tuple) -> dict:
     if not table_exists(filepath, table):
         raise TableNotFound(table)
 
@@ -135,10 +141,10 @@ def fetch_row(filepath: str, table: str, condition: tuple) -> dict:
         WHERE rowid IN (SELECT rowid FROM numbered_rows WHERE {"".join(condition)})
         """
 
-    return sql_connection.fetch_one(filepath, query)[0]["COUNT(1)"]
+    return sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"]
 
 
-def table_exists(filepath: str, table: str) -> bool:
+def table_exists(engine: str, filepath: str, table: str) -> bool:
     query = f"SELECT COUNT(1) FROM sqlite_master WHERE type='table' AND name='{table}'"
 
-    return bool(sql_connection.fetch_one(filepath, query)[0]["COUNT(1)"])
+    return bool(sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"])

@@ -20,7 +20,7 @@ def create_table(
 
     _fields: str = formatters.fields_to_str(fields)
 
-    sql_queries.create(filepath, table, _fields)
+    sql_queries.create(engine, filepath, table, _fields)
 
 
 def insert_row(engine: str, filename: str, table: str, fields: Iterable[tuple]) -> None:
@@ -35,7 +35,7 @@ def insert_row(engine: str, filename: str, table: str, fields: Iterable[tuple]) 
     row: dict = formatters.fields_to_dict(fields)
     row = formatters.assign_types(engine, types, row)
 
-    primary_key: str = sql_queries.fetch_primary_key(filepath, table)
+    primary_key: str = sql_queries.fetch_primary_key(engine, filepath, table)
 
     if primary_key := validators.field_name_in(fields, primary_key):
         condition: str = f"{primary_key} = {row[primary_key]}"
@@ -45,7 +45,7 @@ def insert_row(engine: str, filename: str, table: str, fields: Iterable[tuple]) 
 
     _fields: tuple[str, str] = formatters.deglose_fields(row)
 
-    sql_queries.insert(filepath, table, row, _fields)
+    sql_queries.insert(engine, filepath, table, row, _fields)
 
 
 def read_rows(
@@ -64,7 +64,7 @@ def read_rows(
 
     condition = formatters.quote_values(engine, types, condition)
 
-    rows: list[dict] = sql_queries.read(filepath, table, condition)
+    rows: list[dict] = sql_queries.read(engine, filepath, table, condition)
 
     if not formatters.depurate_empty_rows(rows):
         raise RowNotFound(condition)
@@ -90,20 +90,20 @@ def update_rows(
     row = formatters.assign_types(engine, types, row)
 
     # check if other row have the same pk
-    primary_key: str = sql_queries.fetch_primary_key(filepath, table)
+    primary_key: str = sql_queries.fetch_primary_key(engine, filepath, table)
 
     if primary_key := validators.field_name_in(fields, primary_key):
         _condition: str = f"{primary_key} = {row[primary_key]}"
 
-        if _row_exists(filepath, table, _condition):
+        if _row_exists(engine, filepath, table, _condition):
             raise RowAlreadyExists(row[primary_key])
 
-    if not _row_exists(filepath, table, condition):
+    if not _row_exists(engine, filepath, table, condition):
         raise RowNotFound(condition)
 
     _fields: str = formatters.merge_fields(row)
 
-    sql_queries.update(filepath, table, row, _fields, condition)
+    sql_queries.update(engine, filepath, table, row, _fields, condition)
 
 
 def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> None:
@@ -115,12 +115,12 @@ def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> Non
     if not _row_exists(filepath, table, condition):
         raise RowNotFound(condition)
 
-    types: dict = sql_queries.fetch_types(filepath, table)
+    types: dict = sql_queries.fetch_types(engine, filepath, table)
     types = formatters.scourgify_types(types)
 
     condition = formatters.quote_values(engine, types, condition)
 
-    sql_queries.delete(filepath, table, condition)
+    sql_queries.delete(engine, filepath, table, condition)
 
 
 def drop_table(engine: str, filename: str, table: str) -> None:
@@ -129,7 +129,7 @@ def drop_table(engine: str, filename: str, table: str) -> None:
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    sql_queries.drop(filepath, table)
+    sql_queries.drop(engine, filepath, table)
 
 
 def drop_database(engine: str, filename: str) -> None:
@@ -141,5 +141,5 @@ def drop_database(engine: str, filename: str) -> None:
     file_manager.remove_file(filepath)
 
 
-def _row_exists(filepath: str, table: str, condition: tuple) -> list:
-    return sql_queries.fetch_row(filepath, table, condition)
+def _row_exists(engine: str, filepath: str, table: str, condition: tuple) -> list:
+    return sql_queries.fetch_row(engine, filepath, table, condition)
