@@ -1,1 +1,1 @@
-SELECT name, type FROM pragma_table_info('{table}')
+SELECT name FROM pragma_table_info('{table}') WHERE pk = 1
