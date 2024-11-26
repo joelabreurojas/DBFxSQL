@@ -29,7 +29,7 @@ def insert_row(engine: str, filename: str, table: str, fields: Iterable[tuple]) 
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    types: dict = sql_queries.fetch_types(filepath, table)
+    types: dict = sql_queries.fetch_types(engine, filepath, table)
     types = formatters.scourgify_types(types)
 
     row: dict = formatters.fields_to_dict(fields)
@@ -40,7 +40,7 @@ def insert_row(engine: str, filename: str, table: str, fields: Iterable[tuple]) 
     if primary_key := validators.field_name_in(fields, primary_key):
         condition: str = f"{primary_key} = {row[primary_key]}"
 
-        if _row_exists(filepath, table, condition):
+        if _row_exists(engine, filepath, table, condition):
             raise RowAlreadyExists(row[primary_key])
 
     _fields: tuple[str, str] = formatters.deglose_fields(row)
@@ -57,9 +57,9 @@ def read_rows(
         raise SourceNotFound(filepath)
 
     if not condition:
-        return sql_queries.read(filepath, table)
+        return sql_queries.read(engine, filepath, table)
 
-    types: dict = sql_queries.fetch_types(filepath, table)
+    types: dict = sql_queries.fetch_types(engine, filepath, table)
     types = formatters.scourgify_types(types)
 
     condition = formatters.quote_values(engine, types, condition)
@@ -81,7 +81,7 @@ def update_rows(
         raise SourceNotFound(filepath)
 
     # assign types to each row's value
-    types: dict = sql_queries.fetch_types(filepath, table)
+    types: dict = sql_queries.fetch_types(engine, filepath, table)
     types = formatters.scourgify_types(types)
 
     condition = formatters.quote_values(engine, types, condition)
@@ -112,7 +112,7 @@ def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> Non
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    if not _row_exists(filepath, table, condition):
+    if not _row_exists(engine, filepath, table, condition):
         raise RowNotFound(condition)
 
     types: dict = sql_queries.fetch_types(engine, filepath, table)

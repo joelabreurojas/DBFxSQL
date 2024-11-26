@@ -1,0 +1,12 @@
+WITH numbered_rows AS (
+	SELECT rowid, ROW_NUMBER()
+	OVER (ORDER BY rowid)
+	AS row_number
+	FROM {table}
+)
+SELECT COUNT(1) FROM {table}
+WHERE rowid IN (
+	SELECT rowid
+	FROM numbered_rows
+	WHERE {condition}
+)

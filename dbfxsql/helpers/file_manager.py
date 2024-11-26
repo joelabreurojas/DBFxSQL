@@ -17,6 +17,15 @@ def load_config() -> dict:
     return toml_data
 
 
+def load_query(engine: str, command: str) -> str:
+    sql_path: str = Path(__file__).resolve().parents[1] / "modules/sql"
+
+    with open(f"{sql_path}/{engine.lower()}_queries/{command}") as sqlfile:
+        sql_query: str = sqlfile.read()
+
+    return sql_query
+
+
 def new_file(filepath: str) -> None:
     Path(filepath).touch()
 

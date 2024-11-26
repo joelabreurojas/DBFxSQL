@@ -1,0 +1,13 @@
+WITH numbered_rows AS (
+	SELECT rowid, ROW_NUMBER()
+	OVER (ORDER BY rowid)
+	AS row_number
+	FROM {table}
+)
+UPDATE {table}
+SET {fields}
+WHERE rowid IN (
+	SELECT rowid
+	FROM numbered_rows
+	WHERE {condition}
+)
