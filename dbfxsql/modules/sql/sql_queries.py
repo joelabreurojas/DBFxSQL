@@ -29,7 +29,7 @@ def read(
 ) -> list[dict]:
     command: str = "read"
 
-    if not condition:
+    if not condition_:
         query: str = load_query(engine, command)
         query = query.format(table=table)
 
