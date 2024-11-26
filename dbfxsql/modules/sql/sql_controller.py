@@ -5,6 +5,7 @@ from dbfxsql.helpers import file_manager, formatters, validators
 from dbfxsql.exceptions.source_errors import SourceNotFound
 from dbfxsql.exceptions.row_errors import RowAlreadyExists, RowNotFound
 from dbfxsql.exceptions.field_errors import FieldReserved
+from dbfxsql.exceptions.table_errors import TableAlreadyExists, TableNotFound
 
 
 def create_table(
@@ -14,6 +15,9 @@ def create_table(
 
     if validators.path_exists(filepath):
         file_manager.new_file(filepath)
+
+    if sql_queries.table_exists(engine, filepath, table):
+        raise TableAlreadyExists(table)
 
     if row_number := validators.field_name_in(fields, "row_number"):
         raise FieldReserved(row_number)
@@ -28,6 +32,9 @@ def insert_row(engine: str, filename: str, table: str, fields: Iterable[tuple]) 
 
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
+
+    if sql_queries.table_exists(engine, filepath, table):
+        raise TableAlreadyExists(table)
 
     types: dict = sql_queries.fetch_types(engine, filepath, table)
     types = formatters.scourgify_types(types)
@@ -56,6 +63,9 @@ def read_rows(
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
+    if not sql_queries.table_exists(engine, filepath, table):
+        raise TableNotFound(table)
+
     if not condition:
         return sql_queries.read(engine, filepath, table)
 
@@ -79,6 +89,9 @@ def update_rows(
 
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
+
+    if not sql_queries.table_exists(engine, filepath, table):
+        raise TableNotFound(table)
 
     # assign types to each row's value
     types: dict = sql_queries.fetch_types(engine, filepath, table)
@@ -112,6 +125,9 @@ def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> Non
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
+    if not sql_queries.table_exists(engine, filepath, table):
+        raise TableNotFound(table)
+
     if not _row_exists(engine, filepath, table, condition):
         raise RowNotFound(condition)
 
@@ -128,6 +144,9 @@ def drop_table(engine: str, filename: str, table: str) -> None:
 
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
+
+    if not sql_queries.table_exists(engine, filepath, table):
+        raise TableNotFound(table)
 
     sql_queries.drop(engine, filepath, table)
 

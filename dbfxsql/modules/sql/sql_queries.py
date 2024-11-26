@@ -2,13 +2,9 @@
 
 from . import sql_connection
 from dbfxsql.helpers.file_manager import load_query
-from dbfxsql.exceptions.table_errors import TableAlreadyExists, TableNotFound
 
 
 def create(engine: str, filepath: str, table: str, fields: str) -> None:
-    if table_exists(engine, filepath, table):
-        raise TableAlreadyExists(table)
-
     query: str = load_query(engine, command="create")
     query = query.format(table=table, fields=fields)
 
@@ -18,9 +14,6 @@ def create(engine: str, filepath: str, table: str, fields: str) -> None:
 def insert(
     engine: str, filepath: str, table: str, row: dict, fields: tuple[str, str]
 ) -> None:
-    if not table_exists(engine, filepath, table):
-        raise TableNotFound(table)
-
     field_names, values = fields
 
     query: str = load_query(engine, command="insert")
@@ -34,9 +27,6 @@ def insert(
 def read(
     engine: str, filepath: str, table: str, condition: tuple | None = None
 ) -> list[dict]:
-    if not table_exists(engine, filepath, table):
-        raise TableNotFound(table)
-
     command: str = "read"
 
     if not condition:
@@ -63,9 +53,6 @@ def read(
 def update(
     engine: str, filepath: str, table: str, row: dict, fields: str, condition: tuple
 ) -> None:
-    if not table_exists(engine, filepath, table):
-        raise TableNotFound(table)
-
     field_name, *_ = condition
 
     command: str = "update" if "row_number" != field_name else "update_by_row_number"
@@ -79,9 +66,6 @@ def update(
 
 
 def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
-    if not table_exists(engine, filepath, table):
-        raise TableNotFound(table)
-
     field_name, *_ = condition
 
     command: str = "delete" if "row_number" != field_name else "delete_by_row_number"
@@ -93,9 +77,6 @@ def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
 
 
 def drop(engine: str, filepath: str, table: str) -> None:
-    if not table_exists(engine, filepath, table):
-        raise TableNotFound(table)
-
     query: str = load_query(engine, command="drop")
     query = query.format(table=table)
 
@@ -119,9 +100,6 @@ def fetch_primary_key(engine: str, filepath: str, table: str) -> str:
 
 
 def fetch_row(engine: str, filepath: str, table: str, condition: tuple) -> dict:
-    if not table_exists(engine, filepath, table):
-        raise TableNotFound(table)
-
     field, *_ = condition
 
     command: str = "fetch_row" if "row_number" != field else "fetch_row_by_row_number"
