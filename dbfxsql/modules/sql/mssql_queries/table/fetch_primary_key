@@ -1,0 +1,9 @@
+SELECT column_name AS name
+FROM information_schema.key_column_usage
+WHERE table_name = '{table}'
+AND constraint_name = (
+	SELECT constraint_name
+	FROM information_schema.table_constraints
+	WHERE table_name = '{table}'
+	AND constraint_type = 'PRIMARY KEY'
+)

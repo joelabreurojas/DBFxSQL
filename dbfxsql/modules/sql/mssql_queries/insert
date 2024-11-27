@@ -1,1 +1,0 @@
-INSERT INTO {table} ({fields_names}) VALUES ({values})

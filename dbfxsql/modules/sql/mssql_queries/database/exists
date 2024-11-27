@@ -1,0 +1,6 @@
+SELECT 
+	COUNT(1) AS 'COUNT(1)'
+FROM 
+	sys.databases
+WHERE
+	name = '{database}'
