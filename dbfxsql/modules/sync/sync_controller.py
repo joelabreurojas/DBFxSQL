@@ -14,9 +14,9 @@ def init() -> dict:
     return file_manager.load_config()
 
 
-def collect_files(setup: dict, priority: str) -> tuple:
-    folders: list[str] = list(set(path for path in setup["folderpaths"][priority]))
-    extensions: list[str] = setup["extensions"][priority]
+def collect_files(engine_data: dict) -> tuple:
+    folders: list[str] = list(set(engine_data["folderpaths"]))
+    extensions: list[str] = list(set(engine_data["extensions"]))
 
     return file_manager.get_filenames(folders, extensions)
 
