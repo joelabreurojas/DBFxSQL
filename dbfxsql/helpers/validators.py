@@ -4,7 +4,9 @@ from pathlib import Path
 
 
 def path_exists(filepath: str) -> None:
-    return Path(filepath).exists()
+    filepath = Path(filepath)
+
+    return filepath.exists()
 
 
 def field_name_in(fields: Iterable[tuple], field_name_: str) -> str:

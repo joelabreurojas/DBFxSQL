@@ -50,6 +50,7 @@ def create(source: str, table: str | None, fields: tuple) -> None:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
     else:
+        sql_controller.create_database(engine, source)
         sql_controller.create_table(engine, source, table, fields)
 
 

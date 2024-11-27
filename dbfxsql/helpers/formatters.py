@@ -49,13 +49,13 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
         if field not in type_names:
             raise FieldNotFound(field)
 
-        type_: str = types_[field]
+        type_: str = types_[field].upper()
         value: str = _apply_type_cases(field, row[field], type_)
 
         try:
             row[field] = data_type[type_](value)
 
-        except (ValueError, AttributeError, decimal.InvalidOperation):
+        except (ValueError, AttributeError, KeyError, decimal.InvalidOperation):
             raise ValueNotValid(field, value, type_)
 
     return row

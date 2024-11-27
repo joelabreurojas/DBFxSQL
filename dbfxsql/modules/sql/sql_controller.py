@@ -1,20 +1,25 @@
 from collections.abc import Iterable
 
 from . import sql_queries
-from dbfxsql.helpers import file_manager, formatters, validators
+from dbfxsql.helpers import formatters, validators
 from dbfxsql.exceptions.source_errors import SourceNotFound
 from dbfxsql.exceptions.row_errors import RowAlreadyExists, RowNotFound
 from dbfxsql.exceptions.field_errors import FieldReserved
 from dbfxsql.exceptions.table_errors import TableAlreadyExists, TableNotFound
 
 
+def create_database(engine: str, filename: str) -> None:
+    filepath: str = formatters.add_folderpath(engine, filename)
+
+    filename = formatters.decompose_file(filename)[0]
+
+    sql_queries.create_database(engine, filepath, filename)
+
+
 def create_table(
     engine: str, filename: str, table: str, fields_: Iterable[tuple]
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
-
-    if validators.path_exists(filepath):
-        file_manager.new_file(filepath)
 
     if sql_queries.table_exists(engine, filepath, table):
         raise TableAlreadyExists(table)
@@ -24,7 +29,7 @@ def create_table(
 
     fields: str = formatters.fields_to_str(fields_)
 
-    sql_queries.create(engine, filepath, table, fields)
+    sql_queries.create_table(engine, filepath, table, fields)
 
 
 def insert_row(
@@ -35,8 +40,8 @@ def insert_row(
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    if sql_queries.table_exists(engine, filepath, table):
-        raise TableAlreadyExists(table)
+    if not sql_queries.table_exists(engine, filepath, table):
+        raise TableNotFound(table)
 
     types: dict = sql_queries.fetch_types(engine, filepath, table)
     types = formatters.scourgify_types(types)
@@ -150,16 +155,15 @@ def drop_table(engine: str, filename: str, table: str) -> None:
     if not sql_queries.table_exists(engine, filepath, table):
         raise TableNotFound(table)
 
-    sql_queries.drop(engine, filepath, table)
+    sql_queries.drop_table(engine, filepath, table)
 
 
 def drop_database(engine: str, filename: str) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    if not validators.path_exists(filepath):
-        raise SourceNotFound(filepath)
+    filename = formatters.decompose_file(filename)[0]
 
-    file_manager.remove_file(filepath)
+    sql_queries.drop_database(engine, filepath, filename)
 
 
 def _row_exists(engine: str, filepath: str, table: str, condition: tuple) -> list:
