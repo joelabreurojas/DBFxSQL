@@ -6,11 +6,7 @@ from dbfxsql.exceptions.source_errors import SourceNotFound
 
 
 def create_database(engine: str, filepath: str, filename: str) -> None:
-    if "SQLite" == engine:
-        if not validators.path_exists(filepath):
-            file_manager.new_file(filepath)
-
-    elif not _database_exists(engine, filename):
+    if not _database_exists(engine, filename):
         query: str = file_manager.load_query(engine, command="database/create")
         query = query.format(database=filename)
 
@@ -104,19 +100,13 @@ def drop_table(engine: str, filepath: str, table: str) -> None:
 
 
 def drop_database(engine: str, filepath: str, filename: str) -> None:
-    if "SQLite" == engine:
-        if not validators.path_exists(filepath):
-            raise SourceNotFound(filepath)
-
-        file_manager.remove_file(filepath)
-
-    elif not _database_exists(engine, filename):
+    if not _database_exists(engine, filename):
         raise SourceNotFound(filepath)
 
-        query: str = file_manager.load_query(engine, command="database/drop")
-        query = query.format(filename=filename)
+    query: str = file_manager.load_query(engine, command="database/drop")
+    query = query.format(database=filename)
 
-        sql_connection.fetch_none(engine, "master", query)
+    sql_connection.fetch_none(engine, "master", query)
 
 
 def fetch_types(engine: str, filepath: str, table: str) -> dict[str, str]:

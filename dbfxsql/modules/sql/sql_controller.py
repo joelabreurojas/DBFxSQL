@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
 from . import sql_queries
-from dbfxsql.helpers import formatters, validators
+from dbfxsql.helpers import file_manager, formatters, validators
 from dbfxsql.exceptions.source_errors import SourceNotFound
 from dbfxsql.exceptions.row_errors import RowAlreadyExists, RowNotFound
 from dbfxsql.exceptions.field_errors import FieldReserved
@@ -11,9 +11,12 @@ from dbfxsql.exceptions.table_errors import TableAlreadyExists, TableNotFound
 def create_database(engine: str, filename: str) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    filename = formatters.decompose_file(filename)[0]
+    if "SQLite" != engine:
+        filename = formatters.decompose_file(filename)[0]
+        sql_queries.create_database(engine, filepath, filename)
 
-    sql_queries.create_database(engine, filepath, filename)
+    elif not validators.path_exists(filepath):
+        file_manager.new_file(filepath)
 
 
 def create_table(
@@ -161,9 +164,15 @@ def drop_table(engine: str, filename: str, table: str) -> None:
 def drop_database(engine: str, filename: str) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    filename = formatters.decompose_file(filename)[0]
+    if "SQLite" != engine:
+        filename = formatters.decompose_file(filename)[0]
+        sql_queries.drop_database(engine, filepath, filename)
 
-    sql_queries.drop_database(engine, filepath, filename)
+    elif not validators.path_exists(filepath):
+        raise SourceNotFound(filepath)
+
+    else:
+        file_manager.remove_file(filepath)
 
 
 def _row_exists(engine: str, filepath: str, table: str, condition: tuple) -> list:
