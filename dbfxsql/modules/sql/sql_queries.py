@@ -1,7 +1,7 @@
 """Database management for the user table"""
 
 from . import sql_connection
-from dbfxsql.helpers import file_manager, validators
+from dbfxsql.helpers import file_manager
 from dbfxsql.exceptions.source_errors import SourceNotFound
 
 
@@ -30,7 +30,6 @@ def insert(
 
     parameters: dict = {**row}
 
-    input(f"{query=}")
     sql_connection.fetch_none(engine, filepath, query, parameters)
 
 
