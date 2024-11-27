@@ -70,7 +70,12 @@ def update(
         command += "_by_row_number"
 
     query: str = file_manager.load_query(engine, command)
-    query = query.format(table=table, fields=fields, condition="".join(condition))
+    data: dict = {"table": table, "fields": fields, "condition": "".join(condition)}
+
+    if "SQLite" != engine:
+        data["primary_key"] = fetch_primary_key(engine, filepath, table)
+
+    query = query.format(**data)
 
     parameters: dict = {**row}
 
@@ -86,7 +91,12 @@ def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
         command += "_by_row_number"
 
     query: str = file_manager.load_query(engine, command)
-    query = query.format(table=table, condition="".join(condition))
+    data: dict = {"table": table, "condition": "".join(condition)}
+
+    if "SQLite" != engine:
+        data["primary_key"] = fetch_primary_key(engine, filepath, table)
+
+    query = query.format(**data)
 
     sql_connection.fetch_none(engine, filepath, query)
 
@@ -133,7 +143,12 @@ def fetch_row(engine: str, filepath: str, table: str, condition: tuple) -> dict:
         command += "_by_row_number"
 
     query: str = file_manager.load_query(engine, command)
-    query = query.format(table=table, condition="".join(condition))
+    data: dict = {"table": table, "condition": "".join(condition)}
+
+    if "SQLite" != engine:
+        data["primary_key"] = fetch_primary_key(engine, filepath, table)
+
+    query = query.format(**data)
 
     return sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"]
 
