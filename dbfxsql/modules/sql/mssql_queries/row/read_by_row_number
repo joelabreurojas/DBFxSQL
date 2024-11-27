@@ -8,5 +8,5 @@ SELECT * FROM {table}
 WHERE {primary_key} IN (
 	SELECT {primary_key}
 	FROM numbered_rows
-	WHERE {"".join(condition)}
+	WHERE {condition}
 )
