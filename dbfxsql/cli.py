@@ -1,6 +1,7 @@
 from .models.order_commands import OrderCommands
 from .modules import dbf_controller, sql_controller, sync_controller
 from .helpers import utils
+from .constants.data_types import DATA_TYPES
 
 import click
 import asyncio
@@ -272,8 +273,8 @@ def drop(source: str, table: str | None) -> None:
 @click.option(
     "-e",
     "--engine",
-    type=click.Choice(["dBase", "SQLite", "MSSQL"], case_sensitive=False),
-    default="dBase",
+    type=click.Choice(DATA_TYPES.keys(), case_sensitive=False),
+    default=list(DATA_TYPES.keys())[0],
     show_default=True,
 )
 @click.help_option("-h", "--help")
@@ -306,8 +307,8 @@ def migrate(engine: str) -> None:
 @click.option(
     "-e",
     "--engine",
-    type=click.Choice(["dBase", "SQLite", "MSSQL"], case_sensitive=False),
-    default="dBase",
+    type=click.Choice(DATA_TYPES.keys(), case_sensitive=False),
+    default=list(DATA_TYPES.keys())[0],
     show_default=True,
 )
 @click.help_option("-h", "--help")
