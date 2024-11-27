@@ -61,17 +61,17 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
     return row
 
 
-def deglose_fields(row: dict) -> tuple:
+def deglose_fields(row: dict, start: str, end: str) -> tuple:
     keys: list = [str(key) for key in row.keys()]
 
     field_names: str = ", ".join(keys)  # [key]
-    values: str = ":" + ", :".join(keys)  # [:key]
+    values: str = start + f"{end}, {start}".join(keys) + end  # [:key]
 
     return field_names, values
 
 
-def merge_fields(row: dict) -> str:
-    return ", ".join([f"{key} = :{key}" for key in row.keys()])
+def merge_fields(row: dict, start: str, end: str) -> str:
+    return ", ".join([f"{key} = {start}{key}{end}" for key in row.keys()])
 
 
 def scourgify_rows(rows: list[dict]) -> list[dict]:
@@ -98,7 +98,7 @@ def quote_values(engine: str, types: dict[str, str], condition: tuple) -> tuple:
     if "==" == operator:
         operator = "="
 
-    type_: str = types[field]
+    type_: str = types[field].upper()
 
     # SQL
     if DATA_TYPES[engine][type_] is str:
@@ -239,7 +239,7 @@ def parse_filepaths(changes: list[set]) -> list:
 
     for change in changes:
         filepath: str = change[-1]
-        name, extension = decompose_filename(filepath)
+        name, extension = decompose_file(filepath)
         filenames.append(f"{name}{extension}")
 
     return filenames

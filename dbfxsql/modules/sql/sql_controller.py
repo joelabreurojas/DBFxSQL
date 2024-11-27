@@ -60,7 +60,9 @@ def insert_row(
         if _row_exists(engine, filepath, table, condition):
             raise RowAlreadyExists(row[primary_key])
 
-    fields: tuple[str, str] = formatters.deglose_fields(row)
+    start, end = (":", None) if "SQLite" == engine else ("%(", ")s")
+
+    fields: tuple[str, str] = formatters.deglose_fields(row, start, end)
 
     sql_queries.insert(engine, filepath, table, row, fields)
 
@@ -124,13 +126,20 @@ def update_rows(
     if not _row_exists(engine, filepath, table, condition):
         raise RowNotFound(condition)
 
-    fields: str = formatters.merge_fields(row)
+    start, end = (":", None) if "SQLite" == engine else ("%(", ")s")
+
+    fields: str = formatters.merge_fields(row, start, end)
 
     sql_queries.update(engine, filepath, table, row, fields, condition)
 
 
 def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
+
+    types: dict = sql_queries.fetch_types(engine, filepath, table)
+    types = formatters.scourgify_types(types)
+
+    condition = formatters.quote_values(engine, types, condition)
 
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
