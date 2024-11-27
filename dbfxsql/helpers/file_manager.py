@@ -36,7 +36,7 @@ def remove_file(filepath: str) -> None:
 
 def get_filenames(paths: list[str], extensions: tuple[str]) -> list[str]:
     return [
-        file.as_posix()
+        file.name
         for path in paths
         for file in Path(path).iterdir()
         if file.suffix in extensions
