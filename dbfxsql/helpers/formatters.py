@@ -115,7 +115,7 @@ def filter_rows(rows_: list, condition: tuple) -> tuple[list, list]:
     field, operator, value = _parse_condition(condition)
 
     if "==" == operator and "row_number" == field:
-        return [rows[value]], [value]
+        return [rows_[value]], [value]
 
     for index, row in enumerate(rows_):
         if isinstance(row[field], str):
