@@ -89,14 +89,14 @@ def scourgify_rows(rows: list[dict]) -> list[dict]:
 def quote_values(engine: str, types: dict[str, str], condition: tuple) -> tuple:
     field, operator, value = condition
 
+    if "==" == operator:
+        operator = "="
+
     if field == "row_number":
         return field, operator, value
 
     if field not in types:
         raise FieldNotFound(field)
-
-    if "==" == operator:
-        operator = "="
 
     type_: str = types[field].upper()
 

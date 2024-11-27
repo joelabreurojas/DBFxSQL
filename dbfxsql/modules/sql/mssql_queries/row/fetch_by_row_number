@@ -4,7 +4,8 @@ WITH numbered_rows AS (
 	AS row_number
 	FROM {table}
 )
-SELECT COUNT(1) FROM {table}
+SELECT COUNT(1) AS 'COUNT(1)'
+FROM {table}
 WHERE {primary_key} IN (
 	SELECT {primary_key}
 	FROM numbered_rows
