@@ -3,6 +3,9 @@
 from collections.abc import Generator
 from contextlib import contextmanager
 from dbfxsql.constants.sql_libraries import SQL
+from dbfxsql.helpers import formatters
+
+from decouple import config
 
 
 def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
@@ -43,7 +46,19 @@ def fetch_none(
 def _get_cursor(engine: str, filepath: str) -> Generator:
     """Provides a context manager for establishing and closing a database connection."""
 
-    connection: SQL[engine].Connection = SQL[engine].connect(filepath)
+    if "SQLite" == engine:
+        connection: SQL[engine].Connection = SQL[engine].connect(filepath)
+    else:
+        filename: str = formatters.decompose_file(filepath)[0]
+
+        connection: SQL[engine].Connection = SQL[engine].connect(
+            server=config("DB_SERVER"),
+            user=config("DB_USER"),
+            password=config("DB_PASSWORD"),
+            database=filename,
+            autocommit=True,
+        )
+
     cursor: SQL[engine].Cursor = connection.cursor()
 
     try:
