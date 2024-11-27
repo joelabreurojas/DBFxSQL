@@ -94,9 +94,9 @@ This early version of the code demonstrates a basic interaction with the tool.
   <ul>
       <li>[x] Adapt configuration by engines.</li>
       <li>[x] Update engines terminology (dBase, SQLite, MSSQL).</li>
-      <li>[ ] Handle '==' and dict parameters in SQL.</li>
-      <li>[ ] Manipulate migration by primary key in MSSQL.</li>
-      <li>[ ] CRUD operations for MSSQL.</li>
+      <li>[x] Handle '==' and dict parameters in SQL.</li>
+      <li>[x] Manipulate migration by primary key in MSSQL.</li>
+      <li>[x] CRUD operations for MSSQL.</li>
       <li>[ ] Classify engine to use by extension and path during migration.</li>
       <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
