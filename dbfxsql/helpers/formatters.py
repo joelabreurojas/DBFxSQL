@@ -373,15 +373,3 @@ def _define_tables(tables: list[SyncTable], filename: str) -> tuple:
             destiny = table
 
     return origin, destiny
-
-
-def _insert_rows(origin: list[dict], destiny: list[dict]) -> list:
-    return origin[len(destiny) :]
-
-
-def _delete_rows(origin: list[dict], destiny: list[dict], limit: int = 0) -> tuple:
-    return origin[len(destiny) :], origin[:limit]
-
-
-def _update_rows(origin: list[dict], destiny: list[dict]) -> list:
-    return origin
