@@ -1,9 +1,11 @@
 import logging
+import itertools
 from collections.abc import AsyncGenerator
 
 from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
-from dbfxsql.helpers import file_manager, formatters, utils
+from dbfxsql.models.watch_modified import WatchModified
+from dbfxsql.helpers import file_manager, formatters
 
 from watchfiles import awatch
 
@@ -22,6 +24,8 @@ def collect_files(engine_data: dict) -> tuple:
 
 
 def migrate(filenames: list, relations: dict) -> None:
+    filenames = formatters.ldf_to_mdf(filenames)
+
     changes: list[dict] = formatters.package_changes(filenames, relations)
 
     for tables in changes:
@@ -37,13 +41,19 @@ def migrate(filenames: list, relations: dict) -> None:
         _execute_operations(operations, destinies)
 
 
-async def synchronize(setup: dict, priority: str) -> None:
-    folders: list[str] = list(
-        set(path for folder in setup["folderpaths"].values() for path in folder)
-    )
+async def synchronize(setup: dict) -> None:
+    # Get all folders and extensions
+    engine_data: dict = setup["engines"].values()
+    folders: tuple = tuple(values["folderpaths"] for values in engine_data)
+    extensions: tuple = tuple(values["extensions"] for values in engine_data)
+
+    # Remove duplicates
+    folders = tuple(set(itertools.chain.from_iterable(folders)))
+    extensions = tuple(set(itertools.chain.from_iterable(extensions)))
+
     relations: list[dict] = setup["relations"]
 
-    async for filenames in _listen(folders):
+    async for filenames in _listen(folders, extensions):
         migrate(filenames, relations)
 
 
@@ -94,8 +104,8 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
             )
 
 
-async def _listen(folders: tuple[str]) -> AsyncGenerator[tuple, None]:
+async def _listen(folders: tuple[str], extensions: tuple[str]) -> AsyncGenerator:
     """Asynchronously listens for file changes and triggers the runner function."""
 
-    async for changes in awatch(*folders, watch_filter=utils.only_modified):
+    async for changes in awatch(*folders, watch_filter=WatchModified(extensions)):
         yield formatters.parse_filepaths(changes)

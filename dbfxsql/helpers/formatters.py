@@ -268,6 +268,10 @@ def classify_operations(residual_tables: tuple) -> list:
     return operations
 
 
+def ldf_to_mdf(filenames: list) -> list:
+    return [filename.replace("_log.ldf", ".mdf") for filename in filenames]
+
+
 def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple:
     residual_origin: list = []
     residual_destiny: list = [

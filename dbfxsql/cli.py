@@ -326,15 +326,19 @@ def sync(engine: str) -> None:
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
+
             setup: dict = sync_controller.init()
-            relations: list = setup["relations"]
-            filenames: list = sync_controller.collect_files(setup, engine)
+            engine_data: dict = setup["engines"][engine]
+            filenames: list = sync_controller.collect_files(engine_data)
 
             # Database data alignment
             spinner.text = "Migrating..."
+
+            relations: list = setup["relations"]
             sync_controller.migrate(filenames, relations)
 
             spinner.text = "Listening..."
+
             asyncio.run(sync_controller.synchronize(setup))
 
         except KeyboardInterrupt:
