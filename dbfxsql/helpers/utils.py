@@ -4,7 +4,6 @@ from dbfxsql.constants import sample_commands
 from dbfxsql.helpers import file_manager, formatters
 
 from prettytable import PrettyTable
-from watchfiles import Change
 
 
 def show_table(rows: list[dict]) -> None:
@@ -41,12 +40,6 @@ def embed_examples(func: types.FunctionType) -> types.FunctionType:
     func.__doc__ += examples
 
     return func
-
-
-def only_modified(change: Change, path: str) -> bool:
-    allowed_extensions: tuple[str] = (".dbf", ".sql")
-
-    return change == Change.modified and path.endswith(allowed_extensions)
 
 
 def notify(operations: list, tables: list) -> None:
