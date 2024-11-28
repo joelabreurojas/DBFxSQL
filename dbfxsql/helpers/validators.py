@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 
 from pathlib import Path
+from watchfiles import Change
 
 
 def path_exists(filepath: str) -> None:
@@ -46,3 +47,23 @@ def same_rows(origin_row: dict, destiny_row: dict, fields: tuple) -> bool:
             return False
 
     return True
+
+
+def only_modified(change: Change, path: str) -> bool:
+    return change == Change.modified
+
+
+def valid_filepath(filepath_: str, engine_data: dict) -> bool:
+    filepath = Path(filepath_)
+
+    extension: str = filepath.suffix
+    folderpath: str = str(filepath.parent)
+
+    for engine in engine_data:
+        folderpaths: list = [f.removesuffix("/") for f in engine["folderpaths"]]
+
+        if extension in engine["extensions"]:
+            if folderpath in folderpaths:
+                return True
+
+    return False

@@ -4,8 +4,7 @@ from collections.abc import AsyncGenerator
 
 from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
-from dbfxsql.models.watch_modified import WatchModified
-from dbfxsql.helpers import file_manager, formatters
+from dbfxsql.helpers import file_manager, formatters, validators
 
 from watchfiles import awatch
 
@@ -24,8 +23,6 @@ def collect_files(engine_data: dict) -> tuple:
 
 
 def migrate(filenames: list, relations: dict) -> None:
-    filenames = formatters.ldf_to_mdf(filenames)
-
     changes: list[dict] = formatters.package_changes(filenames, relations)
 
     for tables in changes:
@@ -53,7 +50,7 @@ async def synchronize(setup: dict) -> None:
 
     relations: list[dict] = setup["relations"]
 
-    async for filenames in _listen(folders, extensions):
+    async for filenames in _listen(folders, engine_data):
         migrate(filenames, relations)
 
 
@@ -104,8 +101,8 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
             )
 
 
-async def _listen(folders: tuple[str], extensions: tuple[str]) -> AsyncGenerator:
+async def _listen(folders: tuple[str], engine_data: dict) -> AsyncGenerator:
     """Asynchronously listens for file changes and triggers the runner function."""
 
-    async for changes in awatch(*folders, watch_filter=WatchModified(extensions)):
-        yield formatters.parse_filepaths(changes)
+    async for changes in awatch(*folders, watch_filter=validators.only_modified):
+        yield formatters.filter_filepaths(changes, engine_data)

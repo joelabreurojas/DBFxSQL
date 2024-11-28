@@ -232,15 +232,21 @@ def _change_fields(row: list, fields: list) -> list[dict]:
     return {key: value for key, value in zip(fields, row.values())}
 
 
-def parse_filepaths(changes: list[set]) -> list:
+def filter_filepaths(changes: list[set], engine_data: dict) -> list:
     """Retrieves the modified file from the environment variables."""
 
     filenames: list = []
 
     for change in changes:
         filepath: str = change[-1]
-        name, extension = decompose_file(filepath)
-        filenames.append(f"{name}{extension}")
+
+        # MSSQL uses logs to track changes
+        if filepath.endswith("_log.ldf"):
+            filepath = filepath.replace("_log.ldf", ".mdf")
+
+        if validators.valid_filepath(filepath, engine_data):
+            name, extension = decompose_file(filepath)
+            filenames.append(f"{name}{extension}")
 
     return filenames
 
@@ -266,10 +272,6 @@ def classify_operations(residual_tables: tuple) -> list:
         operations.append({"insert": insert, "update": update, "delete": delete})
 
     return operations
-
-
-def ldf_to_mdf(filenames: list) -> list:
-    return [filename.replace("_log.ldf", ".mdf") for filename in filenames]
 
 
 def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple:
