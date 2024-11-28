@@ -12,7 +12,7 @@ extensions = [".sql", ".SQL", ".sqlite3", ".SQLite3", ".db", ".DB"]
 [engines.MSSQL]
 # For Windows, change the path to your MSSQL data folder
 folderpaths = ["/var/opt/mssql/data/"] 
-extensions = [".mdf", ".MDF", ".ldf", ".LDF"]
+extensions = [".mdf", ".MDF"]
 
 [[relations]]
 sources = ["users.dbf", "company.sql"]
