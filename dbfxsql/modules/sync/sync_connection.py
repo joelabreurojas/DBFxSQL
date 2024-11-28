@@ -19,7 +19,7 @@ def read(engine: str, filename: str, table: str) -> dict:
 def update(engine: str, filename: str, table: str, fields: tuple, index: int) -> None:
     condition: tuple = ("row_number", "==", f"{index + 1}")
 
-    if "dBase" == engine.upper():
+    if "dBase" == engine:
         dbf_controller.update_rows(engine, filename, fields, condition)
 
     else:
@@ -29,7 +29,7 @@ def update(engine: str, filename: str, table: str, fields: tuple, index: int) ->
 def delete(engine: str, filename: str, table: str, index: int) -> None:
     condition: tuple = ("row_number", "==", f"{index + 1}")
 
-    if "dBase" == engine.upper():
+    if "dBase" == engine:
         dbf_controller.delete_rows(engine, filename, condition)
 
     else:
