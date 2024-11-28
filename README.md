@@ -98,6 +98,10 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Manipulate migration by primary key in MSSQL.</li>
       <li>[x] CRUD operations for MSSQL.</li>
       <li>[x] Classify engine to use by extension and path during synchronization.</li>
+      <li>[ ] Use models to transmit data between shapes.</li>
+      <li>[ ] Agrupate entities like exceptions and models.</li>
+      <li>[ ] New cli workflow base in stages.</li>
+      <li>[ ] Implement more abstraction in controllers.</li>
       <li>[ ] Error and exception logging.</li>
       <li>[ ] Decorator for listening command.</li>
       <li>[ ] Group origin tables by destiny tables to optimize read queries when migrating.</li>
