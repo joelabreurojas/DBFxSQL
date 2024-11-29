@@ -233,8 +233,6 @@ def _change_fields(row: list, fields: list) -> list[dict]:
 
 
 def filter_filepaths(changes: list[set], engines: dict) -> list:
-    """Retrieves the modified file from the environment variables."""
-
     filenames: list = []
 
     for change in changes:

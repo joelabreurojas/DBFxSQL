@@ -326,7 +326,6 @@ def sync(engine: str) -> None:
 
             engines, relations, filenames = sync_controller.init(engine)
 
-            # Database data alignment
             spinner.text = "Migrating..."
 
             sync_controller.migrate(filenames, relations)
