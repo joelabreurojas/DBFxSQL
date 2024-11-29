@@ -21,13 +21,6 @@ def init(engine) -> tuple:
     return engines, relations, filenames
 
 
-def _collect_files(engine_data: dict) -> tuple:
-    folders: list[str] = list(set(engine_data["folderpaths"]))
-    extensions: list[str] = list(set(engine_data["extensions"]))
-
-    return file_manager.get_filenames(folders, extensions)
-
-
 def migrate(filenames: list, relations: dict) -> None:
     changes: list[dict] = formatters.package_changes(filenames, relations)
 
@@ -45,13 +38,8 @@ def migrate(filenames: list, relations: dict) -> None:
 
 
 async def synchronize(engines: dict, relations: dict) -> None:
-    # Get all folders and extensions
     folders: tuple = tuple(engine["folderpaths"] for engine in engines.values())
-    extensions: tuple = tuple(engine["extensions"] for engine in engines.values())
-
-    # Remove duplicates
     folders = tuple(set(itertools.chain.from_iterable(folders)))
-    extensions = tuple(set(itertools.chain.from_iterable(extensions)))
 
     async for filenames in _listen(folders, engines):
         migrate(filenames, relations)
