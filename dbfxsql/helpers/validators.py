@@ -53,13 +53,13 @@ def only_modified(change: Change, path: str) -> bool:
     return change == Change.modified
 
 
-def valid_filepath(filepath_: str, engine_data: dict) -> bool:
+def valid_filepath(filepath_: str, engines: dict) -> bool:
     filepath = Path(filepath_)
 
     extension: str = filepath.suffix
     folderpath: str = str(filepath.parent)
 
-    for engine in engine_data:
+    for engine in engines.values():
         folderpaths: list = [f.removesuffix("/") for f in engine["folderpaths"]]
 
         if extension in engine["extensions"]:

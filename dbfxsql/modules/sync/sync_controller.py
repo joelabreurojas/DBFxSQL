@@ -9,13 +9,19 @@ from dbfxsql.helpers import file_manager, formatters, validators
 from watchfiles import awatch
 
 
-def init() -> dict:
+def init(engine) -> tuple:
     logging.getLogger("watchfiles").setLevel(logging.ERROR)
 
-    return file_manager.load_config()
+    setup: dict = file_manager.load_config()
+
+    engines: dict = setup["engines"]
+    relations: list = setup["relations"]
+    filenames: list = file_manager.get_filenames(engines[engine])
+
+    return engines, relations, filenames
 
 
-def collect_files(engine_data: dict) -> tuple:
+def _collect_files(engine_data: dict) -> tuple:
     folders: list[str] = list(set(engine_data["folderpaths"]))
     extensions: list[str] = list(set(engine_data["extensions"]))
 
@@ -38,19 +44,16 @@ def migrate(filenames: list, relations: dict) -> None:
         _execute_operations(operations, destinies)
 
 
-async def synchronize(setup: dict) -> None:
+async def synchronize(engines: dict, relations: dict) -> None:
     # Get all folders and extensions
-    engine_data: dict = setup["engines"].values()
-    folders: tuple = tuple(values["folderpaths"] for values in engine_data)
-    extensions: tuple = tuple(values["extensions"] for values in engine_data)
+    folders: tuple = tuple(engine["folderpaths"] for engine in engines.values())
+    extensions: tuple = tuple(engine["extensions"] for engine in engines.values())
 
     # Remove duplicates
     folders = tuple(set(itertools.chain.from_iterable(folders)))
     extensions = tuple(set(itertools.chain.from_iterable(extensions)))
 
-    relations: list[dict] = setup["relations"]
-
-    async for filenames in _listen(folders, engine_data):
+    async for filenames in _listen(folders, engines):
         migrate(filenames, relations)
 
 
@@ -101,8 +104,8 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
             )
 
 
-async def _listen(folders: tuple[str], engine_data: dict) -> AsyncGenerator:
+async def _listen(folders: tuple[str], engines: dict) -> AsyncGenerator:
     """Asynchronously listens for file changes and triggers the runner function."""
 
     async for changes in awatch(*folders, watch_filter=validators.only_modified):
-        yield formatters.filter_filepaths(changes, engine_data)
+        yield formatters.filter_filepaths(changes, engines)

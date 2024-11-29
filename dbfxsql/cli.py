@@ -291,13 +291,10 @@ def migrate(engine: str) -> None:
         try:
             spinner.text = "Initializing..."
 
-            setup: dict = sync_controller.init()
-            engine_data: dict = setup["engines"][engine]
-            filenames: list = sync_controller.collect_files(engine_data)
+            _, relations, filenames = sync_controller.init(engine)
 
             spinner.text = "Migrating..."
 
-            relations: list = setup["relations"]
             sync_controller.migrate(filenames, relations)
 
             spinner.ok("DONE")
@@ -327,19 +324,16 @@ def sync(engine: str) -> None:
         try:
             spinner.text = "Initializing..."
 
-            setup: dict = sync_controller.init()
-            engine_data: dict = setup["engines"][engine]
-            filenames: list = sync_controller.collect_files(engine_data)
+            engines, relations, filenames = sync_controller.init(engine)
 
             # Database data alignment
             spinner.text = "Migrating..."
 
-            relations: list = setup["relations"]
             sync_controller.migrate(filenames, relations)
 
             spinner.text = "Listening..."
 
-            asyncio.run(sync_controller.synchronize(setup))
+            asyncio.run(sync_controller.synchronize(engines, relations))
 
         except KeyboardInterrupt:
             spinner.ok("END")

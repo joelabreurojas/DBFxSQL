@@ -34,11 +34,14 @@ def remove_file(filepath: str) -> None:
     Path(filepath).unlink()
 
 
-def get_filenames(paths: list[str], extensions: tuple[str]) -> list[str]:
+def get_filenames(engine_data: dict) -> list[str]:
+    folderpaths: list[str] = list(set(engine_data["folderpaths"]))
+    extensions: list[str] = list(set(engine_data["extensions"]))
+
     return [
         file.name
-        for path in paths
-        for file in Path(path).iterdir()
+        for folderpath in folderpaths
+        for file in Path(folderpath).iterdir()
         if file.suffix in extensions
     ]
 

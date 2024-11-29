@@ -232,7 +232,7 @@ def _change_fields(row: list, fields: list) -> list[dict]:
     return {key: value for key, value in zip(fields, row.values())}
 
 
-def filter_filepaths(changes: list[set], engine_data: dict) -> list:
+def filter_filepaths(changes: list[set], engines: dict) -> list:
     """Retrieves the modified file from the environment variables."""
 
     filenames: list = []
@@ -244,7 +244,7 @@ def filter_filepaths(changes: list[set], engine_data: dict) -> list:
         if filepath.endswith("_log.ldf"):
             filepath = filepath.replace("_log.ldf", ".mdf")
 
-        if validators.valid_filepath(filepath, engine_data):
+        if validators.valid_filepath(filepath, engines):
             name, extension = decompose_file(filepath)
             filenames.append(f"{name}{extension}")
 
