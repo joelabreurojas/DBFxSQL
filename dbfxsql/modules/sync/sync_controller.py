@@ -1,12 +1,13 @@
 import logging
 import itertools
-from collections.abc import AsyncGenerator
+import json
 
 from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
 from dbfxsql.helpers import file_manager, formatters, validators
 
-from watchfiles import awatch
+from decouple import config
+from watchfiles import arun_process
 
 
 def init(engine) -> tuple:
@@ -41,8 +42,15 @@ async def synchronize(engines: dict, relations: dict) -> None:
     folders: tuple = tuple(engine["folderpaths"] for engine in engines.values())
     folders = tuple(set(itertools.chain.from_iterable(folders)))
 
-    async for filenames in _listen(folders, engines):
-        migrate(filenames, relations)
+    try:
+        await arun_process(
+            *folders,
+            watch_filter=validators.only_modified,
+            target=_listen,
+            args=(folders, relations, engines),
+        )
+    except Exception as e:
+        logging.error(f"Synchronization error: {str(e)}")
 
 
 def _assing_rows(tables_: list[SyncTable]) -> list[SyncTable]:
@@ -92,8 +100,10 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
             )
 
 
-async def _listen(folders: tuple[str], engines: dict) -> AsyncGenerator:
-    """Asynchronously listens for file changes and triggers the runner function."""
+def _listen(folders: tuple, relations: dict, engines: dict) -> None:
+    if changes := json.loads(config("WATCHFILES_CHANGES")):
+        changes = formatters.filter_filepaths(changes, engines)
 
-    async for changes in awatch(*folders, watch_filter=validators.only_modified):
-        yield formatters.filter_filepaths(changes, engines)
+        filenames: list = formatters.parse_filenames(changes)
+
+        migrate(filenames, relations)

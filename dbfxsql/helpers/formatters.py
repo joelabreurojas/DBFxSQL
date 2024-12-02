@@ -233,7 +233,7 @@ def _change_fields(row: list, fields: list) -> list[dict]:
 
 
 def filter_filepaths(changes: list[set], engines: dict) -> list:
-    filenames: list = []
+    filepaths: list = []
 
     for change in changes:
         filepath: str = change[-1]
@@ -243,8 +243,17 @@ def filter_filepaths(changes: list[set], engines: dict) -> list:
             filepath = filepath.replace("_log.ldf", ".mdf")
 
         if validators.valid_filepath(filepath, engines):
-            name, extension = decompose_file(filepath)
-            filenames.append(f"{name}{extension}")
+            filepaths.append(filepath)
+
+    return filepaths
+
+
+def parse_filenames(filepaths: list[str]) -> list:
+    filenames: list = []
+
+    for filepath in filepaths:
+        name, extension = decompose_file(filepath)
+        filenames.append(f"{name}{extension}")
 
     return filenames
 
