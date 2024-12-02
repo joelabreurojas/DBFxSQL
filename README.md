@@ -98,12 +98,11 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Manipulate migration by primary key in MSSQL.</li>
       <li>[x] CRUD operations for MSSQL.</li>
       <li>[x] Classify engine to use by extension and path during synchronization.</li>
+      <li>[ ] Error and exception logging.</li>
       <li>[ ] Use models to transmit data between shapes.</li>
       <li>[ ] Agrupate entities like exceptions and models.</li>
-      <li>[ ] New cli workflow base in stages.</li>
+      <li>[ ] New cli workflow based in stages.</li>
       <li>[ ] Implement more abstraction in controllers.</li>
-      <li>[ ] Error and exception logging.</li>
-      <li>[ ] Decorator for listening command.</li>
       <li>[ ] Group origin tables by destiny tables to optimize read queries when migrating.</li>
       <li>[ ] Accept conditions over row_number for DBF.</li>
       <li>[ ] Add FIELDS options for filtering read queries.</li>
@@ -112,9 +111,8 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[ ] Validate KeyErrors for invalid fields.</li>
       <li>[ ] Validate type lengths and names for consistency between DBF and SQL.</li>
       <li>[ ] Validate the data migration to a the same table.</li>
-      <li>[ ] Automatically generate the path to use in MSSQL between differents OS.</li>
       <li>[ ] Support for relationships between +2 tables in the config file.</li>
-      <li>[ ] Comprehensive project documentation.</li>
+      <li>[ ] Public project documentation.</li>
       <li>[ ] Implementation of CQRS (Command Query Responsibility Segregation) patterns.</li>
       <li>[ ] Sharing as a Python library.</li>
       <li>[ ] Development of a GUI for managing DBF and SQL.</li>
