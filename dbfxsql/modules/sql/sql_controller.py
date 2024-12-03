@@ -60,7 +60,7 @@ def insert_row(
         if _row_exists(engine, filepath, table, condition):
             raise RowAlreadyExists(row[primary_key])
 
-    start, end = (":", None) if "SQLite" == engine else ("%(", ")s")
+    start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
 
     fields: tuple[str, str] = formatters.deglose_fields(row, start, end)
 
@@ -126,7 +126,7 @@ def update_rows(
     if not _row_exists(engine, filepath, table, condition):
         raise RowNotFound(condition)
 
-    start, end = (":", None) if "SQLite" == engine else ("%(", ")s")
+    start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
 
     fields: str = formatters.merge_fields(row, start, end)
 
