@@ -73,31 +73,31 @@ def _assing_rows(tables_: list[SyncTable]) -> list[SyncTable]:
 
 
 def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
+    operation_functions = {
+        "insert": sync_connection.insert,
+        "update": sync_connection.update,
+        "delete": sync_connection.delete,
+    }
+
     for operation, destiny in zip(operations, destinies):
-        for insert in operation["insert"]:
-            sync_connection.insert(
-                destiny.engine,
-                destiny.source,
-                destiny.name,
-                formatters.fields_to_tuple(insert["fields"]),
-            )
+        values: dict = {
+            "engine": destiny.engine,
+            "filename": destiny.source,
+            "table": destiny.name,
+        }
 
-        for update in operation["update"]:
-            sync_connection.update(
-                destiny.engine,
-                destiny.source,
-                destiny.name,
-                formatters.fields_to_tuple(update["fields"]),
-                update["index"],
-            )
+        for name, dataset in operation.items():
+            if name == "delete":
+                dataset = dataset[::-1]  # Reverse order
 
-        for delete in operation["delete"][::-1]:
-            sync_connection.delete(
-                destiny.engine,
-                destiny.source,
-                destiny.name,
-                delete["index"],
-            )
+            for data in dataset:
+                if "delete" != name:
+                    values["fields"] = formatters.fields_to_tuple(data["fields"])
+
+                if "insert" != name:
+                    values["index"] = data["index"]
+
+                operation_functions[name](**values)
 
 
 def _listen(folders: tuple, relations: dict, engines: dict) -> None:
