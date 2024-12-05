@@ -284,7 +284,8 @@ def classify_operations(residual_tables: tuple) -> list:
 def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple:
     residual_origin: list = []
     residual_destiny: list = [
-        {"index": index, "fields": fields} for index, fields in enumerate(destiny_rows)
+        {"index": index, "fields": fields}
+        for index, fields in enumerate(destiny_rows, start=1)
     ]
 
     origin_range: int = len(origin_rows)
@@ -297,7 +298,7 @@ def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple
         origin_row: dict = origin_rows[origin_index]
 
         if not destiny_range:
-            residual_origin.append({"index": origin_index, "fields": origin_row})
+            residual_origin.append({"index": origin_index + 1, "fields": origin_row})
 
         while destiny_index < destiny_range:
             destiny_row: dict = residual_destiny[destiny_index]["fields"]
@@ -314,7 +315,9 @@ def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple
                 break
 
             if destiny_index == destiny_range - 1:
-                residual_origin.append({"index": origin_index, "fields": origin_row})
+                residual_origin.append(
+                    {"index": origin_index + 1, "fields": origin_row}
+                )
 
             destiny_index += 1
         origin_index += 1

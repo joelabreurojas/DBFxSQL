@@ -17,7 +17,7 @@ def read(engine: str, filename: str, table: str) -> dict:
 
 
 def update(engine: str, filename: str, table: str, fields: tuple, index: int) -> None:
-    condition: tuple = ("row_number", "==", f"{index + 1}")
+    condition: tuple = ("row_number", "==", f"{index}")
 
     if "dBase" == engine:
         dbf_controller.update_rows(engine, filename, fields, condition)
@@ -27,7 +27,7 @@ def update(engine: str, filename: str, table: str, fields: tuple, index: int) ->
 
 
 def delete(engine: str, filename: str, table: str, index: int) -> None:
-    condition: tuple = ("row_number", "==", f"{index + 1}")
+    condition: tuple = ("row_number", "==", f"{index}")
 
     if "dBase" == engine:
         dbf_controller.delete_rows(engine, filename, condition)
