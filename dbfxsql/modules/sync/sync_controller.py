@@ -1,3 +1,4 @@
+import os
 import logging
 import itertools
 import json
@@ -6,7 +7,6 @@ from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
 from dbfxsql.helpers import file_manager, formatters, validators
 
-from decouple import config
 from watchfiles import arun_process
 
 
@@ -101,7 +101,7 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
 
 
 def _listen(folders: tuple, relations: dict, engines: dict) -> None:
-    if changes := json.loads(config("WATCHFILES_CHANGES")):
+    if changes := json.loads(os.getenv("WATCHFILES_CHANGES")):
         changes = formatters.filter_filepaths(changes, engines)
 
         filenames: list = formatters.parse_filenames(changes)

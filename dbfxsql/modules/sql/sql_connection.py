@@ -3,9 +3,7 @@
 from collections.abc import Generator
 from contextlib import contextmanager
 from dbfxsql.constants.sql_libraries import SQL
-from dbfxsql.helpers import formatters
-
-from decouple import config
+from dbfxsql.helpers import formatters, file_manager
 
 
 def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
@@ -49,12 +47,13 @@ def _get_cursor(engine: str, filepath: str) -> Generator:
     if "SQLite" == engine:
         connection: SQL[engine].Connection = SQL[engine].connect(filepath)
     else:
+        config: dict = file_manager.load_config()["engines"][engine]
         filename: str = formatters.decompose_file(filepath)[0]
 
         connection: SQL[engine].Connection = SQL[engine].connect(
-            server=config("DB_SERVER"),
-            user=config("DB_USER"),
-            password=config("DB_PASSWORD"),
+            server=config["db_server"],
+            user=config["db_user"],
+            password=config["db_password"],
             database=filename,
             autocommit=True,
         )
