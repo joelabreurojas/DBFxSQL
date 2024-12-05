@@ -16,6 +16,7 @@ watchfiles = "0.24.0"
 yaspin = "3.0.2"
 pytest = "^8.3.3"
 tomli-w = "^1.1.0"
+pymssql = "^2.3.2"
 
 [build-system]
 requires = ["poetry-core"]
