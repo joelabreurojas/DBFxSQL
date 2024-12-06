@@ -10,12 +10,14 @@ folderpaths = ["."]
 extensions = [".sql", ".SQL", ".sqlite3", ".SQLite3", ".db", ".DB"]
 
 [engines.MSSQL]
-# For Windows, change the path to your MSSQL data folder
-folderpaths = ["/var/opt/mssql/data/"] 
+# Linux Folderpath (Default)
+folderpaths = ["/var/opt/mssql/data/"]
+# Windows Folderpath
+# folderpaths = ["C:\\\\Program Files\\\\Microsoft SQL Server\\\\VERSION?\\\\INSTANCE?\\\\DATA\\\\"]
 extensions = [".mdf", ".MDF"]
-db_server = "YOUR_MSSQL_SERVER"
-db_user = "YOUR_MSSQL_USER"
-db_password = "YOUR_MSSQL_PASSWORD"
+db_server = "MSSQL_SERVER?\\\\MSSQL_INSTANCE?"
+db_user = "MSSQL_USER?"
+db_password = "MSSQL_PASSWORD?"
 
 [[relations]]
 sources = ["users.dbf", "company.sql"]
