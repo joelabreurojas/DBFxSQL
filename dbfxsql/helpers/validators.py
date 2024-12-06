@@ -57,10 +57,12 @@ def valid_filepath(filepath_: str, engines: dict) -> bool:
     filepath = Path(filepath_)
 
     extension: str = filepath.suffix
-    folderpath: str = str(filepath.parent)
+    folderpath: str = str(filepath.resolve().parent)
 
     for engine in engines.values():
-        folderpaths: list = [f.removesuffix("/") for f in engine["folderpaths"]]
+        folderpaths: list = [str(Path(f).resolve()) for f in engine["folderpaths"]]
+
+        print(f"\n{folderpath=}\n{folderpaths=}")
 
         if extension in engine["extensions"]:
             if folderpath in folderpaths:
