@@ -56,6 +56,7 @@ def _get_cursor(engine: str, filepath: str) -> Generator:
             password=config["db_password"],
             database=filename,
             autocommit=True,
+            tds_version="7.0",
         )
 
     cursor: SQL[engine].Cursor = connection.cursor()
