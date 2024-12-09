@@ -10,10 +10,10 @@ folderpaths = ["."]
 extensions = [".sql", ".SQL", ".sqlite3", ".SQLite3", ".db", ".DB"]
 
 [engines.MSSQL]
-# Linux Folderpath (Default)
+# Linux Folderpath
 folderpaths = ["/var/opt/mssql/data/"]
-# Windows Folderpath
-# folderpaths = ["C:\\\\Program Files\\\\Microsoft SQL Server\\\\VERSION?\\\\INSTANCE?\\\\DATA\\\\"]
+# Windows Folderpath (via WSL)
+# folderpaths = ["/mnt/c/Program Files/Microsoft SQL Server/VERSION?/MSSQL/DATA/"]
 extensions = [".mdf", ".MDF"]
 db_server = "MSSQL_SERVER?\\\\MSSQL_INSTANCE?"
 db_user = "MSSQL_USER?"
