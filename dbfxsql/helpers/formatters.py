@@ -21,10 +21,7 @@ def add_folderpath(engine: str, filename: str) -> str:
     engines: str = file_manager.load_config()["engines"]
     folderpath: str = engines[engine]["folderpaths"][0]
 
-    if not folderpath.endswith("/"):
-        folderpath += "/"
-
-    return folderpath + filename
+    return str(Path(folderpath).resolve() / filename)
 
 
 def fields_to_str(fields: Iterable[tuple[str, str]], sep: str = ", ") -> str:
