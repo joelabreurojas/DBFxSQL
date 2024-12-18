@@ -62,8 +62,6 @@ def valid_filepath(filepath_: str, engines: dict) -> bool:
     for engine in engines.values():
         folderpaths: list = [str(Path(f).resolve()) for f in engine["folderpaths"]]
 
-        print(f"\n{folderpath=}\n{folderpaths=}")
-
         if extension in engine["extensions"]:
             if folderpath in folderpaths:
                 return True
