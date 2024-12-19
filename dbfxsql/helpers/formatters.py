@@ -58,6 +58,16 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
     return row
 
 
+def collect_changes(before: dict, after: dict) -> dict:
+    changes: list = []
+
+    for key, value in after.items():
+        if value != before[key]:
+            changes.append((key, value))
+
+    return dict(changes)
+
+
 def deglose_fields(row: dict, start: str, end: str) -> tuple:
     keys: list = [str(key) for key in row.keys()]
 

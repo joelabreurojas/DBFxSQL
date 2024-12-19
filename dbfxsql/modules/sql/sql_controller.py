@@ -126,11 +126,15 @@ def update_rows(
     if not _row_exists(engine, filepath, table, condition):
         raise RowNotFound(condition)
 
-    start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
+    # ignore non altered fields
+    before: dict = sql_queries.read(engine, filepath, table, condition)
 
-    fields: str = formatters.merge_fields(row, start, end)
+    if row := formatters.collect_changes(before, row):
+        start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
 
-    sql_queries.update(engine, filepath, table, row, fields, condition)
+        fields: str = formatters.merge_fields(row, start, end)
+
+        sql_queries.update(engine, filepath, table, row, fields, condition)
 
 
 def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> None:

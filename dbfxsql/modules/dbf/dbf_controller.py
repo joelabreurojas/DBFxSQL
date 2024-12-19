@@ -79,8 +79,9 @@ def update_rows(
         raise RowNotFound(condition)
 
     # update filtered rows by their index
-    if validators.values_are_different(rows, row):
-        dbf_queries.update(filepath, row, indexes)
+    for row_ in rows:
+        if row := formatters.collect_changes(row_, row):
+            dbf_queries.update(filepath, row, indexes)
 
 
 def delete_rows(engine: str, filename: str, condition: tuple) -> None:
