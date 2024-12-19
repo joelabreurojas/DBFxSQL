@@ -18,17 +18,6 @@ def field_name_in(fields: Iterable[tuple], field_name_: str) -> str:
             return field_name
 
 
-def values_are_different(rows: list[dict], row_: dict) -> bool:
-    """Checks if a list of rows are different from a given row."""
-
-    for row in rows:
-        for key, value in row_.items():
-            if value != row[key]:
-                return True
-
-    return False
-
-
 def only_empty_records(rows: list) -> list:
     """Return an empty list if a list of rows only contains empty rows."""
 
