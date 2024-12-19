@@ -14,7 +14,14 @@ def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
 
         fields: list[str] = [description[0] for description in cursor.description]
 
-        rows: list[dict] = [dict(zip(fields, row)) for row in cursor.fetchall()]
+        rows: list = []
+
+        for row in cursor.fetchall():
+            rows.append(
+                [field.rstrip() if isinstance(field, str) else field for field in row]
+            )
+
+        rows: list[dict] = [dict(zip(fields, row)) for row in rows]
 
     return rows if rows else [{field: "" for field in fields}]
 
@@ -27,8 +34,12 @@ def fetch_one(engine: str, filepath: str, query: str) -> list[dict] | None:
 
         fields: list[str] = [description[0] for description in cursor.description]
 
-        if row := cursor.fetchone():
-            return [dict(zip(fields, row))]
+        row: list = []
+
+        for field in cursor.fetchone():
+            row.append(field.rstrip() if isinstance(field, str) else field)
+
+        return [dict(zip(fields, row))]
 
 
 def fetch_none(
