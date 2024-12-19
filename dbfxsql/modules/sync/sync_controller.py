@@ -5,7 +5,7 @@ import json
 
 from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
-from dbfxsql.helpers import file_manager, formatters, validators
+from dbfxsql.helpers import file_manager, formatters, validators, utils
 
 from watchfiles import arun_process
 
