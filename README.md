@@ -98,12 +98,13 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Manipulate migration by primary key in MSSQL.</li>
       <li>[x] CRUD operations for MSSQL.</li>
       <li>[x] Classify engine to use by extension and path during synchronization.</li>
-      <li>[ ] Changed fields collector for UPDATE operation in SQL.</li>
+      <li>[x] Changed fields collector for UPDATE operation in SQL.</li>
+      <li>[x] Strip SQL DB fields during read operations.</li>
       <li>[ ] Transform temporal file extensions to .mdf during modification events.</li>
       <li>[ ] Automatic creation of temporal files based on configuration (MSSQL - Windows).</li>
       <li>[ ] Integrate Store Procedures & Triggers to modify temporal files (MSSQL - Windows).</li>
       <li>[ ] Standardize automatic sinchronization tests.</li>
-      <li>[ ] Error and exception logging.</li>
+      <li>[x] Error and exception logging.</li>
       <li>[ ] Use models to transmit data between shapes.</li>
       <li>[ ] Agrupate entities like exceptions and models.</li>
       <li>[ ] New cli workflow based in stages.</li>
