@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import logging
 import itertools
 import json
@@ -7,6 +8,8 @@ from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
 from dbfxsql.helpers import file_manager, formatters, validators, utils
 
+import dbf
+import pymssql
 from watchfiles import arun_process
 
 
@@ -42,15 +45,12 @@ async def synchronize(engines: dict, relations: dict) -> None:
     folders: tuple = tuple(engine["folderpaths"] for engine in engines.values())
     folders = tuple(set(itertools.chain.from_iterable(folders)))
 
-    try:
-        await arun_process(
-            *folders,
-            watch_filter=validators.only_modified,
-            target=_listen,
-            args=(folders, relations, engines),
-        )
-    except Exception as e:
-        logging.error(f"Synchronization error: {str(e)}")
+    await arun_process(
+        *folders,
+        watch_filter=validators.only_modified,
+        target=_listen,
+        args=(folders, relations, engines),
+    )
 
 
 def _assing_rows(tables_: list[SyncTable]) -> list[SyncTable]:
@@ -97,7 +97,15 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
                 if "insert" != name:
                     values["index"] = data["index"]
 
-                operation_functions[name](**values)
+                try:
+                    operation_functions[name](**values)
+
+                except (
+                    dbf.DbfError,
+                    sqlite3.OperationalError,
+                    pymssql.OperationalError,
+                ) as error:
+                    logging.error(f"Synchronization error: {str(error)}")
 
 
 def _listen(folders: tuple, relations: dict, engines: dict) -> None:
