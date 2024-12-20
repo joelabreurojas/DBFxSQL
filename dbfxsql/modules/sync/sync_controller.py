@@ -87,9 +87,6 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
         }
 
         for name, dataset in operation.items():
-            if name == "delete":
-                dataset = dataset[::-1]  # Reverse order
-
             for data in dataset:
                 if "delete" != name:
                     values["fields"] = formatters.fields_to_tuple(data["fields"])

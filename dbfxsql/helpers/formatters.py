@@ -266,7 +266,7 @@ def classify_operations(residual_tables: tuple) -> list:
 
         insert: list = [{"fields": row["fields"]} for row in origin[destiny_range:]]
 
-        delete: list = [{"index": row["index"]} for row in destiny[origin_range:]]
+        delete: list = [{"index": row["index"]} for row in destiny[:origin_range][::-1]]
 
         update: list = [
             {"index": destiny_row["index"], "fields": origin_row["fields"]}
