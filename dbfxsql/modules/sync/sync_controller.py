@@ -80,13 +80,13 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
     }
 
     for operation, destiny in zip(operations, destinies):
-        values: dict = {
-            "engine": destiny.engine,
-            "filename": destiny.source,
-            "table": destiny.name,
-        }
-
         for name, dataset in operation.items():
+            values: dict = {
+                "engine": destiny.engine,
+                "filename": destiny.source,
+                "table": destiny.name,
+            }
+
             for data in dataset:
                 if "delete" != name:
                     values["fields"] = formatters.fields_to_tuple(data["fields"])
