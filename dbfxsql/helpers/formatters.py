@@ -273,7 +273,7 @@ def classify_operations(residual_tables: tuple) -> list:
             for origin_row, destiny_row in zip(origin, destiny)
         ]
 
-        operations.append({"insert": insert, "update": update, "delete": delete})
+        operations.append({"delete": delete, "update": update, "insert": insert})
 
     return operations
 
