@@ -45,6 +45,9 @@ def create(source: str, table: str | None, fields: tuple) -> None:
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
+        if table:
+            raise click.UsageError("No such option '-t' / '--table' for DBF.")
+
         dbf_controller.create_table(engine, source, fields)
 
     elif not table:
@@ -86,6 +89,9 @@ def insert(source: str, table: str | None, fields: tuple) -> None:
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
+        if table:
+            raise click.UsageError("No such option '-t' / '--table' for DBF.")
+
         dbf_controller.insert_row(engine, source, fields)
 
     elif not table:
@@ -131,6 +137,9 @@ def read(
     rows: list = []
 
     if "dBase" == engine:
+        if table:
+            raise click.UsageError("No such option '-t' / '--table' for DBF.")
+
         rows = dbf_controller.read_rows(engine, source, condition)
 
     elif not table:
@@ -186,6 +195,9 @@ def update(
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
+        if table:
+            raise click.UsageError("No such option '-t' / '--table' for DBF.")
+
         dbf_controller.update_rows(engine, source, fields, condition)
 
     elif not table:
@@ -226,6 +238,9 @@ def delete(source: str, table: str | None, condition: tuple) -> None:
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
+        if table:
+            raise click.UsageError("No such option '-t' / '--table' for DBF.")
+
         dbf_controller.delete_rows(engine, source, condition)
 
     elif not table:
@@ -260,6 +275,9 @@ def drop(source: str, table: str | None) -> None:
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
+        if table:
+            raise click.UsageError("No such option '-t' / '--table' for DBF.")
+
         dbf_controller.drop_table(engine, source)
 
     elif not table:
