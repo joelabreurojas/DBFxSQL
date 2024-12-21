@@ -269,13 +269,22 @@ def classify_operations(residual_tables: tuple) -> list:
         delete: list = [{"index": row["index"]} for row in destiny[origin_range:][::-1]]
 
         update: list = [
-            {"index": destiny_row["index"], "fields": origin_row["fields"]}
+            {
+                "index": destiny_row["index"],
+                "fields": _residual_rows(origin_row["fields"], destiny_row["fields"]),
+            }
             for origin_row, destiny_row in zip(origin, destiny)
         ]
 
         operations.append({"delete": delete, "update": update, "insert": insert})
 
     return operations
+
+
+def _residual_rows(destiny_row: dict, origin_row: dict) -> dict:
+    return {
+        key: value for key, value in destiny_row.items() if value != origin_row[key]
+    }
 
 
 def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple:
