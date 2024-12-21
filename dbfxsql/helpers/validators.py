@@ -42,6 +42,17 @@ def only_modified(change: Change, path: str) -> bool:
     return change == Change.modified
 
 
+def values_are_different(rows: list[dict], row_: dict) -> bool:
+    """Checks if a list of rows are different from a given row."""
+
+    for row in rows:
+        for key, value in row_.items():
+            if value != row[key]:
+                return True
+
+    return False
+
+
 def valid_filepath(filepath_: str, engines: dict) -> bool:
     filepath = Path(filepath_)
 
