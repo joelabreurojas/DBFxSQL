@@ -50,6 +50,9 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
         value: str = _apply_type_cases(field, row[field], type_)
 
         try:
+            if data_type[type_] is int and value is None:
+                value = "0"
+
             row[field] = data_type[type_](value)
 
         except (ValueError, AttributeError, KeyError, decimal.InvalidOperation):
