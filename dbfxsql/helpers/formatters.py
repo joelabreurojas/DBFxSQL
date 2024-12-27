@@ -224,8 +224,8 @@ def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> list:
     return residual_tables
 
 
-def _depurate_fields(row: list, fields: list) -> list[dict]:
-    return {key: value for key, value in row.items() if key in fields}
+def _depurate_fields(row: dict, fields: list) -> list[dict]:
+    return {key: row[key] for key in fields}
 
 
 def _change_fields(row: list, fields: list) -> list[dict]:
