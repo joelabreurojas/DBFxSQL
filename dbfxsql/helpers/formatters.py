@@ -398,3 +398,24 @@ def _define_tables(tables: list[SyncTable], filename: str) -> tuple:
             destiny = table
 
     return origin, destiny
+
+
+def extract_data(name: str, dataset: list[dict], destiny: SyncTable) -> list[dict]:
+    values: list = []
+
+    for data in dataset:
+        value: dict = {
+            "engine": destiny.engine,
+            "filename": destiny.source,
+            "table": destiny.name,
+        }
+
+        if "delete" != name:
+            value["fields"] = fields_to_tuple(data["fields"])
+
+        if "insert" != name:
+            value["index"] = data["index"]
+
+        values.append(value)
+
+    return values
