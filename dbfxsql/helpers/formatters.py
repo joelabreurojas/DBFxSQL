@@ -290,7 +290,7 @@ def _residual_rows(destiny_row: dict, origin_row: dict) -> dict:
     }
 
 
-def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple:
+def _compare_rows(origin_rows: list, destiny_rows: list, fields_: tuple) -> tuple:
     residual_origin: list = []
     residual_destiny: list = [
         {"index": index, "fields": fields}
@@ -312,7 +312,7 @@ def _compare_rows(origin_rows: list, destiny_rows: list, fields: tuple) -> tuple
         while destiny_index < destiny_range:
             destiny_row: dict = residual_destiny[destiny_index]["fields"]
 
-            if validators.same_rows(origin_row, destiny_row, fields):
+            if validators.same_rows(origin_row, destiny_row, fields_):
                 # New list skipping then existent index
 
                 residual_destiny = (
