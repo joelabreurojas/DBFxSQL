@@ -1,7 +1,12 @@
 from dbfxsql.modules import dbf_controller, sql_controller
 
 
-def insert(engine: str, filename: str, table: str, fields: tuple) -> None:
+def insert(values: list[dict]) -> None:
+    engine: str = values[0]["engine"]
+    filename: str = values[0]["filename"]
+    table: str = values[0]["table"]
+    fields: tuple = tuple(values[0]["fields"])
+
     if "dBase" == engine:
         dbf_controller.insert_row(engine, filename, fields)
 
@@ -16,8 +21,12 @@ def read(engine: str, filename: str, table: str) -> dict:
     return sql_controller.read_rows(engine, filename, table, condition=None)
 
 
-def update(engine: str, filename: str, table: str, fields: tuple, index: int) -> None:
-    condition: tuple = ("row_number", "==", f"{index}")
+def update(values: list[dict]) -> None:
+    engine: str = values[0]["engine"]
+    filename: str = values[0]["filename"]
+    table: str = values[0]["table"]
+    fields: tuple = tuple(values[0]["fields"])
+    condition: tuple = ("row_number", "==", f"{values[0]["index"]}")
 
     if "dBase" == engine:
         dbf_controller.update_rows(engine, filename, fields, condition)
@@ -26,8 +35,11 @@ def update(engine: str, filename: str, table: str, fields: tuple, index: int) ->
         sql_controller.update_rows(engine, filename, table, fields, condition)
 
 
-def delete(engine: str, filename: str, table: str, index: int) -> None:
-    condition: tuple = ("row_number", "==", f"{index}")
+def delete(values: list[dict]) -> None:
+    engine: str = values[0]["engine"]
+    filename: str = values[0]["filename"]
+    table: str = values[0]["table"]
+    condition: tuple = ("row_number", "==", f"{values[0]["index"]}")
 
     if "dBase" == engine:
         dbf_controller.delete_rows(engine, filename, condition)
