@@ -77,25 +77,22 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
         "insert": sync_connection.insert,
         "update": sync_connection.update,
         "delete": sync_connection.delete,
+        "bulk_insert": sync_connection.bulk_insert,
+        "bulk_update": sync_connection.bulk_update,
+        "bulk_delete": sync_connection.bulk_delete,
     }
 
     for operation, destiny in zip(operations, destinies):
         for name, dataset in operation.items():
-            values: dict = {
-                "engine": destiny.engine,
-                "filename": destiny.source,
-                "table": destiny.name,
-            }
+            values: list[dict] = formatters.extract_data(name, dataset, destiny)
 
-            for data in dataset:
-                if "delete" != name:
-                    values["fields"] = formatters.fields_to_tuple(data["fields"])
+            # Bulk operations
+            if 1 < len(dataset):
+                name = "bulk_" + name
 
-                if "insert" != name:
-                    values["index"] = data["index"]
-
+            if values:
                 try:
-                    operation_functions[name](**values)
+                    operation_functions[name](values)
 
                 except (
                     dbf.DbfError,

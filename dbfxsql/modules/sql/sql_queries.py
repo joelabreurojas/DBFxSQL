@@ -101,6 +101,54 @@ def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
     sql_connection.fetch_none(engine, filepath, query)
 
 
+def bulk_insert(
+    engine: str, filepath: str, table: str, rows: list, fields: tuple[str, str]
+) -> None:
+    field_name, values = fields
+
+    query: str = file_manager.load_query(engine, command="row/insert")
+    query = query.format(table=table, field_names=field_name, values=values)
+
+    parameters: list[dict] = rows
+
+    sql_connection.fetch_none(engine, filepath, query, parameters, execute_many=True)
+
+
+def bulk_update(
+    engine: str,
+    filepath: str,
+    table: str,
+    rows: list[dict],
+    fields: list[tuple],
+    conditions: list[tuple],
+) -> None:
+    queries: list = []
+
+    for field, condition in zip(fields, conditions):
+        query: str = file_manager.load_query(engine, command="row/update")
+        query = query.format(table=table, fields=field, condition=condition)
+
+        queries.append(query)
+
+    parameters: list[dict] = rows
+
+    sql_connection.fetch_none(engine, filepath, query, parameters)
+
+
+def bulk_delete(
+    engine: str, filepath: str, table: str, conditions: list[tuple]
+) -> None:
+    queries: list = []
+
+    for condition in conditions:
+        query: str = file_manager.load_query(engine, command="row/delete")
+        query = query.format(table=table, condition=condition)
+
+        queries.append(query)
+
+    sql_connection.fetch_none(engine, filepath, query)
+
+
 def drop_table(engine: str, filepath: str, table: str) -> None:
     query: str = file_manager.load_query(engine, command="table/drop")
     query = query.format(table=table)

@@ -43,12 +43,22 @@ def fetch_one(engine: str, filepath: str, query: str) -> list[dict] | None:
 
 
 def fetch_none(
-    engine: str, filepath: str, query: str, parameters: dict | None = None
+    engine: str,
+    filepath: str,
+    query: str | list,
+    parameters: dict | list | None = None,
+    execute_many: bool = False,
 ) -> None:
     """Executes a query that doesn't return values."""
 
     with _get_cursor(engine, filepath) as cursor:
-        cursor.execute(query, parameters) if parameters else cursor.execute(query)
+        if execute_many:
+            cursor.executemany(query, parameters)
+        elif isinstance(query, list):
+            for query_, parameter in zip(query, parameters):
+                cursor.execute(query_, parameter)
+        else:
+            cursor.execute(query, parameters) if parameters else cursor.execute(query)
 
 
 @contextmanager

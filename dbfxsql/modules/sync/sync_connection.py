@@ -46,3 +46,43 @@ def delete(values: list[dict]) -> None:
 
     else:
         sql_controller.delete_rows(engine, filename, table, condition)
+
+
+def bulk_insert(values: list[dict]) -> None:
+    engine: str = values[0]["engine"]
+    filename: str = values[0]["filename"]
+    table: str = values[0]["table"]
+    fields: list[tuple] = [tuple(value["fields"]) for value in values]
+
+    if "dBase" == engine:
+        dbf_controller.bulk_insert_rows(engine, filename, fields)
+
+    else:
+        sql_controller.bulk_insert_rows(engine, filename, table, fields)
+
+
+def bulk_update(values: list[dict]) -> None:
+    engine: str = values[0]["engine"]
+    filename: str = values[0]["filename"]
+    table: str = values[0]["table"]
+    fields: tuple = tuple(values[0]["fields"])
+    condition: tuple = ("row_number", "==", f"{values[0]["index"]}")
+
+    if "dBase" == engine:
+        dbf_controller.bulk_update_rows(engine, filename, fields, condition)
+
+    else:
+        sql_controller.bulk_update_rows(engine, filename, table, fields, condition)
+
+
+def bulk_delete(values: list[dict]) -> None:
+    engine: str = values[0]["engine"]
+    filename: str = values[0]["filename"]
+    table: str = values[0]["table"]
+    condition: tuple = ("row_number", "==", f"{values[0]["index"]}")
+
+    if "dBase" == engine:
+        dbf_controller.bulk_delete_rows(engine, filename, condition)
+
+    else:
+        sql_controller.bulk_delete_rows(engine, filename, table, condition)
