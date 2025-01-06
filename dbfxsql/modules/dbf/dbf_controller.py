@@ -36,6 +36,17 @@ def insert_row(engine: str, filename: str, fields: Iterable[tuple]) -> None:
     dbf_queries.insert(filepath, row)
 
 
+def bulk_insert_rows(engine: str, filename: str, fields: list[tuple]) -> None:
+    filepath: str = formatters.add_folderpath(engine, filename)
+
+    types: dict = dbf_queries.fetch_types(filepath)
+    rows: list[dict] = [formatters.fields_to_dict(field) for field in fields]
+
+    rows = [formatters.assign_types(engine, types, row) for row in rows]
+
+    dbf_queries.bulk_insert(filepath, rows)
+
+
 def read_rows(engine: str, filename: str, condition: tuple | None) -> list[dict]:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -83,6 +94,29 @@ def update_rows(
         dbf_queries.update(filepath, row, indexes)
 
 
+def bulk_update_rows(
+    engine: str, filename: str, fields: list[tuple], conditions: list[tuple]
+) -> None:
+    filepath: str = formatters.add_folderpath(engine, filename)
+
+    types: dict = dbf_queries.fetch_types(filepath)
+    dict_rows: list[dict] = [formatters.fields_to_dict(field) for field in fields]
+
+    dict_rows = [formatters.assign_types(engine, types, row) for row in dict_rows]
+
+    table_rows = dbf_queries.read(filepath)
+    table_rows = formatters.scourgify_rows(table_rows)
+
+    update_rows: list = []
+
+    for dict_row, condition in zip(dict_rows, conditions):
+        _, indexes = formatters.filter_rows(table_rows, condition)
+
+        update_rows.append((dict_row, indexes))
+
+    dbf_queries.bulk_update(filepath, update_rows)
+
+
 def delete_rows(engine: str, filename: str, condition: tuple) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -98,6 +132,22 @@ def delete_rows(engine: str, filename: str, condition: tuple) -> None:
         raise RowNotFound(condition)
 
     dbf_queries.delete(filepath, indexes)
+
+
+def bulk_delete_rows(engine: str, filename: str, conditions: list[tuple]) -> None:
+    filepath: str = formatters.add_folderpath(engine, filename)
+
+    table_rows = dbf_queries.read(filepath)
+    table_rows = formatters.scourgify_rows(table_rows)
+
+    delete_indexes: list = []
+
+    for condition in conditions:
+        _, indexes = formatters.filter_rows(table_rows, condition)
+
+        delete_indexes.append(indexes)
+
+    dbf_queries.bulk_delete(filepath, delete_indexes)
 
 
 def drop_table(engine: str, filename: str) -> None:
