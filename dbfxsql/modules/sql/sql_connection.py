@@ -55,9 +55,15 @@ def fetch_none(
     with _get_cursor(engine, filepath) as cursor:
         if execute_many:
             cursor.executemany(query, parameters)
+
         elif isinstance(query, list):
-            for query_, parameter in zip(query, parameters):
-                cursor.execute(query_, parameter)
+            if parameters:
+                for query_, parameter in zip(query, parameters):
+                    cursor.execute(query_, parameter)
+            else:
+                for query_ in query:
+                    cursor.execute(query_)
+
         else:
             cursor.execute(query, parameters) if parameters else cursor.execute(query)
 

@@ -124,36 +124,45 @@ def bulk_update(
 ) -> None:
     queries: list = []
 
+    text: str = file_manager.load_query(engine, command="row/update_by_row_number")
+    data: dict = {"table": table}
+
+    if "SQLite" != engine:
+        data["primary_key"] = fetch_primary_key(engine, filepath, table)
+
     for field, condition in zip(fields, conditions):
-        query: str = file_manager.load_query(engine, command="row/update")
-        query = query.format(table=table, fields=field, condition=condition)
+        data["fields"] = field
+        data["condition"] = "".join(condition)
+        query: str = text.format(**data)
 
         queries.append(query)
 
     parameters: list[dict] = rows
 
-    sql_connection.fetch_none(engine, filepath, query, parameters)
+    sql_connection.fetch_none(engine, filepath, queries, parameters)
 
 
 def bulk_delete(
-    engine: str, filepath: str, table: str, conditions: list[tuple]
+    engine: str,
+    filepath: str,
+    table: str,
+    conditions: list[tuple],
 ) -> None:
     queries: list = []
 
+    text: str = file_manager.load_query(engine, command="row/delete_by_row_number")
+    data: dict = {"table": table}
+
+    if "SQLite" != engine:
+        data["primary_key"] = fetch_primary_key(engine, filepath, table)
+
     for condition in conditions:
-        query: str = file_manager.load_query(engine, command="row/delete")
-        query = query.format(table=table, condition=condition)
+        data["condition"] = "".join(condition)
+        query: str = text.format(**data)
 
         queries.append(query)
 
-    sql_connection.fetch_none(engine, filepath, query)
-
-
-def drop_table(engine: str, filepath: str, table: str) -> None:
-    query: str = file_manager.load_query(engine, command="table/drop")
-    query = query.format(table=table)
-
-    sql_connection.fetch_none(engine, filepath, query)
+    sql_connection.fetch_none(engine, filepath, queries)
 
 
 def drop_database(engine: str, filepath: str, filename: str) -> None:
