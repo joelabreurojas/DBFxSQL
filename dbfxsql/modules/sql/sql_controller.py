@@ -67,6 +67,20 @@ def insert_row(
     sql_queries.insert(engine, filepath, table, row, fields)
 
 
+def bulk_insert_rows(
+    engine: str, filename: str, table: str, fields_: list[tuple]
+) -> None:
+    filepath: str = formatters.add_folderpath(engine, filename)
+
+    rows: list[dict] = [formatters.fields_to_dict(field) for field in fields_]
+
+    start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
+
+    fields: tuple[str, str] = formatters.deglose_fields(rows[0], start, end)
+
+    sql_queries.bulk_insert(engine, filepath, table, rows, fields)
+
+
 def read_rows(
     engine: str, filename: str, table: str, condition: tuple | None
 ) -> list[dict]:
@@ -133,6 +147,27 @@ def update_rows(
     sql_queries.update(engine, filepath, table, row, fields, condition)
 
 
+def bulk_update_rows(
+    engine: str, filename: str, table: str, fields: list[tuple], conditions: list[tuple]
+) -> None:
+    filepath: str = formatters.add_folderpath(engine, filename)
+
+    types: dict = sql_queries.fetch_types(engine, filepath, table)
+    types = formatters.scourgify_types(types)
+
+    conditions = [
+        formatters.quote_values(engine, types, condition) for condition in conditions
+    ]
+
+    rows: list[dict] = [formatters.fields_to_dict(field) for field in fields]
+
+    start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
+
+    fields: list[tuple] = [formatters.merge_fields(row, start, end) for row in rows]
+
+    sql_queries.bulk_update(engine, filepath, table, rows, fields, conditions)
+
+
 def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -156,6 +191,21 @@ def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> Non
     condition = formatters.quote_values(engine, types, condition)
 
     sql_queries.delete(engine, filepath, table, condition)
+
+
+def bulk_delete_rows(
+    engine: str, filename: str, table: str, conditions: list[tuple]
+) -> None:
+    filepath: str = formatters.add_folderpath(engine, filename)
+
+    types: dict = sql_queries.fetch_types(engine, filepath, table)
+    types = formatters.scourgify_types(types)
+
+    conditions = [
+        formatters.quote_values(engine, types, condition) for condition in conditions
+    ]
+
+    sql_queries.bulk_delete(engine, filepath, table, conditions)
 
 
 def drop_table(engine: str, filename: str, table: str) -> None:
@@ -182,56 +232,6 @@ def drop_database(engine: str, filename: str) -> None:
 
     else:
         file_manager.remove_file(filepath)
-
-
-def bulk_insert_rows(
-    engine: str, filename: str, table: str, fields_: list[tuple]
-) -> None:
-    filepath: str = formatters.add_folderpath(engine, filename)
-
-    rows: list[dict] = [formatters.fields_to_dict(field) for field in fields_]
-
-    start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
-
-    fields: tuple[str, str] = formatters.deglose_fields(rows[0], start, end)
-
-    sql_queries.bulk_insert(engine, filepath, table, rows, fields)
-
-
-def bulk_update_rows(
-    engine: str, filename: str, table: str, fields: list[tuple], conditions: list[tuple]
-) -> None:
-    filepath: str = formatters.add_folderpath(engine, filename)
-
-    types: dict = sql_queries.fetch_types(engine, filepath, table)
-    types = formatters.scourgify_types(types)
-
-    conditions = [
-        formatters.quote_values(engine, types, condition) for condition in conditions
-    ]
-
-    rows: list[dict] = [formatters.fields_to_dict(field) for field in fields]
-
-    start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
-
-    fields: list[tuple] = [formatters.merge_fields(row, start, end) for row in rows]
-
-    sql_queries.bulk_update(engine, filepath, table, fields, conditions)
-
-
-def bulk_delete_rows(
-    engine: str, filename: str, table: str, conditions: list[tuple]
-) -> None:
-    filepath: str = formatters.add_folderpath(engine, filename)
-
-    types: dict = sql_queries.fetch_types(engine, filepath, table)
-    types = formatters.scourgify_types(types)
-
-    conditions = [
-        formatters.quote_values(engine, types, condition) for condition in conditions
-    ]
-
-    sql_queries.bulk_delete(engine, filepath, table, conditions)
 
 
 def _row_exists(engine: str, filepath: str, table: str, condition: tuple) -> list:
