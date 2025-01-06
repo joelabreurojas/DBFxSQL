@@ -1,5 +1,6 @@
 """Communications with the SQL database"""
 
+import logging
 from collections.abc import Generator
 from contextlib import contextmanager
 from dbfxsql.constants.sql_libraries import SQL
@@ -85,6 +86,11 @@ def _get_cursor(engine: str, filepath: str) -> Generator:
     try:
         yield cursor
         connection.commit()
+
+    except Exception as error:
+        logging.error(error)
+        connection.rollback()
+
     finally:
         cursor.close()
         connection.close()

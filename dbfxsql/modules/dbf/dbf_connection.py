@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from collections.abc import Generator
 
 import dbf
+import logging
 from pathlib import Path
 
 
@@ -18,6 +19,9 @@ def get_table(filepath: str) -> Generator[dbf.Table]:
 
     try:
         yield table
+
+    except Exception as error:
+        logging.error(error)
 
     finally:
         table.close()

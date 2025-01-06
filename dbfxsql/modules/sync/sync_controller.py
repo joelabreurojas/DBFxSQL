@@ -91,15 +91,7 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
                 name = "bulk_" + name
 
             if values:
-                try:
-                    operation_functions[name](values)
-
-                except (
-                    dbf.DbfError,
-                    sqlite3.OperationalError,
-                    pymssql.OperationalError,
-                ) as error:
-                    logging.error(f"Synchronization error: {str(error)}")
+                operation_functions[name](values)
 
 
 def _listen(folders: tuple, relations: dict, engines: dict) -> None:
