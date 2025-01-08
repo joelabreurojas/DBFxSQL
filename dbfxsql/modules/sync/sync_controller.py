@@ -1,5 +1,4 @@
 import os
-import sqlite3
 import logging
 import itertools
 import json
@@ -8,8 +7,6 @@ from . import sync_connection
 from dbfxsql.models.sync_table import SyncTable
 from dbfxsql.helpers import file_manager, formatters, validators, utils
 
-import dbf
-import pymssql
 from watchfiles import arun_process
 
 
