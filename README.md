@@ -85,17 +85,20 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
-- [x] Bulk operation support
-- [ ] MSSQL triggers/procedures for table changes.
-- [ ] Handle starving connections.
+- [ ] Equalize rows for indirect table relationships.
+- [ ] Implement field target to indirect table relationships.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[x] Limit the error logger scope.</li>
+      <li>[ ] Detect indirect table relationships by their destiny tables.</li>
+      <li>[ ] Match the number of rows between indirect table relationships (big over small).</li>
+      <li>[ ] Apply synchronization by target fields, if they exist.</li>
       <li>[ ] Transform temporal file extensions to .mdf during modification events.</li>
-      <li>[ ] Automatic creation of temporal files based on configuration (MSSQL - Windows).</li>
-      <li>[ ] Integrate Store Procedures & Triggers to modify temporal files (MSSQL - Windows).</li>
+      <li>[ ] Automatic creation of temporal files based on configuration (Windows).</li>
+      <li>[ ] MSSQL triggers/procedures for table changes.</li>
+      <li>[ ] Integrate Store Procedures & Triggers to modify temporal files (Windows).</li>
+      <li>[ ] Handle starving connections.</li>
       <li>[ ] Standardize automatic sinchronization tests.</li>
       <li>[ ] Use models to transmit data between shapes.</li>
       <li>[ ] Agrupate entities like exceptions and models.</li>
