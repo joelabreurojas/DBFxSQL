@@ -71,6 +71,8 @@ def fetch_types(filepath) -> dict[str, str]:
     with get_table(filepath) as table:
         for i in range(table.field_count):
             names.append(table._field_layout(i).lower().split(" ")[0])
-            data_structure.append(table._field_layout(i).split(" ")[-1][0])
+
+            data_type: str = table._field_layout(i).split(" ")[-1][0]
+            data_structure.append(data_type if data_type != "n" else "C")
 
     return dict(zip(names, data_structure))
