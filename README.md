@@ -85,16 +85,18 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
-- [ ] Equalize rows for indirect table relationships.
-- [ ] Implement field target to indirect table relationships.
+- [ ] Transform temporal file extensions to .mdf during modification events.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
+      <li>[x] Handle 'n' type as 'C' type in DBF.</li>
+      <li>[x] Support for date/datetime/None types.</li>
+      <li>[ ] Equalize rows for indirect table relationships.</li>
+      <li>[ ] Implement field target to indirect table relationships.</li>
       <li>[ ] Detect indirect table relationships by their destiny tables.</li>
       <li>[ ] Match the number of rows between indirect table relationships (big over small).</li>
       <li>[ ] Apply synchronization by target fields, if they exist.</li>
-      <li>[ ] Transform temporal file extensions to .mdf during modification events.</li>
       <li>[ ] Automatic creation of temporal files based on configuration (Windows).</li>
       <li>[ ] MSSQL triggers/procedures for table changes.</li>
       <li>[ ] Integrate Store Procedures & Triggers to modify temporal files (Windows).</li>
