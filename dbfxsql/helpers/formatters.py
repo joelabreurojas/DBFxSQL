@@ -1,4 +1,4 @@
-import decimal
+import datetime
 from collections.abc import Iterable
 
 from . import file_manager, validators, utils
@@ -47,15 +47,22 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
             raise FieldNotFound(field)
 
         type_: str = types_[field].upper()
-        value: str = _apply_type_cases(field, row[field], type_)
+        value: str = row[field]
 
         try:
-            if data_type[type_] is int and value is None:
-                value = "0"
+            # date case
+            if value and data_type[type_] is datetime.date:
+                row[field] = datetime.datetime.strptime(value, "%Y-%m-%d").date()
 
-            row[field] = data_type[type_](value)
+            # datetime case
+            elif value and data_type[type_] is datetime.datetime:
+                row[field] = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
 
-        except (ValueError, AttributeError, KeyError, decimal.InvalidOperation):
+            # other cases
+            elif value:
+                row[field] = data_type[type_](value)
+
+        except ValueError:
             raise ValueNotValid(field, value, type_)
 
     return row
@@ -338,21 +345,6 @@ def _search_filenames(filename: str, relations: list[dict]) -> str | None:
     for relation in relations:
         if filename in relation["sources"]:
             return filename
-
-
-def _apply_type_cases(field: str, value: str, type_: str) -> str:
-    # Logical case
-    if "N" == type_ and value is None:
-        value = "0"
-
-    if "L" == type_ and ("True" != value != "False"):
-        raise ValueNotValid(value, field, "bool")
-
-    # Date/Datetime case
-    if "D" == type_ or "@" == type_:
-        value.replace("/", "-")
-
-    return value
 
 
 def _parse_condition(condition: tuple[str, str, str]) -> tuple:
