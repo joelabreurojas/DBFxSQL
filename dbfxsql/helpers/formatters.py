@@ -1,7 +1,7 @@
 import datetime
 from collections.abc import Iterable
 
-from . import file_manager, validators, utils
+from . import file_manager, validators
 from ..constants.data_types import DATA_TYPES
 from ..models.sync_table import SyncTable
 from ..exceptions.field_errors import FieldNotFound
@@ -368,7 +368,7 @@ def _parse_tables(relation: dict) -> list[SyncTable, SyncTable]:
 
     for index, _ in enumerate(relation["sources"]):
         table: SyncTable = SyncTable(
-            engine=utils.check_engine(relation["sources"][index]),
+            engine=validators.check_engine(relation["sources"][index]),
             source=relation["sources"][index],
             name=relation["tables"][index],
             fields=relation["fields"][index],

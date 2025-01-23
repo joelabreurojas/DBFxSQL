@@ -1,7 +1,6 @@
 import types
 
 from dbfxsql.constants import sample_commands
-from dbfxsql.helpers import file_manager, formatters
 
 from prettytable import PrettyTable
 
@@ -56,12 +55,3 @@ def notify(operations: list, tables: list) -> None:
 
             for row in operation["delete"]:
                 print(f"Delete row with row_number {row["index"]}")
-
-
-def check_engine(filename: str) -> str | None:
-    extension: str = formatters.decompose_file(filename)[1]
-    engines: dict = file_manager.load_config()["engines"]
-
-    for engine_name, engine_config in engines.items():
-        if extension in engine_config["extensions"]:
-            return engine_name

@@ -1,6 +1,6 @@
 from .models.order_commands import OrderCommands
 from .modules import dbf_controller, sql_controller, sync_controller
-from .helpers import utils
+from .helpers import validators, utils
 from .constants.data_types import DATA_TYPES
 
 import click
@@ -41,7 +41,7 @@ def create(source: str, table: str | None, fields: tuple) -> None:
     """Create a DBF file/SQL file and table."""
 
     # Use cases
-    if not (engine := utils.check_engine(source)):
+    if not (engine := validators.check_engine(source)):
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
@@ -85,7 +85,7 @@ def insert(source: str, table: str | None, fields: tuple) -> None:
     """Insert a row into a DBF file/SQL table."""
 
     # Use cases
-    if not (engine := utils.check_engine(source)):
+    if not (engine := validators.check_engine(source)):
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
@@ -131,7 +131,7 @@ def read(
     """Read rows from a DBF file/SQL table."""
 
     # Use cases
-    if not (engine := utils.check_engine(source)):
+    if not (engine := validators.check_engine(source)):
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     rows: list = []
@@ -191,7 +191,7 @@ def update(
     """Update rows from a DBF file/SQL table."""
 
     # Use cases
-    if not (engine := utils.check_engine(source)):
+    if not (engine := validators.check_engine(source)):
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
@@ -234,7 +234,7 @@ def delete(source: str, table: str | None, condition: tuple) -> None:
     """Delete rows from an DBF file/SQL table."""
 
     # Use cases
-    if not (engine := utils.check_engine(source)):
+    if not (engine := validators.check_engine(source)):
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:
@@ -271,7 +271,7 @@ def drop(source: str, table: str | None) -> None:
     """Drop a DBF file/SQL file/SQL table."""
 
     # Use cases
-    if not (engine := utils.check_engine(source)):
+    if not (engine := validators.check_engine(source)):
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     if "dBase" == engine:

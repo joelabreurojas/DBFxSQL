@@ -1,5 +1,7 @@
 from collections.abc import Iterable
 
+from dbfxsql.helpers import formatters, file_manager
+
 from pathlib import Path
 from watchfiles import Change
 
@@ -67,3 +69,12 @@ def valid_filepath(filepath_: str, engines: dict) -> bool:
                 return True
 
     return False
+
+
+def check_engine(filename: str) -> str | None:
+    extension: str = formatters.decompose_file(filename)[1]
+    engines: dict = file_manager.load_config()["engines"]
+
+    for engine_name, engine_config in engines.items():
+        if extension in engine_config["extensions"]:
+            return engine_name
