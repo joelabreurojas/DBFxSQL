@@ -247,7 +247,7 @@ def filter_filepaths(changes: list[set], engines: dict) -> list:
 
         # MSSQL uses logs to track changes
         if filepath.endswith("_log.ldf"):
-            filepath = filepath.replace("_log.ldf", ".mdf")
+            filepath = filepath.replace("_log.ldf", engines["MSSQL"]["extensions"][0])
 
         if validators.valid_filepath(filepath, engines):
             filepaths.append(filepath)
