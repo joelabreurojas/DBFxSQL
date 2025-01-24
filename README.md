@@ -85,22 +85,22 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
-- [x] Support interaction between tables with same engine, using their position to migrate.
+- [ ] Detect OS to migrate.
+- [ ] Handle temp files for MSSQL in Windows.
+- [ ] Create Store Procedures & Triggers for MSSQL in Windows.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[x] Handle 'n' type as 'C' type in DBF.</li>
-      <li>[x] Support for date/datetime/None types.</li>
-      <li>[ ] Transform temporal file extensions to .mdf during modification events.</li>
+      <li>[ ] Automate the creation of temporal files for each MSSQL source, in Windows.</li>
+      <li>[ ] Create a Storage Procedure (writeFile) to update temporal files, in Windows.</li>
+      <li>[ ] Create insert/update/delete Triggers for each MSSQL table, in Windows.</li>
+      <li>[ ] Add CDC to SQL.</li>
       <li>[ ] Equalize rows for indirect table relationships.</li>
       <li>[ ] Implement field target to indirect table relationships.</li>
       <li>[ ] Detect indirect table relationships by their destiny tables.</li>
       <li>[ ] Match the number of rows between indirect table relationships (big over small).</li>
       <li>[ ] Apply synchronization by target fields, if they exist.</li>
-      <li>[ ] Automatic creation of temporal files based on configuration (Windows).</li>
-      <li>[ ] MSSQL triggers/procedures for table changes.</li>
-      <li>[ ] Integrate Store Procedures & Triggers to modify temporal files (Windows).</li>
       <li>[ ] Handle starving connections.</li>
       <li>[ ] Standardize automatic sinchronization tests.</li>
       <li>[ ] Use models to transmit data between shapes.</li>
