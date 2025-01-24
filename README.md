@@ -85,13 +85,14 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
-- [ ] Transform temporal file extensions to .mdf during modification events.
+- [x] Support interaction between tables with same engine, using their position to migrate.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
       <li>[x] Handle 'n' type as 'C' type in DBF.</li>
       <li>[x] Support for date/datetime/None types.</li>
+      <li>[ ] Transform temporal file extensions to .mdf during modification events.</li>
       <li>[ ] Equalize rows for indirect table relationships.</li>
       <li>[ ] Implement field target to indirect table relationships.</li>
       <li>[ ] Detect indirect table relationships by their destiny tables.</li>
