@@ -17,6 +17,10 @@ def init(position) -> tuple:
 
     engines: dict = setup["engines"]
     relations: list = setup["relations"]
+
+    if os.name != "posix":
+        utils.generate_tmp_files(engines, relations)
+
     filenames: list = file_manager.checked_filenames(engines, relations, position)
 
     return engines, relations, filenames
