@@ -1,5 +1,6 @@
 import tomllib
 
+from . import validators, formatters
 from ..constants import default_config
 
 from pathlib import Path
@@ -34,7 +35,24 @@ def remove_file(filepath: str) -> None:
     Path(filepath).unlink()
 
 
+def checked_filenames(engines, relations, position) -> list[str]:
+    files: dict = formatters.get_filenames(engines, relations)
 
+    # Receives the position of the source to return the index
+    indexes: dict = {"first": 0, "second": 1}
+    index: int = indexes[position]
+
+    filenames: list = []
+
+    # Take the filename based on the index, and check if it exists
+    for relation in relations:
+        filename: str = relation["sources"][index]
+        engine: str = validators.check_engine(filename)
+
+        if filename in files[engine]:
+            filenames.append(filename)
+
+    return filenames
 
 
 def _create_default_config(configpath: Path) -> None:
