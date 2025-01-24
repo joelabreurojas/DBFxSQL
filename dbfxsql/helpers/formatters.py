@@ -429,3 +429,28 @@ def get_filenames(engines, relations) -> list[str]:
         paths.append(files)
 
     return dict(zip(engines.keys(), paths))
+
+
+def get_mssql_databases(relations: list[dict]) -> list[str]:
+    databases: list = []
+
+    for relation in relations:
+        for filename in relation["sources"]:
+            if "MSSQL" == validators.check_engine(filename):
+                databases.append(filename)
+
+    return list(set(databases))
+
+
+def filter_mssql_databases(engines, databases) -> list[str]:
+    extension: str = engines["MSSQL"]["extensions"][0]
+
+    filepaths: list = []
+
+    for database in databases:
+        for folderpath in engines["MSSQL"]["folderpaths"]:
+            if validators.path_exists(f"{folderpath}{database}"):
+                tmp_file: str = database.replace(extension, ".tmp")
+                filepaths.append(f"{folderpath}{tmp_file}")
+
+    return filepaths
