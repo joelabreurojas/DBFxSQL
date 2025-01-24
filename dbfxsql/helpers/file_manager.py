@@ -34,16 +34,7 @@ def remove_file(filepath: str) -> None:
     Path(filepath).unlink()
 
 
-def get_filenames(engine_data: dict) -> list[str]:
-    folderpaths: list[str] = list(set(engine_data["folderpaths"]))
-    extensions: list[str] = list(set(engine_data["extensions"]))
 
-    return [
-        file.name
-        for folderpath in folderpaths
-        for file in Path(folderpath).iterdir()
-        if file.suffix in extensions
-    ]
 
 
 def _create_default_config(configpath: Path) -> None:

@@ -17,7 +17,6 @@ def init(engine) -> tuple:
 
     engines: dict = setup["engines"]
     relations: list = setup["relations"]
-    filenames: list = file_manager.get_filenames(engines[engine])
 
     return engines, relations, filenames
 

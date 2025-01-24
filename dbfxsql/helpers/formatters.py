@@ -411,3 +411,21 @@ def extract_data(name: str, dataset: list[dict], destiny: SyncTable) -> list[dic
         values.append(value)
 
     return values
+
+
+def get_filenames(engines, relations) -> list[str]:
+    """
+    Returns a dict with the filenames based on the engines
+    """
+    paths: list = []
+
+    for engine in engines.values():
+        files: list = []
+
+        for folder in list(set(engine["folderpaths"])):
+            for path in Path(folder).iterdir():
+                files.append("".join(decompose_file(path)))
+
+        paths.append(files)
+
+    return dict(zip(engines.keys(), paths))
