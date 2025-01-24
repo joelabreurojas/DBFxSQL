@@ -85,14 +85,15 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
-- [ ] Detect OS to migrate.
+- [x] Detect OS to migrate.
 - [ ] Handle temp files for MSSQL in Windows.
 - [ ] Create Store Procedures & Triggers for MSSQL in Windows.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[ ] Automate the creation of temporal files for each MSSQL source, in Windows.</li>
+      <li>[x] Automate the creation of temporal files for each MSSQL source, in Windows.</li>
+      <li>[ ] Handle temporal files as MSSQL sources.</li>
       <li>[ ] Create a Storage Procedure (writeFile) to update temporal files, in Windows.</li>
       <li>[ ] Create insert/update/delete Triggers for each MSSQL table, in Windows.</li>
       <li>[ ] Add CDC to SQL.</li>
