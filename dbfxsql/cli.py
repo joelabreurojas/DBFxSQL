@@ -1,7 +1,6 @@
 from .models.order_commands import OrderCommands
 from .modules import dbf_controller, sql_controller, sync_controller
 from .helpers import validators, utils
-from .constants.data_types import DATA_TYPES
 
 import click
 import asyncio
@@ -289,27 +288,28 @@ def drop(source: str, table: str | None) -> None:
 
 @cli.command()
 @click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(DATA_TYPES.keys(), case_sensitive=False),
-    default=list(DATA_TYPES.keys())[0],
+    "-p",
+    "--position",
+    type=click.Choice(["first", "second"], case_sensitive=False),
+    default="first",
     show_default=True,
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def migrate(engine: str) -> None:
+def migrate(position: str) -> None:
     """
     Migrate data between DBF and SQL files.
 
-    Based on an engine, selects the appropriate files for migration according
-    to the relationships described in the configuration.
+    Based on an source position (from the relationship), selects the
+    appropriate files for migration according to the relationships described in
+    the configuration.
     """
 
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
 
-            _, relations, filenames = sync_controller.init(engine)
+            _, relations, filenames = sync_controller.init(position)
 
             spinner.text = "Migrating..."
 
@@ -323,26 +323,27 @@ def migrate(engine: str) -> None:
 
 @cli.command()
 @click.option(
-    "-e",
-    "--engine",
-    type=click.Choice(DATA_TYPES.keys(), case_sensitive=False),
-    default=list(DATA_TYPES.keys())[0],
+    "-p",
+    "--position",
+    type=click.Choice(["first", "second"], case_sensitive=False),
+    default="first",
     show_default=True,
 )
 @click.help_option("-h", "--help")
-def sync(engine: str) -> None:
+def sync(position: str) -> None:
     """
     Synchronize data between DBF and SQL files.
 
     Listens to the folders described in the configuration and performs database
-    migrations when changes occur. It performs an initial migration based on a
-    engine to align the databases before synchronisation.
+    migrations when changes occur. It performs an initial migration based on the
+    source position received (from the relationship) engine to align the
+    databases before synchronisation.
     """
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
 
-            engines, relations, filenames = sync_controller.init(engine)
+            engines, relations, filenames = sync_controller.init(position)
 
             spinner.text = "Migrating..."
 

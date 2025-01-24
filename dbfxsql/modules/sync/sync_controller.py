@@ -10,13 +10,14 @@ from dbfxsql.helpers import file_manager, formatters, validators, utils
 from watchfiles import arun_process
 
 
-def init(engine) -> tuple:
+def init(position) -> tuple:
     logging.getLogger("watchfiles").setLevel(logging.ERROR)
 
     setup: dict = file_manager.load_config()
 
     engines: dict = setup["engines"]
     relations: list = setup["relations"]
+    filenames: list = file_manager.checked_filenames(engines, relations, position)
 
     return engines, relations, filenames
 
