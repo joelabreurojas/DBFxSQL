@@ -165,6 +165,13 @@ def bulk_delete(
     sql_connection.fetch_none(engine, filepath, queries)
 
 
+def drop_table(engine: str, filepath: str, table: str) -> None:
+    query: str = file_manager.load_query(engine, command="table/drop")
+    query = query.format(table=table)
+
+    sql_connection.fetch_none(engine, filepath, query)
+
+
 def drop_database(engine: str, filepath: str, filename: str) -> None:
     if not _database_exists(engine, filename):
         raise SourceNotFound(filepath)
