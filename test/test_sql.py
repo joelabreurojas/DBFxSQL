@@ -6,7 +6,7 @@ import subprocess
 from dbfxsql.constants import sample_commands
 from dbfxsql.helpers import formatters, validators
 from dbfxsql.modules.sql import sql_queries
-from dbfxsql.helpers.utils import check_engine
+from dbfxsql.helpers.validators import check_engine
 
 
 def test_create_table() -> None:
