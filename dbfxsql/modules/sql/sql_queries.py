@@ -7,14 +7,14 @@ from dbfxsql.exceptions.source_errors import SourceNotFound
 
 def create_database(engine: str, filepath: str, filename: str) -> None:
     if not _database_exists(engine, filename):
-        query: str = file_manager.load_query(engine, command="database/create")
+        query: str = file_manager.load_query(engine, command="databases/create")
         query = query.format(database=filename)
 
         sql_connection.fetch_none(engine, "master", query)
 
 
 def create_table(engine: str, filepath: str, table: str, fields: str) -> None:
-    query: str = file_manager.load_query(engine, command="table/create")
+    query: str = file_manager.load_query(engine, command="tables/create")
     query = query.format(table=table, fields=fields)
 
     sql_connection.fetch_none(engine, filepath, query)
@@ -25,7 +25,7 @@ def insert(
 ) -> None:
     field_names, values = fields
 
-    query: str = file_manager.load_query(engine, command="row/insert")
+    query: str = file_manager.load_query(engine, command="rows/insert")
     query = query.format(table=table, field_names=field_names, values=values)
 
     parameters: dict = {**row}
@@ -36,7 +36,7 @@ def insert(
 def read(
     engine: str, filepath: str, table: str, condition_: tuple | None = None
 ) -> list[dict]:
-    command: str = "row/read"
+    command: str = "rows/read"
 
     if not condition_:
         query: str = file_manager.load_query(engine, command)
@@ -64,7 +64,7 @@ def update(
 ) -> None:
     field_name, *_ = condition
 
-    command: str = "row/update"
+    command: str = "rows/update"
 
     if "row_number" == field_name:
         command += "_by_row_number"
@@ -85,7 +85,7 @@ def update(
 def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
     field_name, *_ = condition
 
-    command: str = "row/delete"
+    command: str = "rows/delete"
 
     if "row_number" == field_name:
         command += "_by_row_number"
@@ -106,7 +106,7 @@ def bulk_insert(
 ) -> None:
     field_name, values = fields
 
-    query: str = file_manager.load_query(engine, command="row/insert")
+    query: str = file_manager.load_query(engine, command="rows/insert")
     query = query.format(table=table, field_names=field_name, values=values)
 
     parameters: list[dict] = rows
@@ -124,7 +124,7 @@ def bulk_update(
 ) -> None:
     queries: list = []
 
-    text: str = file_manager.load_query(engine, command="row/update_by_row_number")
+    text: str = file_manager.load_query(engine, command="rows/update_by_row_number")
     data: dict = {"table": table}
 
     if "SQLite" != engine:
@@ -150,7 +150,7 @@ def bulk_delete(
 ) -> None:
     queries: list = []
 
-    text: str = file_manager.load_query(engine, command="row/delete_by_row_number")
+    text: str = file_manager.load_query(engine, command="rows/delete_by_row_number")
     data: dict = {"table": table}
 
     if "SQLite" != engine:
@@ -169,21 +169,21 @@ def drop_database(engine: str, filepath: str, filename: str) -> None:
     if not _database_exists(engine, filename):
         raise SourceNotFound(filepath)
 
-    query: str = file_manager.load_query(engine, command="database/drop")
+    query: str = file_manager.load_query(engine, command="databases/drop")
     query = query.format(database=filename)
 
     sql_connection.fetch_none(engine, "master", query)
 
 
 def fetch_types(engine: str, filepath: str, table: str) -> dict[str, str]:
-    query: str = file_manager.load_query(engine, command="table/fetch_types")
+    query: str = file_manager.load_query(engine, command="tables/fetch_types")
     query = query.format(table=table)
 
     return sql_connection.fetch_all(engine, filepath, query)
 
 
 def fetch_primary_key(engine: str, filepath: str, table: str) -> str:
-    query: str = file_manager.load_query(engine, command="table/fetch_primary_key")
+    query: str = file_manager.load_query(engine, command="tables/fetch_primary_key")
     query = query.format(table=table)
 
     primary_key: list | None = sql_connection.fetch_one(engine, filepath, query)
@@ -194,7 +194,7 @@ def fetch_primary_key(engine: str, filepath: str, table: str) -> str:
 def fetch_row(engine: str, filepath: str, table: str, condition: tuple) -> dict:
     field_name, *_ = condition
 
-    command: str = "row/fetch"
+    command: str = "rows/fetch"
 
     if "row_number" == field_name:
         command += "_by_row_number"
@@ -211,14 +211,14 @@ def fetch_row(engine: str, filepath: str, table: str, condition: tuple) -> dict:
 
 
 def table_exists(engine: str, filepath: str, table: str) -> bool:
-    query: str = file_manager.load_query(engine, command="table/exists")
+    query: str = file_manager.load_query(engine, command="tables/exists")
     query = query.format(table=table)
 
     return bool(sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"])
 
 
 def _database_exists(engine: str, filename: str) -> bool:
-    query: str = file_manager.load_query(engine, command="database/exists")
+    query: str = file_manager.load_query(engine, command="databases/exists")
     query = query.format(database=filename)
 
     return bool(sql_connection.fetch_one(engine, "master", query)[0]["COUNT(1)"])
