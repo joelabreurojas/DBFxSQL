@@ -1,0 +1,66 @@
+-- Enable advanced options and Ole Automation Procedures
+-- These options are required to use COM objects within SQL Server
+sp_configure 'show advanced options', 1
+GO
+RECONFIGURE;
+GO
+sp_configure 'Ole Automation Procedures', 1
+GO
+RECONFIGURE;
+GO
+
+-- Create the procedure
+CREATE PROCEDURE write_file
+(
+    @fileName NVARCHAR(MAX),
+    @fileContents NVARCHAR(MAX)
+)
+AS
+BEGIN
+    -- Declare variables
+    DECLARE @OLE            INT
+    DECLARE @FileID         INT
+    DECLARE @outputCursor   CURSOR;
+    DECLARE @outputLine     NVARCHAR(MAX);
+
+    -- Create a FileSystemObject 
+    EXECUTE sp_OACreate 'Scripting.FileSystemObject', @OLE OUT
+
+    -- Open the file for writing
+    EXECUTE sp_OAMethod @OLE, 'OpenTextFile', @FileID OUT, @fileName, 2, 1 
+
+    -- Define line separator
+    DECLARE @sep char(2);
+    SET @sep = char(13) + char(10);
+
+    -- Create a cursor to iterate through lines
+    SET @outputCursor = CURSOR FOR
+    WITH splitter_cte AS (
+        SELECT CAST(CHARINDEX(@sep, @fileContents) as BIGINT) as pos, 
+                CAST(0 as BIGINT) as lastPos
+        UNION ALL
+        SELECT CHARINDEX(@sep, @fileContents, pos + 1), pos
+        FROM splitter_cte
+        WHERE pos > 0
+    )
+    SELECT SUBSTRING(@fileContents, lastPos + 1,
+                        CASE WHEN pos = 0 THEN 999999999
+                             ELSE pos - lastPos -1 END + 1) as chunk
+    FROM splitter_cte
+    ORDER BY lastPos
+    OPTION (MAXRECURSION 0);
+
+    -- Loop through each line and write to the file
+    OPEN @outputCursor;
+    FETCH NEXT FROM @outputCursor INTO @outputLine;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        EXECUTE sp_OAMethod @FileID, 'Write', Null, @outputLine;
+        FETCH NEXT FROM @outputCursor INTO @outputLine;
+    END
+
+    -- Close the cursor and release resources
+    CLOSE @outputCursor;
+    DEALLOCATE @outputCursor;
+    EXECUTE sp_OADestroy @FileID;
+END;
