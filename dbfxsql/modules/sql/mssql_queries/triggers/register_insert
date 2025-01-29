@@ -1,0 +1,9 @@
+CREATE TRIGGER register_insert
+ON dbo.users
+AFTER INSERT
+AS
+BEGIN
+    EXEC writeFile @fileName = '{sourcepath}', 
+               @fileContents = '{data}'
+END
+GO
