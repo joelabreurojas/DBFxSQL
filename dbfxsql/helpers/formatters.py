@@ -432,18 +432,19 @@ def get_filenames(engines: dict, relations: list[dict]) -> list[str]:
     return dict(zip(engines.keys(), paths))
 
 
-def get_mssql_databases(relations: list[dict]) -> list[str]:
-    databases: list = []
+def get_mssql_entities(relations: list[dict]) -> dict:
+    entities: dict = {}
 
     for relation in relations:
-        for filename in relation["sources"]:
+        for index, filename in enumerate(relation["sources"]):
             if "MSSQL" == validators.check_engine(filename):
-                databases.append(filename)
+                entities[filename].append(relation["tables"][index])
 
-    return list(set(databases))
+    return entities
 
 
-def filter_mssql_databases(engines, databases) -> list[str]:
+def filter_mssql_databases(engines: dict, entities: dict) -> list[str]:
+    databases: list = list(entities.keys())
     extension: str = engines["MSSQL"]["extensions"][0]
 
     filepaths: list = []
@@ -453,5 +454,3 @@ def filter_mssql_databases(engines, databases) -> list[str]:
             if validators.path_exists(f"{folderpath}{database}"):
                 tmp_file: str = database.replace(extension, ".tmp")
                 filepaths.append(f"{folderpath}{tmp_file}")
-
-    return filepaths
