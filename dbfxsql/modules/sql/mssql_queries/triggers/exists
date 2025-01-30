@@ -3,5 +3,5 @@ SELECT
 FROM
 	sys.triggers
 WHERE
-	name = '{trigger}'
+	name = '{value}'
 

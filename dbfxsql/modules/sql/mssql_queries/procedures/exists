@@ -3,4 +3,4 @@ SELECT
 FROM
 	sys.procedures
 WHERE
-	name = '{procedure}'
+	name = '{value}'

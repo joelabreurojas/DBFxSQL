@@ -231,8 +231,8 @@ def deploy_triggers(engine, filepath, database, table):
             sql_connection.fetch_none(engine, filepath, query)
 
 
-def statement_exists(engine: str, filepath: str, statement: str, value: str) -> bool:
+def statement_exists(engine: str, filepath: str, value: str, statement: str) -> bool:
     query: str = file_manager.load_query(engine, command=f"{statement}/exists")
-    query = query.format(value)
+    query = query.format(value=value)
 
     return bool(sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"])

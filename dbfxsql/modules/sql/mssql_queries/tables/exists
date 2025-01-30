@@ -1,3 +1,3 @@
 SELECT COUNT(1) AS "COUNT(1)"
 FROM information_schema.tables
-WHERE table_name='{table}'
+WHERE table_name='{value}'
