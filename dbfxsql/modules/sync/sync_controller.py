@@ -17,17 +17,19 @@ def init(position) -> tuple:
 
     engines: dict = setup["engines"]
     relations: list = setup["relations"]
-
-    # MSSQL change detection
-    engines["MSSQL"]["trigger"] = "_log.ldf"
-
-    if os.name != "posix":
-        utils.generate_tmp_files(engines, relations)
-
-        # MSSQL change detection on Windows
-        engines["MSSQL"]["trigger"] = ".tmp"
-
     filenames: list = file_manager.checked_filenames(engines, relations, position)
+
+    # MSSQL edge cases
+    engines["MSSQL"]["listen"] = "_log.ldf"
+
+    if os.name != "posix":  # For Windows cache
+        entities: dict = formatters.get_mssql_entities(relations)
+        databases: list[str] = list(entities.keys())
+
+        sync_connection.deploy_sql_statements(entities, databases)
+        utils.generate_tmp_files(engines, databases)
+
+        engines["MSSQL"]["listen"] = ".tmp"
 
     return engines, relations, filenames
 

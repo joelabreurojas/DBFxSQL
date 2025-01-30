@@ -88,3 +88,7 @@ def bulk_delete(values: list[dict]) -> None:
 
     else:
         sql_controller.bulk_delete_rows(engine, filename, table, condition)
+
+
+def deploy_sql_statements(entities: dict, databases: list[str]) -> None:
+    sql_controller.deploy_statements(entities, databases, engine="MSSQL")
