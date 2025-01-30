@@ -24,7 +24,7 @@ def create_table(
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    if sql_queries.table_exists(engine, filepath, table):
+    if sql_queries.statement_exists(engine, filepath, table, statement="tables"):
         raise TableAlreadyExists(table)
 
     if row_number := validators.field_name_in(fields_, "row_number"):
@@ -43,7 +43,7 @@ def insert_row(
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    if not sql_queries.table_exists(engine, filepath, table):
+    if sql_queries.statement_exists(engine, filepath, table, statement="tables"):
         raise TableNotFound(table)
 
     types: dict = sql_queries.fetch_types(engine, filepath, table)
@@ -89,7 +89,7 @@ def read_rows(
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    if not sql_queries.table_exists(engine, filepath, table):
+    if sql_queries.statement_exists(engine, filepath, table, statement="tables"):
         raise TableNotFound(table)
 
     if not condition:
@@ -116,7 +116,7 @@ def update_rows(
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    if not sql_queries.table_exists(engine, filepath, table):
+    if sql_queries.statement_exists(engine, filepath, table, statement="tables"):
         raise TableNotFound(table)
 
     # assign types to each row's value
@@ -179,7 +179,7 @@ def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> Non
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    if not sql_queries.table_exists(engine, filepath, table):
+    if sql_queries.statement_exists(engine, filepath, table, statement="tables"):
         raise TableNotFound(table)
 
     if not _row_exists(engine, filepath, table, condition):
@@ -214,7 +214,7 @@ def drop_table(engine: str, filename: str, table: str) -> None:
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    if not sql_queries.table_exists(engine, filepath, table):
+    if sql_queries.statement_exists(engine, filepath, table, statement="tables"):
         raise TableNotFound(table)
 
     sql_queries.drop_table(engine, filepath, table)

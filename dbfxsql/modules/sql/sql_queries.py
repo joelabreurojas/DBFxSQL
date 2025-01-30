@@ -166,7 +166,7 @@ def bulk_delete(
 
 
 def drop_database(engine: str, filepath: str, filename: str) -> None:
-    if not _database_exists(engine, filename):
+    if not statement_exists(engine, filename):
         raise SourceNotFound(filepath)
 
     query: str = file_manager.load_query(engine, command="databases/drop")
@@ -214,7 +214,7 @@ def deploy_procedures(engine, filepath):
     procedures: list[str] = file_manager.list_files(engine, folder="procedures")
 
     for procedure in procedures:
-        if not _procedure_exists(engine, filepath, procedure):
+        if not statement_exists(engine, filepath, procedure, statement="procedures"):
             query = file_manager.load_query(engine, command=f"procedures/{procedure}")
 
             sql_connection.fetch_none(engine, filepath, query)
@@ -224,36 +224,15 @@ def deploy_triggers(engine, filepath, database, table):
     triggers: list[str] = file_manager.list_files(engine, folder="triggers")
 
     for trigger in triggers:
-        if not _trigger_exists(engine, filepath, trigger):
+        if not statement_exists(engine, filepath, trigger, statement="triggers"):
             query = file_manager.load_query(engine, command=f"triggers/{trigger}")
             query = query.format(database=database, table=table)
 
             sql_connection.fetch_none(engine, filepath, query)
 
 
-def table_exists(engine: str, filepath: str, table: str) -> bool:
-    query: str = file_manager.load_query(engine, command="tables/exists")
-    query = query.format(table=table)
-
-    return bool(sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"])
-
-
-def _database_exists(engine: str, filename: str) -> bool:
-    query: str = file_manager.load_query(engine, command="databases/exists")
-    query = query.format(database=filename)
-
-    return bool(sql_connection.fetch_one(engine, "master", query)[0]["COUNT(1)"])
-
-
-def _procedure_exists(engine: str, filepath: str, procedure: str) -> bool:
-    query: str = file_manager.load_query(engine, command="procedures/exists")
-    query = query.format(procedure=procedure)
-
-    return bool(sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"])
-
-
-def _trigger_exists(engine: str, filepath: str, trigger: str) -> bool:
-    query: str = file_manager.load_query(engine, command="triggers/exists")
-    query = query.format(trigger=trigger)
+def statement_exists(engine: str, filepath: str, statement: str, value: str) -> bool:
+    query: str = file_manager.load_query(engine, command=f"{statement}/exists")
+    query = query.format(value)
 
     return bool(sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"])
