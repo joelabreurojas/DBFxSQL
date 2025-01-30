@@ -234,5 +234,15 @@ def drop_database(engine: str, filename: str) -> None:
         file_manager.remove_file(filepath)
 
 
+def deploy_statements(engine: str, entities: dict, databases: list[str]) -> None:
+    for database in databases:
+        filepath: str = formatters.add_folderpath(engine, database)
+
+        sql_queries.deploy_procedures(engine, filepath)
+
+        for table in entities[database]:
+            sql_queries.deploy_triggers(engine, filepath, database, table)
+
+
 def _row_exists(engine: str, filepath: str, table: str, condition: tuple) -> list:
     return sql_queries.fetch_row(engine, filepath, table, condition)

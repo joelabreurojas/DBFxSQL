@@ -210,6 +210,27 @@ def fetch_row(engine: str, filepath: str, table: str, condition: tuple) -> dict:
     return sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"]
 
 
+def deploy_procedures(engine, filepath):
+    procedures: list[str] = file_manager.list_files(engine, folder="procedures")
+
+    for procedure in procedures:
+        if not _procedure_exists(engine, filepath, procedure):
+            query = file_manager.load_query(engine, command=f"procedures/{procedure}")
+
+            sql_connection.fetch_none(engine, filepath, query)
+
+
+def deploy_triggers(engine, filepath, database, table):
+    triggers: list[str] = file_manager.list_files(engine, folder="triggers")
+
+    for trigger in triggers:
+        if not _trigger_exists(engine, filepath, trigger):
+            query = file_manager.load_query(engine, command=f"triggers/{trigger}")
+            query = query.format(database=database, table=table)
+
+            sql_connection.fetch_none(engine, filepath, query)
+
+
 def table_exists(engine: str, filepath: str, table: str) -> bool:
     query: str = file_manager.load_query(engine, command="tables/exists")
     query = query.format(table=table)
@@ -222,3 +243,17 @@ def _database_exists(engine: str, filename: str) -> bool:
     query = query.format(database=filename)
 
     return bool(sql_connection.fetch_one(engine, "master", query)[0]["COUNT(1)"])
+
+
+def _procedure_exists(engine: str, filepath: str, procedure: str) -> bool:
+    query: str = file_manager.load_query(engine, command="procedures/exists")
+    query = query.format(procedure=procedure)
+
+    return bool(sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"])
+
+
+def _trigger_exists(engine: str, filepath: str, trigger: str) -> bool:
+    query: str = file_manager.load_query(engine, command="triggers/exists")
+    query = query.format(trigger=trigger)
+
+    return bool(sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"])
