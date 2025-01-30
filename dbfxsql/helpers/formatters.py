@@ -414,7 +414,7 @@ def extract_data(name: str, dataset: list[dict], destiny: SyncTable) -> list[dic
     return values
 
 
-def get_filenames(engines, relations) -> list[str]:
+def get_filenames(engines: dict, relations: list[dict]) -> list[str]:
     """
     Returns a dict with the filenames based on the engines
     """
