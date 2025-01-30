@@ -58,10 +58,7 @@ def notify(operations: list, tables: list) -> None:
                 print(f"Delete row with row_number {row["index"]}")
 
 
-def generate_tmp_files(engines: dict, relations: list[dict]) -> None:
-    databases: list[str] = formatters.get_mssql_databases(relations)
-    filepaths: list = formatters.filter_mssql_databases(engines, databases)
-
+def generate_tmp_files(filepaths: list[str]) -> None:
     for filepath in filepaths:
         if not validators.path_exists(filepath):
             file_manager.new_file(filepath)
