@@ -25,9 +25,10 @@ def init(position) -> tuple:
     if os.name != "posix":  # For Windows cache
         entities: dict = formatters.get_mssql_entities(relations)
         databases: list[str] = list(entities.keys())
+        filepaths: list[str] = formatters.db_to_tmp(engines, databases)
 
         sync_connection.deploy_sql_statements(entities, databases)
-        utils.generate_tmp_files(engines, databases)
+        utils.generate_tmp_files(filepaths)
 
         engines["MSSQL"]["listen"] = ".tmp"
 
