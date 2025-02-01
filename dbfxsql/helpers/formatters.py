@@ -440,13 +440,13 @@ def get_mssql_entities(relations: list[dict]) -> dict:
             if "MSSQL" == validators.check_engine(filename):
                 if filename not in entities.keys():
                     entities[filename] = []
+
                 entities[filename].append(relation["tables"][index])
 
     return entities
 
 
-def filter_mssql_databases(engines: dict, entities: dict) -> list[str]:
-    databases: list = list(entities.keys())
+def db_to_tmp(engines: dict, databases: list) -> list[str]:
     extension: str = engines["MSSQL"]["extensions"][0]
 
     filepaths: list = []
@@ -456,3 +456,5 @@ def filter_mssql_databases(engines: dict, entities: dict) -> list[str]:
             if validators.path_exists(f"{folderpath}{database}"):
                 tmp_file: str = database.replace(extension, ".tmp")
                 filepaths.append(f"{folderpath}{tmp_file}")
+
+    return filepaths
