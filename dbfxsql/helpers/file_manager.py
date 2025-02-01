@@ -55,6 +55,18 @@ def checked_filenames(engines, relations, position) -> list[str]:
     return filenames
 
 
+def list_files(engine: str, folder: str) -> list[str]:
+    sql_path: str = Path(__file__).resolve().parents[1] / "modules/sql"
+    query_folder: str = f"{engine.lower()}_queries/{folder}"
+    files: list = []
+
+    for file in Path(sql_path / query_folder).iterdir():
+        if "exists" != file.name:
+            files.append(file.name)
+
+    return files
+
+
 def _create_default_config(configpath: Path) -> None:
     configpath.parent.mkdir(parents=True, exist_ok=True)
     configpath.touch()
