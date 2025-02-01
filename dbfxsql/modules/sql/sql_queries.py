@@ -226,7 +226,7 @@ def deploy_triggers(engine, filepath, database, table):
     for trigger in triggers:
         if not statement_exists(engine, filepath, trigger, statement="triggers"):
             query = file_manager.load_query(engine, command=f"triggers/{trigger}")
-            query = query.format(database=database, table=table)
+            query = query.format(table=table, filepath=filepath, data={trigger})
 
             sql_connection.fetch_none(engine, filepath, query)
 
