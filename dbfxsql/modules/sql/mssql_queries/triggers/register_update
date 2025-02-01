@@ -1,10 +1,10 @@
 
 CREATE TRIGGER register_update
-ON dbo.users
+ON dbo.{table}
 AFTER UPDATE
 AS
 BEGIN
-    EXEC writeFile @fileName = '{sourcepath}', 
+    EXEC writeFile @fileName = '{filepath}', 
                @fileContents = '{data}'
 END
 GO

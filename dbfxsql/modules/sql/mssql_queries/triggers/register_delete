@@ -1,10 +1,10 @@
 
 CREATE TRIGGER register_delete
-ON dbo.users
+ON dbo.{table}
 AFTER DELETE
 AS
 BEGIN
-    EXEC writeFile @fileName = '{sourcepath}', 
+    EXEC writeFile @fileName = '{filepath}', 
                @fileContents = '{data}'
 END
 GO
