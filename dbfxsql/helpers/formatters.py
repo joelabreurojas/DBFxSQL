@@ -438,6 +438,8 @@ def get_mssql_entities(relations: list[dict]) -> dict:
     for relation in relations:
         for index, filename in enumerate(relation["sources"]):
             if "MSSQL" == validators.check_engine(filename):
+                if filename not in entities.keys():
+                    entities[filename] = []
                 entities[filename].append(relation["tables"][index])
 
     return entities
