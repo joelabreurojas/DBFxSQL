@@ -1,15 +1,3 @@
--- Enable advanced options and Ole Automation Procedures
--- These options are required to use COM objects within SQL Server
-sp_configure 'show advanced options', 1
-GO
-RECONFIGURE;
-GO
-sp_configure 'Ole Automation Procedures', 1
-GO
-RECONFIGURE;
-GO
-
--- Create the procedure
 CREATE PROCEDURE write_file
 (
     @fileName NVARCHAR(MAX),
