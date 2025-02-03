@@ -5,10 +5,10 @@ from dbfxsql.helpers import file_manager
 from dbfxsql.exceptions.source_errors import SourceNotFound
 
 
-def create_database(engine: str, filepath: str, filename: str) -> None:
-    if not _database_exists(engine, filename):
+def create_database(engine: str, filepath: str, database: str) -> None:
+    if not statement_exists(engine, filepath, database, statement="databases"):
         query: str = file_manager.load_query(engine, command="databases/create")
-        query = query.format(database=filename)
+        query = query.format(database=database)
 
         sql_connection.fetch_none(engine, "master", query)
 
@@ -165,12 +165,12 @@ def bulk_delete(
     sql_connection.fetch_none(engine, filepath, queries)
 
 
-def drop_database(engine: str, filepath: str, filename: str) -> None:
-    if not statement_exists(engine, filename):
+def drop_database(engine: str, filepath: str, database: str) -> None:
+    if not statement_exists(engine, filepath, database, statement="databases"):
         raise SourceNotFound(filepath)
 
     query: str = file_manager.load_query(engine, command="databases/drop")
-    query = query.format(database=filename)
+    query = query.format(database=database)
 
     sql_connection.fetch_none(engine, "master", query)
 
