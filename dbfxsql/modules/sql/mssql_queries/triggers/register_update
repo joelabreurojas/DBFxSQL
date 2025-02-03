@@ -3,6 +3,6 @@ ON dbo.{table}
 AFTER UPDATE
 AS
 BEGIN
-    EXEC writeFile @fileName = '{filepath}', 
+    EXEC write_file @fileName = '{filepath}', 
                @fileContents = '{data}'
 END;
