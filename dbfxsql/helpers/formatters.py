@@ -150,7 +150,7 @@ def depurate_empty_rows(rows: list[dict]) -> list:
     if not rows:
         return rows
 
-    if [{""}] == [{row for row in rows.values()} for rows in rows]:
+    if all(all(not value for value in row.values()) for row in rows):
         return []
 
     return rows
