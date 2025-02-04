@@ -86,16 +86,16 @@ This early version of the code demonstrates a basic interaction with the tool.
 
 **Required:**
 - [x] Detect OS to migrate.
-- [ ] Handle temp files for MSSQL in Windows.
-- [ ] Create Store Procedures & Triggers for MSSQL in Windows.
+- [x] Handle temp files for MSSQL in Windows.
+- [x] Create Store Procedures & Triggers for MSSQL in Windows.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
       <li>[x] Automate the creation of temporal files for each MSSQL source, in Windows.</li>
-      <li>[ ] Handle temporal files as MSSQL sources.</li>
-      <li>[ ] Create a Storage Procedure (writeFile) to update temporal files, in Windows.</li>
-      <li>[ ] Create insert/update/delete Triggers for each MSSQL table, in Windows.</li>
+      <li>[x] Handle temporal files as MSSQL sources.</li>
+      <li>[x] Create a Storage Procedure (write_file) to update temporal files, in Windows.</li>
+      <li>[x] Create insert/update/delete Triggers for each MSSQL table, in Windows.</li>
       <li>[ ] Add CDC to SQL.</li>
       <li>[ ] Equalize rows for indirect table relationships.</li>
       <li>[ ] Implement field target to indirect table relationships.</li>
