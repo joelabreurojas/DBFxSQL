@@ -245,10 +245,10 @@ def filter_filepaths(changes: list[set], engines: dict) -> list:
     for change in changes:
         filepath: str = change[-1]
 
-        trigger: str = engines["MSSQL"]["trigger"]
+        listened: str = engines["MSSQL"]["listen"]
 
-        if filepath.endswith(trigger):
-            filepath = filepath.replace(trigger, engines["MSSQL"]["extensions"][0])
+        if filepath.endswith(listened):
+            filepath = filepath.replace(listened, engines["MSSQL"]["extensions"][0])
 
         if validators.valid_filepath(filepath, engines):
             filepaths.append(filepath)
