@@ -287,29 +287,19 @@ def drop(source: str, table: str | None) -> None:
 
 
 @cli.command()
-@click.option(
-    "-p",
-    "--position",
-    type=click.Choice(["first", "second"], case_sensitive=False),
-    default="first",
-    show_default=True,
-)
-@click.help_option("-h", "--help")
-@utils.embed_examples
-def migrate(position: str) -> None:
+def migrate() -> None:
     """
     Migrate data between DBF and SQL files.
 
-    Based on an source position (from the relationship), selects the
-    appropriate files for migration according to the relationships described in
-    the configuration.
+    Transfers data from the files that have priority in the relations defined
+    in the configuration.
     """
 
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
 
-            _, relations, filenames = sync_controller.init(position)
+            _, relations, filenames = sync_controller.init()
 
             spinner.text = "Migrating..."
 
@@ -322,28 +312,21 @@ def migrate(position: str) -> None:
 
 
 @cli.command()
-@click.option(
-    "-p",
-    "--position",
-    type=click.Choice(["first", "second"], case_sensitive=False),
-    default="first",
-    show_default=True,
-)
 @click.help_option("-h", "--help")
-def sync(position: str) -> None:
+def sync() -> None:
     """
     Synchronize data between DBF and SQL files.
 
     Listens to the folders described in the configuration and performs database
     migrations when changes occur. It performs an initial migration based on the
-    source position received (from the relationship) engine to align the
-    databases before synchronisation.
+    source priority defined (from the relation) to align the databases before
+    synchronisation.
     """
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
 
-            engines, relations, filenames = sync_controller.init(position)
+            engines, relations, filenames = sync_controller.init()
 
             spinner.text = "Migrating..."
 
