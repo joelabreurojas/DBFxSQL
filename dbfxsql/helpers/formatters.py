@@ -1,4 +1,5 @@
-import datetime
+from datetime import date
+from datetime import datetime
 from collections.abc import Iterable
 
 from . import file_manager, validators
@@ -51,12 +52,14 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
 
         try:
             # date case
-            if value and data_type[type_] is datetime.date:
-                row[field] = datetime.datetime.strptime(value, "%Y-%m-%d").date()
+            if value and data_type[type_] is date:
+                if type(value) is str:
+                    row[field] = date.fromisoformat(value)
 
             # datetime case
-            elif value and data_type[type_] is datetime.datetime:
-                row[field] = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+            elif value and data_type[type_] is datetime:
+                if type(value) is str:
+                    row[field] = datetime.fromisoformat(value)
 
             # other cases
             elif value:
