@@ -54,7 +54,11 @@ def fetch_none(
 
     with _get_cursor(engine, filepath) as cursor:
         if execute_many:
-            cursor.executemany(query, parameters)
+            for parameter in parameters:
+                cursor.execute(query, parameter)
+
+            # Triggers don't detect executemany changes
+            # cursor.executemany(query, parameters)
 
         elif isinstance(query, list):
             if parameters:
