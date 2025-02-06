@@ -10,14 +10,14 @@ from dbfxsql.helpers import file_manager, formatters, validators, utils
 from watchfiles import arun_process
 
 
-def init(position) -> tuple:
+def init() -> tuple:
     logging.getLogger("watchfiles").setLevel(logging.ERROR)
 
     setup: dict = file_manager.load_config()
 
     engines: dict = setup["engines"]
     relations: list = setup["relations"]
-    filenames: list = file_manager.checked_filenames(engines, relations, position)
+    filenames: list = file_manager.prioritized_files(engines, relations)
 
     # MSSQL edge cases
     engines["MSSQL"]["listen"] = "_log.ldf"
