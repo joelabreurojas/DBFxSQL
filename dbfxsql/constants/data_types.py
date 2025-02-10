@@ -3,7 +3,7 @@ import decimal
 import uuid
 
 DBASE: dict[str, type] = {
-    "0": None,
+    "0": type(None),
     "C": str,
     "Y": float,
     "D": datetime.date,
@@ -20,7 +20,7 @@ DBASE: dict[str, type] = {
 }
 
 SQLITE: dict[str, type] = {
-    "NULL": None,
+    "NULL": type(None),
     "INTEGER": int,
     "REAL": float,
     "TEXT": str,
@@ -28,6 +28,7 @@ SQLITE: dict[str, type] = {
 }
 
 MSSQL: dict[str, type] = {
+    "NULL": type(None),
     "BIT": bool,
     "TINYINT": int,
     "SMALLINT": int,
@@ -56,4 +57,3 @@ MSSQL: dict[str, type] = {
 }
 
 DATA_TYPES: dict[str, dict] = {"dBase": DBASE, "SQLite": SQLITE, "MSSQL": MSSQL}
-
