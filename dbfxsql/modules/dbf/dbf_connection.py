@@ -1,8 +1,10 @@
 from contextlib import contextmanager
 from collections.abc import Generator
 
+from dbfxsql.helpers import formatters
+from dbfxsql.exceptions.connection_errors import DBFConnectionFailed
+
 import dbf
-import logging
 from pathlib import Path
 
 
@@ -21,7 +23,9 @@ def get_table(filepath: str) -> Generator[dbf.Table]:
         yield table
 
     except Exception as error:
-        logging.error(error)
+        filename: str = formatters.decompose_file(filepath)[0]
+
+        raise DBFConnectionFailed(filename, error)
 
     finally:
         table.close()

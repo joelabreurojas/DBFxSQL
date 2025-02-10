@@ -1,10 +1,11 @@
 """Communications with the SQL database"""
 
-import logging
 from collections.abc import Generator
 from contextlib import contextmanager
+
 from dbfxsql.constants.sql_libraries import SQL
 from dbfxsql.helpers import formatters, file_manager
+from dbfxsql.exceptions.connection_errors import SQLConnectionFailed
 
 
 def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
@@ -98,8 +99,11 @@ def _get_cursor(engine: str, filepath: str) -> Generator:
         connection.commit()
 
     except Exception as error:
-        logging.error(error)
         connection.rollback()
+
+        filename: str = formatters.decompose_file(filepath)[0]
+
+        raise SQLConnectionFailed(engine, filename, error)
 
     finally:
         cursor.close()
