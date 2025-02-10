@@ -11,6 +11,7 @@ from watchfiles import arun_process
 
 
 def init() -> tuple:
+    # Disable watchfiles logging
     logging.getLogger("watchfiles").setLevel(logging.ERROR)
 
     setup: dict = file_manager.load_config()
