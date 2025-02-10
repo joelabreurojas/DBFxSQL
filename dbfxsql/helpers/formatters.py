@@ -9,6 +9,7 @@ from ..exceptions.field_errors import FieldNotFound
 from ..exceptions.value_errors import ValueNotValid
 
 from pathlib import Path
+from dbf.data_types import NullType
 
 
 def decompose_file(filename: str) -> tuple[str, str]:
@@ -60,6 +61,10 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
             elif value and data_type[type_] is datetime:
                 if type(value) is str:
                     row[field] = datetime.fromisoformat(value)
+
+            # NullType case
+            elif type(value) is NullType:
+                row[field] = None
 
             # other cases
             elif value:
