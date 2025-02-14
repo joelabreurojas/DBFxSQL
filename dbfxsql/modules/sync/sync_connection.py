@@ -5,7 +5,7 @@ def insert(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    fields: tuple = tuple(values[0]["fields"])
+    fields: tuple[tuple[str, str]] = tuple(values[0]["fields"])
 
     if "dBase" == engine:
         dbf_controller.insert_row(engine, filename, fields)
@@ -14,7 +14,7 @@ def insert(values: list[dict]) -> None:
         sql_controller.insert_row(engine, filename, table, fields)
 
 
-def read(engine: str, filename: str, table: str) -> dict:
+def read(engine: str, filename: str, table: str) -> list[dict]:
     if "dBase" == engine:
         return dbf_controller.read_rows(engine, filename, condition=None)
 
@@ -25,8 +25,8 @@ def update(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    fields: tuple = tuple(values[0]["fields"])
-    condition: tuple = ("row_number", "==", f"{values[0]["index"]}")
+    fields: tuple[tuple[str, str]] = tuple(values[0]["fields"])
+    condition: tuple[str, str, str] = ("row_number", "==", f"{values[0]['index']}")
 
     if "dBase" == engine:
         dbf_controller.update_rows(engine, filename, fields, condition)
@@ -39,7 +39,7 @@ def delete(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    condition: tuple = ("row_number", "==", f"{values[0]["index"]}")
+    condition: tuple[str, str, str] = ("row_number", "==", f"{values[0]['index']}")
 
     if "dBase" == engine:
         dbf_controller.delete_rows(engine, filename, condition)
@@ -52,7 +52,7 @@ def bulk_insert(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    fields: list[tuple] = [value["fields"] for value in values]
+    fields: list[tuple[str, str]] = [value["fields"] for value in values]
 
     if "dBase" == engine:
         dbf_controller.bulk_insert_rows(engine, filename, fields)
@@ -65,9 +65,9 @@ def bulk_update(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    fields: list[tuple] = [value["fields"] for value in values]
-    conditions: list[tuple] = [
-        ("row_number", "==", f"{value["index"]}") for value in values
+    fields: list[tuple[str, str]] = [value["fields"] for value in values]
+    conditions: list[tuple[str, str, str]] = [
+        ("row_number", "==", f"{value['index']}") for value in values
     ]
 
     if "dBase" == engine:

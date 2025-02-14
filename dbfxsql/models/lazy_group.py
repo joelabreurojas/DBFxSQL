@@ -12,7 +12,7 @@ class LazyGroup(click.Group):
     during startup.
     """
 
-    def __init__(self, import_name: str, **kwargs: any) -> None:
+    def __init__(self, import_name: str, **kwargs: Any) -> None:
         """Initializes the LazySubcommand with its import name."""
 
         self._import_name: str = import_name

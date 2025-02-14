@@ -37,7 +37,7 @@ def cli():
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def create(source: str, table: str | None, fields: tuple) -> None:
+def create(source: str, table: str | None, fields: tuple[tuple[str, str]]) -> None:
     """Create a DBF file/SQL file and table."""
 
     # Use cases
@@ -81,7 +81,7 @@ def create(source: str, table: str | None, fields: tuple) -> None:
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def insert(source: str, table: str | None, fields: tuple) -> None:
+def insert(source: str, table: str | None, fields: tuple[tuple[str, str]]) -> None:
     """Insert a row into a DBF file/SQL table."""
 
     # Use cases
@@ -126,7 +126,7 @@ def insert(source: str, table: str | None, fields: tuple) -> None:
 def read(
     source: str,
     table: str | None,
-    condition: tuple | None,
+    condition: tuple[str, str, str] | None,
 ) -> None:
     """Read rows from a DBF file/SQL table."""
 
@@ -185,8 +185,8 @@ def read(
 def update(
     source: str,
     table: str | None,
-    fields: tuple,
-    condition: tuple,
+    fields: tuple[tuple[str, str]],
+    condition: tuple[str, str, str],
 ) -> None:
     """Update rows from a DBF file/SQL table."""
 
@@ -230,7 +230,7 @@ def update(
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def delete(source: str, table: str | None, condition: tuple) -> None:
+def delete(source: str, table: str | None, condition: tuple[str, str, str]) -> None:
     """Delete rows from an DBF file/SQL table."""
 
     # Use cases

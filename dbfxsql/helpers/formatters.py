@@ -19,7 +19,9 @@ def decompose_file(filename: str) -> tuple[str, str]:
 
 def add_folderpath(engine: str, filename: str) -> str:
     """Adds the folderpath to the filename depending on the engine."""
-    engines: str = file_manager.load_config()["engines"]
+    engines: dict[str, dict[str, list[str] | str]] = file_manager.load_config()[
+        "engines"
+    ]
     folderpath: str = engines[engine]["folderpaths"][0]
 
     return str(Path(folderpath).resolve() / filename)
@@ -33,12 +35,12 @@ def fields_to_dict(fields: Iterable[tuple[str, str]]) -> dict:
     return {field[0]: field[1] for field in fields}
 
 
-def fields_to_tuple(fields: dict) -> tuple:
+def _fields_to_tuple(fields: dict[str, str]) -> tuple[tuple[str, str], ...]:
     return tuple(fields.items())
 
 
 def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> dict:
-    data_type: dict = DATA_TYPES[engine]
+    data_type: dict[str, type] = DATA_TYPES[engine]
 
     field_names: list[str] = [field.lower() for field in row.keys()]
     type_names: list[str] = [type_.lower() for type_ in types_.keys()]
@@ -75,8 +77,8 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
     return row
 
 
-def deglose_fields(row: dict, start: str, end: str) -> tuple:
-    keys: list = [str(key) for key in row.keys()]
+def deglose_fields(row: dict, start: str, end: str) -> tuple[str, str]:
+    keys: list[str] = [str(key) for key in row.keys()]
 
     field_names: str = ", ".join(keys)  # [key]
     values: str = start + f"{end}, {start}".join(keys) + end  # [:key]
@@ -88,7 +90,7 @@ def merge_fields(row: dict, start: str, end: str) -> str:
     return ", ".join([f"{key} = {start}{key}{end}" for key in row.keys()])
 
 
-def scourgify_rows(rows: list[dict]) -> list[dict]:
+def scourgify_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     """Convert fields to lowercase and stripping values."""
 
     lower_fields: list[str] = [key.lower() for key in rows[0].keys()]
@@ -100,7 +102,9 @@ def scourgify_rows(rows: list[dict]) -> list[dict]:
     return [dict(zip(lower_fields, row.values())) for row in rows]
 
 
-def quote_values(engine: str, types: dict[str, str], condition: tuple) -> tuple:
+def quote_values(
+    engine: str, types: dict[str, str], condition: tuple[str, str, str]
+) -> tuple[str, str, str]:
     field, operator, value = condition
 
     if "==" == operator:
@@ -121,7 +125,9 @@ def quote_values(engine: str, types: dict[str, str], condition: tuple) -> tuple:
     return field, operator, value
 
 
-def filter_rows(rows_: list, condition: tuple) -> tuple[list, list]:
+def filter_rows(
+    rows_: list[dict], condition: tuple[str, str, str]
+) -> tuple[list[dict], list[int]]:
     filter: str = ""
     rows: list = []
     indexes: list = []
@@ -145,8 +151,8 @@ def filter_rows(rows_: list, condition: tuple) -> tuple[list, list]:
 
 
 def scourgify_types(types: list[dict[str, str]]) -> dict[str, str]:
-    names: list = [type_["name"] for type_ in types]
-    data_structure: list = [type_["type"] for type_ in types]
+    names: list[str] = [type_["name"] for type_ in types]
+    data_structure: list[str] = [type_["type"] for type_ in types]
 
     return dict(zip(names, data_structure))
 
@@ -163,7 +169,9 @@ def depurate_empty_rows(rows: list[dict]) -> list:
     return rows
 
 
-def relevant_filenames(filenames: list[str], relations: list[dict]) -> list[str]:
+def relevant_filenames(
+    filenames: list[str], relations: list[dict[str, list[str] | str]]
+) -> list[str]:
     relevant_filenames: list = []
 
     for filename in filenames:
@@ -173,7 +181,9 @@ def relevant_filenames(filenames: list[str], relations: list[dict]) -> list[str]
     return relevant_filenames
 
 
-def package_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
+def package_changes(
+    filenames: list[str], relations: list[dict[str, list[str] | str]]
+) -> list[dict[str, SyncTable | list[SyncTable]]]:
     changes: list = []
 
     for filename in filenames:
@@ -181,8 +191,8 @@ def package_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
 
         for name in origin_tables.keys():
             origin_data: SyncTable = origin_tables[name]["data"]
-            origin_fields: list = origin_tables[name]["fields"]
-            destinies: list = origin_tables[name]["destinies"]
+            origin_fields: list[str] = origin_tables[name]["fields"]
+            destinies: list[SyncTable] = origin_tables[name]["destinies"]
 
             origin: SyncTable = SyncTable(
                 engine=origin_data.engine,
@@ -196,12 +206,12 @@ def package_changes(filenames: list[str], relations: list[dict]) -> list[dict]:
     return changes
 
 
-def _parse_origin(filename: str, relations: list[dict]) -> dict:
+def _parse_origin(filename: str, relations: list[dict[str, list[str] | str]]) -> dict:
     origin_tables: dict = {}
 
     for relation in relations:
         if filename in relation["sources"]:
-            tables: list[SyncTable, SyncTable] = _parse_tables(relation)
+            tables: list[SyncTable] = _parse_tables(relation)
             origin, destiny = _define_tables(tables, filename)
 
             if not destiny:
@@ -220,17 +230,25 @@ def _parse_origin(filename: str, relations: list[dict]) -> dict:
     return origin_tables
 
 
-def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> list:
+def compare_tables(
+    origin: SyncTable, destinies: list[SyncTable]
+) -> list[tuple[list[dict], list[dict]]]:
     residual_tables: list = []
 
     for origin_fields, destiny in zip(origin.fields, destinies):
-        fields: tuple = (origin_fields, destiny.fields)
-        rows: tuple = (origin.rows, destiny.rows)
+        fields: tuple[list[str], list[str]] = (origin_fields, destiny.fields)
 
-        residual_origin, residual_destiny = _compare_rows(*rows, fields)
+        origin_rows: list[dict] = list(origin.rows)
+        destiny_rows: list[dict] = list(destiny.rows)
+
+        residual_origin, residual_destiny = _compare_rows(
+            origin_rows, destiny_rows, fields
+        )
 
         for residual in residual_origin:
-            residual["fields"] = _depurate_fields(residual["fields"], origin_fields)
+            residual["fields"] = _depurate_fields(
+                residual["fields"], list(origin_fields)
+            )
             residual["fields"] = _change_fields(residual["fields"], destiny.fields)
 
         residual_tables.append((residual_origin, residual_destiny))
@@ -238,32 +256,41 @@ def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> list:
     return residual_tables
 
 
-def _depurate_fields(row: dict, fields: list) -> list[dict]:
+def _depurate_fields(row: dict, fields: list[str]) -> dict:
+    """
+    Remove the keys not in the fields
+    """
+
     return {key: row[key] for key in fields}
 
 
-def _change_fields(row: list, fields: list) -> list[dict]:
+def _change_fields(row: dict, fields: list[str]) -> dict:
+    """
+    Change the dict keys to the fields received
+    """
+
     return {key: value for key, value in zip(fields, row.values())}
 
 
-def filter_filepaths(changes: list[set], engines: dict) -> list:
+def filter_filepaths(
+    changes: list[list[str]], engines: dict[str, dict[str, list[str] | str]]
+) -> list:
     filepaths: list = []
 
     for change in changes:
         filepath: str = change[-1]
 
-        listened: str = engines["MSSQL"]["listen"]
+        if isinstance((listened := engines["MSSQL"]["listen"]), str):
+            if filepath.endswith(listened):
+                filepath = filepath.replace(listened, engines["MSSQL"]["extensions"][0])
 
-        if filepath.endswith(listened):
-            filepath = filepath.replace(listened, engines["MSSQL"]["extensions"][0])
-
-        if validators.valid_filepath(filepath, engines):
-            filepaths.append(filepath)
+            if validators.valid_filepath(filepath, engines):
+                filepaths.append(filepath)
 
     return filepaths
 
 
-def parse_filenames(filepaths: list[str]) -> list:
+def parse_filenames(filepaths: list[str]) -> list[str]:
     filenames: list = []
 
     for filepath in filepaths:
@@ -273,7 +300,9 @@ def parse_filenames(filepaths: list[str]) -> list:
     return filenames
 
 
-def classify_operations(residual_tables: tuple) -> list:
+def classify_operations(
+    residual_tables: list[tuple[list[dict], list[dict]]],
+) -> list[dict[str, list[dict]]]:
     operations: list = []
 
     for residual_table in residual_tables:
@@ -282,11 +311,15 @@ def classify_operations(residual_tables: tuple) -> list:
         origin_range: int = len(origin)
         destiny_range: int = len(destiny)
 
-        insert: list = [{"fields": row["fields"]} for row in origin[destiny_range:]]
+        insert: list[dict] = [
+            {"fields": row["fields"]} for row in origin[destiny_range:]
+        ]
 
-        delete: list = [{"index": row["index"]} for row in destiny[origin_range:][::-1]]
+        delete: list[dict] = [
+            {"index": row["index"]} for row in destiny[origin_range:][::-1]
+        ]
 
-        update: list = [
+        update: list[dict] = [
             {
                 "index": destiny_row["index"],
                 "fields": _residual_rows(origin_row["fields"], destiny_row["fields"]),
@@ -305,7 +338,9 @@ def _residual_rows(destiny_row: dict, origin_row: dict) -> dict:
     }
 
 
-def _compare_rows(origin_rows: list, destiny_rows: list, fields_: tuple) -> tuple:
+def _compare_rows(
+    origin_rows: list, destiny_rows: list, fields_: tuple
+) -> tuple[list[dict], list[dict]]:
     residual_origin: list = []
     residual_destiny: list = [
         {"index": index, "fields": fields}
@@ -349,14 +384,18 @@ def _compare_rows(origin_rows: list, destiny_rows: list, fields_: tuple) -> tupl
     return residual_origin, residual_destiny
 
 
-def _search_filenames(filename: str, relations: list[dict]) -> str | None:
+def _search_filenames(filename: str, relations: list[dict]) -> str:
     for relation in relations:
         if filename in relation["sources"]:
             return filename
 
+    return ""
+
 
 def _parse_condition(condition: tuple[str, str, str]) -> tuple:
-    field, operator, value = condition
+    field: str = condition[0]
+    operator: str = condition[1]
+    value: int | str = condition[2]
 
     if "=" == operator:
         operator = "=="
@@ -371,7 +410,7 @@ def _parse_condition(condition: tuple[str, str, str]) -> tuple:
     return field, operator, value
 
 
-def _parse_tables(relation: dict) -> list[SyncTable, SyncTable]:
+def _parse_tables(relation: dict) -> list:
     tables: list = []
 
     for index, _ in enumerate(relation["sources"]):
@@ -388,14 +427,11 @@ def _parse_tables(relation: dict) -> list[SyncTable, SyncTable]:
 
 
 def _define_tables(tables: list[SyncTable], filename: str) -> tuple:
-    origin: SyncTable = None
-    destiny: SyncTable = None
-
     for table in tables:
         if filename == table.source:
-            origin = table
+            origin: SyncTable = table
         else:
-            destiny = table
+            destiny: SyncTable = table
 
     return origin, destiny
 
@@ -421,7 +457,10 @@ def extract_data(name: str, dataset: list[dict], destiny: SyncTable) -> list[dic
     return values
 
 
-def get_filenames(engines: dict, relations: list[dict]) -> list[str]:
+def get_filenames(
+    engines: dict[str, dict[str, list[str] | str]],
+    relations: list[dict[str, list[str] | str]],
+) -> dict:
     """
     Returns a dict with the filenames based on the engines
     """
@@ -453,7 +492,9 @@ def get_mssql_entities(relations: list[dict]) -> dict:
     return entities
 
 
-def db_to_tmp(engines: dict, databases: list) -> list[str]:
+def db_to_tmp(
+    engines: dict[str, dict[str, list[str] | str]], databases: list
+) -> list[str]:
     extension: str = engines["MSSQL"]["extensions"][0]
 
     filepaths: list = []

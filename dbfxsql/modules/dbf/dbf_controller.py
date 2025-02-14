@@ -8,7 +8,9 @@ from dbfxsql.helpers import file_manager, formatters, validators
 from . import dbf_queries
 
 
-def create_table(engine: str, filename: str, fields_: Iterable[tuple]) -> None:
+def create_table(
+    engine: str, filename: str, fields_: Iterable[tuple[str, str]]
+) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if validators.path_exists(filepath):
@@ -23,13 +25,13 @@ def create_table(engine: str, filename: str, fields_: Iterable[tuple]) -> None:
     dbf_queries.create(filepath, fields)
 
 
-def insert_row(engine: str, filename: str, fields: Iterable[tuple]) -> None:
+def insert_row(engine: str, filename: str, fields: Iterable[tuple[str, str]]) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
-    types: dict = dbf_queries.fetch_types(filepath)
+    types: dict[str, str] = dbf_queries.fetch_types(filepath)
     row: dict = formatters.fields_to_dict(fields)
 
     row = formatters.assign_types(engine, types, row)
@@ -37,37 +39,39 @@ def insert_row(engine: str, filename: str, fields: Iterable[tuple]) -> None:
     dbf_queries.insert(filepath, row)
 
 
-def bulk_insert_rows(engine: str, filename: str, fields: list[tuple]) -> None:
+def bulk_insert_rows(engine: str, filename: str, fields_: list[tuple]) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    types: dict = dbf_queries.fetch_types(filepath)
-    rows: list[dict] = [formatters.fields_to_dict(field) for field in fields]
-
-    rows = [formatters.assign_types(engine, types, row) for row in rows]
+    rows: list[dict] = [formatters.fields_to_dict(fields) for fields in fields_]
 
     dbf_queries.bulk_insert(filepath, rows)
 
 
-def read_rows(engine: str, filename: str, condition: tuple | None) -> list[dict]:
+def read_rows(
+    engine: str, filename: str, condition: tuple[str, str, str] | None
+) -> list[dict]:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
+    types: dict[str, str] = dbf_queries.fetch_types(filepath)
     rows: list[dict] = dbf_queries.read(filepath)
+
     rows = formatters.scourgify_rows(rows)
+    rows = [formatters.assign_types(engine, types, row) for row in rows]
 
-    if condition:
-        rows, _ = formatters.filter_rows(rows, condition)
-
-    if not rows:
+    if condition and not (rows := formatters.filter_rows(rows, condition)[0]):
         raise RowNotFound(condition)
 
     return rows
 
 
 def update_rows(
-    engine: str, filename: str, fields: Iterable[tuple], condition: tuple
+    engine: str,
+    filename: str,
+    fields: Iterable[tuple[str, str]],
+    condition: tuple[str, str, str],
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -75,14 +79,16 @@ def update_rows(
         raise SourceNotFound(filepath)
 
     # assign types to each row's value
-    types: dict = dbf_queries.fetch_types(filepath)
+    types: dict[str, str] = dbf_queries.fetch_types(filepath)
     row: dict = formatters.fields_to_dict(fields)
 
     row = formatters.assign_types(engine, types, row)
 
     # get a sanitized list of rows
     rows: list[dict] = dbf_queries.read(filepath)
+
     rows = formatters.scourgify_rows(rows)
+    rows = [formatters.assign_types(engine, types, row) for row in rows]
 
     # manual filter of rows by condition
     rows, indexes = formatters.filter_rows(rows, condition)
@@ -96,16 +102,16 @@ def update_rows(
 
 
 def bulk_update_rows(
-    engine: str, filename: str, fields: list[tuple], conditions: list[tuple]
+    engine: str,
+    filename: str,
+    fields_: list[tuple],
+    conditions: list[tuple[str, str, str]],
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    types: dict = dbf_queries.fetch_types(filepath)
-    dict_rows: list[dict] = [formatters.fields_to_dict(field) for field in fields]
+    dict_rows: list[dict] = [formatters.fields_to_dict(fields) for fields in fields_]
 
-    dict_rows = [formatters.assign_types(engine, types, row) for row in dict_rows]
-
-    table_rows = dbf_queries.read(filepath)
+    table_rows: list[dict] = dbf_queries.read(filepath)
     table_rows = formatters.scourgify_rows(table_rows)
 
     update_rows: list = []
@@ -118,14 +124,17 @@ def bulk_update_rows(
     dbf_queries.bulk_update(filepath, update_rows)
 
 
-def delete_rows(engine: str, filename: str, condition: tuple) -> None:
+def delete_rows(engine: str, filename: str, condition: tuple[str, str, str]) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if not validators.path_exists(filepath):
         raise SourceNotFound(filepath)
 
+    types: dict[str, str] = dbf_queries.fetch_types(filepath)
     rows: list[dict] = dbf_queries.read(filepath)
+
     rows = formatters.scourgify_rows(rows)
+    rows = [formatters.assign_types(engine, types, row) for row in rows]
 
     rows, indexes = formatters.filter_rows(rows, condition)
 
@@ -135,10 +144,12 @@ def delete_rows(engine: str, filename: str, condition: tuple) -> None:
     dbf_queries.delete(filepath, indexes)
 
 
-def bulk_delete_rows(engine: str, filename: str, conditions: list[tuple]) -> None:
+def bulk_delete_rows(
+    engine: str, filename: str, conditions: list[tuple[str, str, str]]
+) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    table_rows = dbf_queries.read(filepath)
+    table_rows: list[dict] = dbf_queries.read(filepath)
     table_rows = formatters.scourgify_rows(table_rows)
 
     delete_indexes: list = []

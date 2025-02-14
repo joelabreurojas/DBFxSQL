@@ -47,14 +47,16 @@ def values_are_different(rows: list[dict], row_: dict) -> bool:
     return False
 
 
-def valid_filepath(filepath_: str, engines: dict) -> bool:
+def valid_filepath(
+    filepath_: str, engines: dict[str, dict[str, list[str] | str]]
+) -> bool:
     filepath = Path(filepath_)
 
     extension: str = filepath.suffix
     folderpath: str = str(filepath.resolve().parent)
 
     for engine in engines.values():
-        folderpaths: list = [str(Path(f).resolve()) for f in engine["folderpaths"]]
+        folderpaths: list[str] = [str(Path(f).resolve()) for f in engine["folderpaths"]]
 
         if extension in engine["extensions"]:
             if folderpath in folderpaths:
@@ -63,10 +65,14 @@ def valid_filepath(filepath_: str, engines: dict) -> bool:
     return False
 
 
-def check_engine(filename: str) -> str | None:
+def check_engine(filename: str) -> str:
     extension: str = formatters.decompose_file(filename)[1]
-    engines: dict = file_manager.load_config()["engines"]
+    engines: dict[str, dict[str, list[str] | str]] = file_manager.load_config()[
+        "engines"
+    ]
 
     for engine_name, engine_config in engines.items():
         if extension in engine_config["extensions"]:
             return engine_name
+
+    return ""

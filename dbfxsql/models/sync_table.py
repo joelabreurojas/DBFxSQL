@@ -6,5 +6,5 @@ class SyncTable:
     engine: str
     source: str
     name: str
-    fields: list[str]
-    rows: list | None = None
+    fields: list
+    rows: list = field(default_factory=list)

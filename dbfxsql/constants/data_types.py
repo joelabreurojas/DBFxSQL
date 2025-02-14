@@ -56,4 +56,8 @@ MSSQL: dict[str, type] = {
     "UNIQUEIDENTIFIER": uuid.UUID,
 }
 
-DATA_TYPES: dict[str, dict] = {"dBase": DBASE, "SQLite": SQLITE, "MSSQL": MSSQL}
+DATA_TYPES: dict[str, dict[str, type]] = {
+    "dBase": DBASE,
+    "SQLite": SQLITE,
+    "MSSQL": MSSQL,
+}

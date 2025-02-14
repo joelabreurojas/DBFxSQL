@@ -20,7 +20,7 @@ def show_table(rows: list[dict]) -> None:
     print(table, end="\n\n")
 
 
-def embed_examples(func: types.FunctionType) -> types.FunctionType:
+def embed_examples(func: Callable) -> Callable:
     """Decorator to add docstrings to a function."""
     examples: str = """
     \n
@@ -45,7 +45,7 @@ def embed_examples(func: types.FunctionType) -> types.FunctionType:
     return func
 
 
-def notify(operations: list, tables: list) -> None:
+def notify(operations: list[dict[str, list[dict]]], tables: list[SyncTable]) -> None:
     for operation, table in zip(operations, tables):
         if operation["insert"] or operation["update"] or operation["delete"]:
             message: str = f"\nMake changes in: {table.source}"

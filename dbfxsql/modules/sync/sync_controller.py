@@ -17,15 +17,15 @@ def init() -> tuple:
 
     setup: dict = file_manager.load_config()
 
-    engines: dict = setup["engines"]
-    relations: list = setup["relations"]
-    filenames: list = file_manager.prioritized_files(engines, relations)
+    engines: dict[str, dict[str, list[str] | str]] = setup["engines"]
+    relations: list[dict[str, list[str] | str]] = setup["relations"]
+    filenames: list[str] = file_manager.prioritized_files(engines, relations)
 
     # MSSQL edge cases
     engines["MSSQL"]["listen"] = "_log.ldf"
 
     if os.name != "posix":  # For Windows cache
-        entities: dict = formatters.get_mssql_entities(relations)
+        entities: dict[str, list[str]] = formatters.get_mssql_entities(relations)
         databases: list[str] = list(entities.keys())
         filepaths: list[str] = formatters.db_to_tmp(engines, databases)
 
@@ -37,12 +37,14 @@ def init() -> tuple:
     return engines, relations, filenames
 
 
-def migrate(filenames: list, relations: dict) -> None:
+def migrate(filenames: list, relations: list[dict[str, list[str] | str]]) -> None:
     changes: list[dict] = formatters.package_changes(filenames, relations)
 
     for tables in changes:
-        origin: SyncTable = _assing_rows([tables["origin"]])[0]
-        destinies: list[SyncTable] = _assing_rows(tables["destinies"])
+        origin: SyncTable = _assing_rows([tables["origin"]])[0]  # SyncTable
+        destinies: list[SyncTable] = _assing_rows(
+            tables["destinies"]  # list[SyncTable]
+        )
 
         residual_tables: list = formatters.compare_tables(origin, destinies)
         operations: list = formatters.classify_operations(residual_tables)
@@ -106,8 +108,10 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
                 operation_functions[name](values)
 
 
-def _listen(folders: tuple, relations: dict, engines: dict) -> None:
-    if changes := json.loads(os.getenv("WATCHFILES_CHANGES")):
+def _listen(
+    folders: tuple, relations: list[dict[str, list[str] | str]], engines: dict
+) -> None:
+    if changes := json.loads(str(os.getenv("WATCHFILES_CHANGES"))):
         changes = formatters.filter_filepaths(changes, engines)
 
         filenames: list = formatters.parse_filenames(changes)

@@ -19,7 +19,7 @@ def load_config() -> dict:
 
 
 def load_query(engine: str, command: str) -> str:
-    sql_path: str = Path(__file__).resolve().parents[1] / "modules/sql"
+    sql_path: Path = Path(__file__).resolve().parents[1] / "modules/sql"
 
     with open(f"{sql_path}/{engine.lower()}_queries/{command}") as sqlfile:
         sql_query: str = sqlfile.read()
@@ -35,13 +35,16 @@ def remove_file(filepath: str) -> None:
     Path(filepath).unlink()
 
 
-def prioritized_files(engines, relations) -> list[str]:
-    files: dict = formatters.get_filenames(engines, relations)
+def prioritized_files(
+    engines: dict[str, dict[str, list[str] | str]],
+    relations: list[dict[str, list[str] | str]],
+) -> list[str]:
+    files: dict[str, list[str]] = formatters.get_filenames(engines, relations)
 
     filenames: list = []
 
     for relation in relations:
-        if filename := relation.get("priority"):
+        if isinstance(filename := relation.get("priority"), str):
             engine: str = validators.check_engine(filename)
 
             if filename in files[engine]:
@@ -51,8 +54,9 @@ def prioritized_files(engines, relations) -> list[str]:
 
 
 def list_files(engine: str, folder: str) -> list[str]:
-    sql_path: str = Path(__file__).resolve().parents[1] / "modules/sql"
+    sql_path: Path = Path(__file__).resolve().parents[1] / "modules/sql"
     query_folder: str = f"{engine.lower()}_queries/{folder}"
+
     files: list = []
 
     for file in Path(sql_path / query_folder).iterdir():

@@ -19,20 +19,18 @@ def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
 
         fields: list[str] = [description[0] for description in cursor.description]
 
-        rows: list = []
+        rows: list = [
+            [field.rstrip() if isinstance(field, str) else field for field in row]
+            for row in cursor.fetchall()
+        ]
 
-        for row in cursor.fetchall():
-            rows.append(
-                [field.rstrip() if isinstance(field, str) else field for field in row]
-            )
-
-        rows: list[dict] = [dict(zip(fields, row)) for row in rows]
+        rows = [dict(zip(fields, row)) for row in rows]
 
     return rows if rows else [{field: "" for field in fields}]
 
 
-def fetch_one(engine: str, filepath: str, query: str) -> list[dict] | None:
-    """Executes a query and returns the first row as a dictionary (or None)."""
+def fetch_one(engine: str, filepath: str, query: str) -> list[dict]:
+    """Executes a query and returns the first row as a dictionary."""
 
     with _get_cursor(engine, filepath) as cursor:
         cursor.execute(query)
@@ -51,7 +49,7 @@ def fetch_none(
     engine: str,
     filepath: str,
     query: str | list,
-    parameters: dict | list | None = None,
+    parameters: dict[str, str] | list = [],
     execute_many: bool = False,
 ) -> None:
     """Executes a query that doesn't return values."""
@@ -79,23 +77,24 @@ def fetch_none(
 @contextmanager
 def _get_cursor(engine: str, filepath: str) -> Generator:
     """Provides a context manager for establishing and closing a database connection."""
+    connection: sqlite3.Connection | pymssql.Connection
 
     if "SQLite" == engine:
-        connection: SQL[engine].Connection = SQL[engine].connect(filepath)
+        connection = SQL[engine].connect(filepath)
     else:
         config: dict = file_manager.load_config()["engines"][engine]
-        filename: str = formatters.decompose_file(filepath)[0]
+        database: str = formatters.decompose_file(filepath)[0]
 
-        connection: SQL[engine].Connection = SQL[engine].connect(
+        connection = SQL[engine].connect(
             server=config["db_server"],
             user=config["db_user"],
             password=config["db_password"],
-            database=filename,
+            database=database,
             autocommit=True,
             tds_version="7.0",
         )
 
-    cursor: SQL[engine].Cursor = connection.cursor()
+    cursor = connection.cursor()
 
     try:
         yield cursor

@@ -2,7 +2,7 @@ from ..models.error_template import ErrorTemplate
 
 
 class RowNotFound(ErrorTemplate):
-    def __init__(self, condition: tuple):
+    def __init__(self, condition: tuple[str, str, str]):
         super().__init__(f"Row not found with: {''.join(condition)}")
 
 

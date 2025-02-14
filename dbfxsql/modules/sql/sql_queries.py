@@ -120,7 +120,7 @@ def bulk_update(
     filepath: str,
     table: str,
     rows: list[dict],
-    fields: list[tuple],
+    fields_: list[str],
     conditions: list[tuple],
 ) -> None:
     queries: list = []
@@ -176,7 +176,7 @@ def drop_database(engine: str, filepath: str, database: str) -> None:
     sql_connection.fetch_none(engine, "master", query)
 
 
-def fetch_types(engine: str, filepath: str, table: str) -> dict[str, str]:
+def fetch_types(engine: str, filepath: str, table: str) -> list[dict[str, str]]:
     query: str = file_manager.load_query(engine, command="tables/fetch_types")
     query = query.format(table=table)
 
@@ -192,7 +192,9 @@ def fetch_primary_key(engine: str, filepath: str, table: str) -> str:
     return "" if not primary_key else primary_key[0]["name"]
 
 
-def fetch_row(engine: str, filepath: str, table: str, condition: tuple) -> dict:
+def fetch_row(
+    engine: str, filepath: str, table: str, condition: tuple[str, str, str]
+) -> dict:
     field_name, *_ = condition
 
     command: str = "rows/fetch"
@@ -211,7 +213,7 @@ def fetch_row(engine: str, filepath: str, table: str, condition: tuple) -> dict:
     return sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"]
 
 
-def deploy_procedures(engine, filepath):
+def deploy_procedures(engine: str, filepath: str) -> None:
     procedures: list[str] = file_manager.list_files(engine, folder="procedures")
 
     for procedure in procedures:
@@ -221,7 +223,7 @@ def deploy_procedures(engine, filepath):
             sql_connection.fetch_none(engine, filepath, query)
 
 
-def deploy_triggers(engine, filepath, database, table):
+def deploy_triggers(engine: str, filepath: str, database: str, table: str) -> None:
     triggers: list[str] = file_manager.list_files(engine, folder="triggers")
 
     for trigger in triggers:
