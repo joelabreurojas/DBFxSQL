@@ -473,7 +473,7 @@ def get_filenames(
 
         for folder in list(set(engine["folderpaths"])):
             for path in Path(folder).iterdir():
-                files.append("".join(decompose_file(path)))
+                files.append("".join(decompose_file(path.as_posix())))
 
         paths.append(files)
 
