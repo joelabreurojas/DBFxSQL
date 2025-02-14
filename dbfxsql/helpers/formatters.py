@@ -334,9 +334,9 @@ def classify_operations(
     return operations
 
 
-def _residual_rows(destiny_row: dict, origin_row: dict) -> dict:
+def _residual_rows(origin_row: dict, destiny_row: dict) -> dict:
     return {
-        key: value for key, value in destiny_row.items() if value != origin_row[key]
+        key: value for key, value in origin_row.items() if value != destiny_row[key]
     }
 
 
