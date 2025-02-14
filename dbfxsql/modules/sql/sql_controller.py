@@ -195,11 +195,6 @@ def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> Non
     if not _row_exists(engine, filepath, table, condition):
         raise RowNotFound(condition)
 
-    types: dict = sql_queries.fetch_types(engine, filepath, table)
-    types = formatters.scourgify_types(types)
-
-    condition = formatters.quote_values(engine, types, condition)
-
     sql_queries.delete(engine, filepath, table, condition)
 
 
