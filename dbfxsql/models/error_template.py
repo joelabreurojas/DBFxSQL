@@ -6,7 +6,7 @@ class ErrorTemplate(Exception):
 
     def __init__(self, message: str):
         self.message = message
-        sys.exit(self)
+        sys.exit(str(self))
 
     def __str__(self) -> str:
         return f"Error: {self.message}"
