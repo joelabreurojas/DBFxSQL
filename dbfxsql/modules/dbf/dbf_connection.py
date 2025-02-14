@@ -14,8 +14,8 @@ def get_table(filepath: str) -> Generator[dbf.Table]:
 
     # create the table if it doesn't exist
     if not Path(filepath).read_bytes():
-        table: dbf.Table = dbf.Table(filepath, "tmp N(1,0)").open(dbf.READ_WRITE)
-        table.delete_fields(table.field_names)
+        tmp_table: dbf.Table = dbf.Table(filepath, "tmp N(1,0)").open(dbf.READ_WRITE)
+        tmp_table.delete_fields(tmp_table.field_names)
 
     table: dbf.Table = dbf.Table(filepath).open(dbf.READ_WRITE)
 
