@@ -130,8 +130,8 @@ def bulk_update(
     if "SQLite" != engine:
         data["primary_key"] = fetch_primary_key(engine, filepath, table)
 
-    for field, condition in zip(fields, conditions):
-        data["fields"] = field
+    for fields, condition in zip(fields_, conditions):
+        data["fields"] = fields
         data["condition"] = "".join(condition)
         query: str = text.format(**data)
 
