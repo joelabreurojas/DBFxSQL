@@ -38,9 +38,9 @@ def read(
     engine: str, filepath: str, table: str, condition_: tuple | None = None
 ) -> list[dict]:
     command: str = "rows/read"
+    query: str = file_manager.load_query(engine, command)
 
     if not condition_:
-        query: str = file_manager.load_query(engine, command)
         query = query.format(table=table)
 
         return sql_connection.fetch_all(engine, filepath, query)
@@ -51,7 +51,6 @@ def read(
     condition: str = "".join(condition_)
     primary_key: str = fetch_primary_key(engine, filepath, table)
 
-    query: str = file_manager.load_query(engine, command)
     query = query.format(table=table, condition=condition, primary_key=primary_key)
 
     if operator == "=" and field_name in ["row_number", primary_key]:
