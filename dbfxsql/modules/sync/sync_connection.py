@@ -81,13 +81,15 @@ def bulk_delete(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    condition: tuple = [("row_number", "==", f"{value["index"]}") for value in values]
+    conditions: list[tuple[str, str, str]] = [
+        ("row_number", "==", f"{value['index']}") for value in values
+    ]
 
     if "dBase" == engine:
-        dbf_controller.bulk_delete_rows(engine, filename, condition)
+        dbf_controller.bulk_delete_rows(engine, filename, conditions)
 
     else:
-        sql_controller.bulk_delete_rows(engine, filename, table, condition)
+        sql_controller.bulk_delete_rows(engine, filename, table, conditions)
 
 
 def deploy_sql_statements(entities: dict, databases: list[str]) -> None:
