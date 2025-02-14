@@ -1,7 +1,4 @@
-SELECT
-	COUNT(1) AS 'COUNT(1)'
-FROM
-	sys.triggers
-WHERE
-	name = '{value}'
+SELECT COUNT(1) AS 'COUNT(1)'
+FROM sys.triggers
+WHERE name = '{value}'
 

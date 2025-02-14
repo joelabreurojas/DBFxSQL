@@ -1,1 +1,2 @@
-INSERT INTO {table} ({field_names}) VALUES ({values})
+INSERT INTO {table} ({field_names})
+VALUES ({values})

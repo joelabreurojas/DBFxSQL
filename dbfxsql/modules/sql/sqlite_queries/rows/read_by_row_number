@@ -4,7 +4,8 @@ WITH numbered_rows AS (
 	AS row_number
 	FROM {table}
 )
-SELECT * FROM {table}
+SELECT *
+FROM {table}
 WHERE rowid IN (
 	SELECT rowid
 	FROM numbered_rows

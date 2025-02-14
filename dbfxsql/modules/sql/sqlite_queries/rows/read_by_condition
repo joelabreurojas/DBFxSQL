@@ -1,1 +1,3 @@
-SELECT * FROM {table} WHERE {condition}
+SELECT *
+FROM {table}
+WHERE {condition}

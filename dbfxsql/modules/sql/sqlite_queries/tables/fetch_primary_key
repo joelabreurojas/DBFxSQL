@@ -1,1 +1,3 @@
-SELECT name FROM pragma_table_info('{table}') WHERE pk = 1
+SELECT name
+FROM pragma_table_info('{table}')
+WHERE pk = 1

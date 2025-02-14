@@ -1,1 +1,2 @@
-IF OBJECT_ID('persons', 'U') IS NULL CREATE TABLE {table} ({fields})
+IF OBJECT_ID('persons', 'U') IS NULL
+CREATE TABLE {table} ({fields})
