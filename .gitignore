@@ -2,7 +2,7 @@
 *.cast
 *.sql
 *.dbf
-
+.null-ls*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
