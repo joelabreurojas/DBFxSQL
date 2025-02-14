@@ -449,7 +449,7 @@ def extract_data(name: str, dataset: list[dict], destiny: SyncTable) -> list[dic
         }
 
         if "delete" != name:
-            value["fields"] = fields_to_tuple(data["fields"])
+            value["fields"] = _fields_to_tuple(data["fields"])
 
         if "insert" != name:
             value["index"] = data["index"]
