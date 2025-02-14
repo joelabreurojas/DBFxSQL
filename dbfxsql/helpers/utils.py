@@ -52,13 +52,13 @@ def notify(operations: list, tables: list) -> None:
             print(message if not table.name else message + f" > {table.name}")
 
             for row in operation["insert"]:
-                print(f"Insert row: {row["fields"]}")
+                print(f"Insert row: {row['fields']}")
 
             for row in operation["update"]:
-                print(f"Update row: {row["fields"]} with row_number {row["index"]}")
+                print(f"Update row: {row['fields']} with row_number {row['index']}")
 
             for row in operation["delete"]:
-                print(f"Delete row with row_number {row["index"]}")
+                print(f"Delete row with row_number {row['index']}")
 
 
 def generate_tmp_files(filepaths: list[str]) -> None:
