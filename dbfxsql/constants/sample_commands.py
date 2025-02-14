@@ -9,7 +9,8 @@ DBF: dict[str, str] = {
 }
 
 SQL: dict[str, str] = {
-    "create": 'dbfxsql create -s company.sql -t users -f id "integer primary key" -f name text',
+    "create": "dbfxsql create -s company.sql -t users -f id 'integer primary key' \
+-f name text",
     "drop_database": "dbfxsql drop -s company.sql",
     "drop_table": "dbfxsql drop -s company.sql -t users",
     "insert": 'dbfxsql insert -s company.sql -t users -f id 1 -f name "John Doe"',
