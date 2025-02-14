@@ -1,9 +1,9 @@
+from pathlib import Path
+
 import tomllib
 
-from . import validators, formatters
 from ..constants import default_config
-
-from pathlib import Path
+from . import formatters, validators
 
 
 def load_config() -> dict:

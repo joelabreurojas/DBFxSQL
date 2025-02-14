@@ -1,8 +1,8 @@
 """Initialization module for the application"""
 
-from .models.lazy_group import LazyGroup
-
 import click
+
+from .models.lazy_group import LazyGroup
 
 
 @click.group(

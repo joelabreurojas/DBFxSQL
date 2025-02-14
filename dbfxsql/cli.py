@@ -1,10 +1,11 @@
-from .models.order_commands import OrderCommands
-from .modules import dbf_controller, sql_controller, sync_controller
-from .helpers import validators, utils
+import asyncio
 
 import click
-import asyncio
 from yaspin import yaspin
+
+from .helpers import utils, validators
+from .models.order_commands import OrderCommands
+from .modules import dbf_controller, sql_controller, sync_controller
 
 
 @click.group(cls=OrderCommands)

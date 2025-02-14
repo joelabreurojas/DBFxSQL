@@ -1,8 +1,9 @@
 """Database management for the user table"""
 
-from . import sql_connection
-from dbfxsql.helpers import file_manager
 from dbfxsql.exceptions.source_errors import SourceNotFound
+from dbfxsql.helpers import file_manager
+
+from . import sql_connection
 
 
 def create_database(engine: str, filepath: str, database: str) -> None:

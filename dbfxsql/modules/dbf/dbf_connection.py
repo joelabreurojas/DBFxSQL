@@ -1,11 +1,11 @@
-from contextlib import contextmanager
 from collections.abc import Generator
-
-from dbfxsql.helpers import formatters
-from dbfxsql.exceptions.connection_errors import DBFConnectionFailed
+from contextlib import contextmanager
+from pathlib import Path
 
 import dbf
-from pathlib import Path
+
+from dbfxsql.exceptions.connection_errors import DBFConnectionFailed
+from dbfxsql.helpers import formatters
 
 
 @contextmanager

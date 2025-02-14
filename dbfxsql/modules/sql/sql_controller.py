@@ -1,11 +1,12 @@
 from collections.abc import Iterable
 
-from . import sql_queries
-from dbfxsql.helpers import file_manager, formatters, validators
-from dbfxsql.exceptions.source_errors import SourceNotFound
-from dbfxsql.exceptions.row_errors import RowAlreadyExists, RowNotFound
 from dbfxsql.exceptions.field_errors import FieldReserved
+from dbfxsql.exceptions.row_errors import RowAlreadyExists, RowNotFound
+from dbfxsql.exceptions.source_errors import SourceNotFound
 from dbfxsql.exceptions.table_errors import TableAlreadyExists, TableNotFound
+from dbfxsql.helpers import file_manager, formatters, validators
+
+from . import sql_queries
 
 
 def create_database(engine: str, filename: str) -> None:

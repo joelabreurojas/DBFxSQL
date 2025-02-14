@@ -1,15 +1,14 @@
-from datetime import date
-from datetime import datetime
 from collections.abc import Iterable
+from datetime import date, datetime
+from pathlib import Path
 
-from . import file_manager, validators
+from dbf.data_types import NullType
+
 from ..constants.data_types import DATA_TYPES
-from ..models.sync_table import SyncTable
 from ..exceptions.field_errors import FieldNotFound
 from ..exceptions.value_errors import ValueNotValid
-
-from pathlib import Path
-from dbf.data_types import NullType
+from ..models.sync_table import SyncTable
+from . import file_manager, validators
 
 
 def decompose_file(filename: str) -> tuple[str, str]:

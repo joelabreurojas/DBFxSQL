@@ -1,5 +1,6 @@
-from importlib import import_module
 from functools import cached_property
+from importlib import import_module
+from typing import Any
 
 import click
 

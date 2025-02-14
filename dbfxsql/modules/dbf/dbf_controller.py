@@ -1,10 +1,11 @@
 from collections.abc import Iterable
 
-from . import dbf_queries
-from dbfxsql.helpers import file_manager, formatters, validators
-from dbfxsql.exceptions.source_errors import SourceAlreadyExists, SourceNotFound
 from dbfxsql.exceptions.field_errors import FieldReserved
 from dbfxsql.exceptions.row_errors import RowNotFound
+from dbfxsql.exceptions.source_errors import SourceAlreadyExists, SourceNotFound
+from dbfxsql.helpers import file_manager, formatters, validators
+
+from . import dbf_queries
 
 
 def create_table(engine: str, filename: str, fields_: Iterable[tuple]) -> None:

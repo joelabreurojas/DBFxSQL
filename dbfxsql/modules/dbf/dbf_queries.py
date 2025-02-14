@@ -1,6 +1,6 @@
-from .dbf_connection import get_table
-
 import dbf
+
+from .dbf_connection import get_table
 
 
 def create(filepath: str, fields: str) -> None:

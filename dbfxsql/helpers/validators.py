@@ -1,38 +1,30 @@
 from collections.abc import Iterable
-
-from dbfxsql.helpers import formatters, file_manager
-
 from pathlib import Path
+
 from watchfiles import Change
 
-
-def path_exists(filepath: str) -> None:
-    filepath = Path(filepath)
-
-    return filepath.exists()
+from ..helpers import file_manager, formatters
 
 
-def field_name_in(fields: Iterable[tuple], field_name_: str) -> str:
+def path_exists(filepath: str) -> bool:
+    path: Path = Path(filepath)
+
+    return path.exists()
+
+
+def field_name_in(fields: Iterable[tuple[str, str]], field_name_: str) -> str:
     for field in fields:
         field_name: str = field[0]
 
         if field_name_.lower() == field_name.lower():
             return field_name
 
-
-def only_empty_records(rows: list) -> list:
-    """Return an empty list if a list of rows only contains empty rows."""
-
-    if not rows:
-        return rows
-
-    if [{""}] == [{row for row in rows.values()} for rows in rows]:
-        return []
-
-    return rows
+    return ""
 
 
-def same_rows(origin_row: dict, destiny_row: dict, fields: tuple) -> bool:
+def same_rows(
+    origin_row: dict, destiny_row: dict, fields: tuple[list[str], list[str]]
+) -> bool:
     for origin_field, destiny_field in zip(*fields):
         if origin_row[origin_field] != destiny_row[destiny_field]:
             return False

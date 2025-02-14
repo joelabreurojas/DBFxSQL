@@ -1,9 +1,10 @@
-import types
-
-from . import file_manager, formatters, validators
-from dbfxsql.constants import sample_commands
+from typing import Callable
 
 from prettytable import PrettyTable
+
+from ..constants import sample_commands
+from ..models.sync_table import SyncTable
+from . import file_manager, validators
 
 
 def show_table(rows: list[dict]) -> None:
