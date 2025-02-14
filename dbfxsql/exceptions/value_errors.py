@@ -6,5 +6,5 @@ class ValueNotValid(ErrorTemplate):
 
     def __init__(self, value: str, field: str, _type: str):
         super().__init__(
-            f"Value '{value}' not valid for field '{field}' with type '{_type}'"
+            f"Value '{value}' not valid for field '{field}' with type '{type_}'"
         )
