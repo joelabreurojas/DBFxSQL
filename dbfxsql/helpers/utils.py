@@ -31,14 +31,16 @@ def embed_examples(func: types.FunctionType) -> types.FunctionType:
 
     for command in sample_commands.DBF.keys():
         if func.__name__ in command:
-            examples += "- " + sample_commands.DBF[command]
+            examples += f"- {sample_commands.DBF[command]}"
 
     for command in sample_commands.SQL.keys():
         if func.__name__ in command:
-            examples += "\n    "
-            examples += "- " + sample_commands.SQL[command]
+            examples += f"\n    - {sample_commands.SQL[command]}"
 
-    func.__doc__ += examples
+    if func.__doc__ is None:
+        func.__doc__ = examples
+    else:
+        func.__doc__ += examples
 
     return func
 
