@@ -56,16 +56,18 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
             # date case
             if value and data_type[type_] is date:
                 if type(value) is str:
-                    row[field] = date.fromisoformat(value)
+                    iso_date: date = date.fromisoformat(value)
+                    row[field] = iso_date.strftime("%Y-%m-%d")
 
             # datetime case
             elif value and data_type[type_] is datetime:
                 if type(value) is str:
-                    row[field] = datetime.fromisoformat(value)
+                    iso_datetime: datetime = datetime.fromisoformat(value)
+                    row[field] = iso_datetime.strftime("%Y-%m-%d %H:%M:%S")
 
             # NullType case
             elif type(value) is NullType:
-                row[field] = None
+                row[field] = ""
 
             # other cases
             elif value:
