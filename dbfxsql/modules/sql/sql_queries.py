@@ -209,7 +209,9 @@ def fetch_row(
 
     query = query.format(**data)
 
-    return sql_connection.fetch_one(engine, filepath, query)[0]["COUNT(1)"]
+    row: list = sql_connection.fetch_one(engine, filepath, query)
+
+    return row[0]["COUNT(1)"]
 
 
 def deploy_procedures(engine: str, filepath: str) -> None:
