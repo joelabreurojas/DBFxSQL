@@ -101,12 +101,12 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Fix date format issues.</li>
       <li>[x] Specify None type for engine data types.</li>
       <li>[x] Handle db connection errors.</li>
-      <li>[ ] Treat dbf.data_types.NullType as empty string.</li>
-      <li>[ ] Order library imports.</li>
-      <li>[ ] Specify types that are used throughout the project.</li>
-      <li>[ ] Order functions by encapsulation level.</li>
+      <li>[x] Treat dbf.data_types.NullType as empty string.</li>
+      <li>[x] Order library imports.</li>
+      <li>[x] Specify types that are used throughout the project.</li>
+      <li>[x] Order functions by encapsulation level.</li>
       <li>[ ] Use alias to mitigate long types.</li>
-      <li>[ ] Remove comparison for bluk operations.</li>
+      <li>[ ] Remove comparison for bulk operations.</li>
       <li>[ ] Create a changelog.</li>
       <li>[ ] Raise an error if an empty string is returned.</li>
       <li>[ ] Specify temporary files to listen on in configuration.</li>
