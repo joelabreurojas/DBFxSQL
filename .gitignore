@@ -2,6 +2,7 @@
 *.cast
 *.sql
 *.dbf
+*.tmp
 .null-ls*
 
 # Byte-compiled / optimized / DLL files
