@@ -59,6 +59,19 @@ def read(
     return sql_connection.fetch_all(engine, filepath, query)
 
 
+def bulk_insert(
+    engine: str, filepath: str, table: str, rows: list, fields: tuple[str, str]
+) -> None:
+    field_name, values = fields
+
+    query: str = file_manager.load_query(engine, command="rows/insert")
+    query = query.format(table=table, field_names=field_name, values=values)
+
+    parameters: list[dict] = rows
+
+    sql_connection.fetch_none(engine, filepath, query, parameters, execute_many=True)
+
+
 def update(
     engine: str, filepath: str, table: str, row: dict, fields: str, condition: tuple
 ) -> None:
@@ -80,38 +93,6 @@ def update(
     parameters: dict = {**row}
 
     sql_connection.fetch_none(engine, filepath, query, parameters)
-
-
-def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
-    field_name, *_ = condition
-
-    command: str = "rows/delete"
-
-    if "row_number" == field_name:
-        command += "_by_row_number"
-
-    query: str = file_manager.load_query(engine, command)
-    data: dict = {"table": table, "condition": "".join(condition)}
-
-    if "SQLite" != engine:
-        data["primary_key"] = fetch_primary_key(engine, filepath, table)
-
-    query = query.format(**data)
-
-    sql_connection.fetch_none(engine, filepath, query)
-
-
-def bulk_insert(
-    engine: str, filepath: str, table: str, rows: list, fields: tuple[str, str]
-) -> None:
-    field_name, values = fields
-
-    query: str = file_manager.load_query(engine, command="rows/insert")
-    query = query.format(table=table, field_names=field_name, values=values)
-
-    parameters: list[dict] = rows
-
-    sql_connection.fetch_none(engine, filepath, query, parameters, execute_many=True)
 
 
 def bulk_update(
@@ -140,6 +121,25 @@ def bulk_update(
     parameters: list[dict] = rows
 
     sql_connection.fetch_none(engine, filepath, queries, parameters)
+
+
+def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
+    field_name, *_ = condition
+
+    command: str = "rows/delete"
+
+    if "row_number" == field_name:
+        command += "_by_row_number"
+
+    query: str = file_manager.load_query(engine, command)
+    data: dict = {"table": table, "condition": "".join(condition)}
+
+    if "SQLite" != engine:
+        data["primary_key"] = fetch_primary_key(engine, filepath, table)
+
+    query = query.format(**data)
+
+    sql_connection.fetch_none(engine, filepath, query)
 
 
 def bulk_delete(
@@ -175,11 +175,27 @@ def drop_database(engine: str, filepath: str, database: str) -> None:
     sql_connection.fetch_none(engine, "master", query)
 
 
-def fetch_types(engine: str, filepath: str, table: str) -> list[dict[str, str]]:
-    query: str = file_manager.load_query(engine, command="tables/fetch_types")
-    query = query.format(table=table)
+def deploy_procedures(engine: str, filepath: str) -> None:
+    procedures: list[str] = file_manager.list_files(engine, folder="procedures")
 
-    return sql_connection.fetch_all(engine, filepath, query)
+    for procedure in procedures:
+        if not statement_exists(engine, filepath, procedure, statement="procedures"):
+            query = file_manager.load_query(engine, command=f"procedures/{procedure}")
+
+            sql_connection.fetch_none(engine, filepath, query)
+
+
+def deploy_triggers(engine: str, filepath: str, database: str, table: str) -> None:
+    triggers: list[str] = file_manager.list_files(engine, folder="triggers")
+
+    for trigger in triggers:
+        trigger_: str = f"{table}_{trigger}"
+
+        if not statement_exists(engine, filepath, trigger_, statement="triggers"):
+            query: str = file_manager.load_query(engine, command=f"triggers/{trigger}")
+            query = query.format(table=table, filepath=filepath, data=trigger)
+
+            sql_connection.fetch_none(engine, filepath, query)
 
 
 def fetch_primary_key(engine: str, filepath: str, table: str) -> str:
@@ -214,27 +230,11 @@ def fetch_row(
     return row[0]["COUNT(1)"]
 
 
-def deploy_procedures(engine: str, filepath: str) -> None:
-    procedures: list[str] = file_manager.list_files(engine, folder="procedures")
+def fetch_types(engine: str, filepath: str, table: str) -> list[dict[str, str]]:
+    query: str = file_manager.load_query(engine, command="tables/fetch_types")
+    query = query.format(table=table)
 
-    for procedure in procedures:
-        if not statement_exists(engine, filepath, procedure, statement="procedures"):
-            query = file_manager.load_query(engine, command=f"procedures/{procedure}")
-
-            sql_connection.fetch_none(engine, filepath, query)
-
-
-def deploy_triggers(engine: str, filepath: str, database: str, table: str) -> None:
-    triggers: list[str] = file_manager.list_files(engine, folder="triggers")
-
-    for trigger in triggers:
-        trigger_: str = f"{table}_{trigger}"
-
-        if not statement_exists(engine, filepath, trigger_, statement="triggers"):
-            query: str = file_manager.load_query(engine, command=f"triggers/{trigger}")
-            query = query.format(table=table, filepath=filepath, data=trigger)
-
-            sql_connection.fetch_none(engine, filepath, query)
+    return sql_connection.fetch_all(engine, filepath, query)
 
 
 def statement_exists(engine: str, filepath: str, value: str, statement: str) -> bool:

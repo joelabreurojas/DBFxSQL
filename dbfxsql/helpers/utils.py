@@ -7,19 +7,6 @@ from ..models.sync_table import SyncTable
 from . import file_manager, validators
 
 
-def show_table(rows: list[dict]) -> None:
-    """Displays a list of rows in a table format."""
-
-    table = PrettyTable()
-
-    table.field_names = rows[0].keys() if rows else []
-
-    for row in rows:
-        table.add_row([row[field] for field in table.field_names])
-
-    print(table, end="\n\n")
-
-
 def embed_examples(func: Callable) -> Callable:
     """Decorator to add docstrings to a function."""
     examples: str = """
@@ -45,6 +32,12 @@ def embed_examples(func: Callable) -> Callable:
     return func
 
 
+def generate_tmp_files(filepaths: list[str]) -> None:
+    for filepath in filepaths:
+        if not validators.path_exists(filepath):
+            file_manager.new_file(filepath)
+
+
 def notify(operations: list[dict[str, list[dict]]], tables: list[SyncTable]) -> None:
     for operation, table in zip(operations, tables):
         if operation["insert"] or operation["update"] or operation["delete"]:
@@ -61,7 +54,14 @@ def notify(operations: list[dict[str, list[dict]]], tables: list[SyncTable]) -> 
                 print(f"Delete row with row_number {row['index']}")
 
 
-def generate_tmp_files(filepaths: list[str]) -> None:
-    for filepath in filepaths:
-        if not validators.path_exists(filepath):
-            file_manager.new_file(filepath)
+def show_table(rows: list[dict]) -> None:
+    """Displays a list of rows in a table format."""
+
+    table = PrettyTable()
+
+    table.field_names = rows[0].keys() if rows else []
+
+    for row in rows:
+        table.add_row([row[field] for field in table.field_names])
+
+    print(table, end="\n\n")

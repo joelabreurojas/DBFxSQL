@@ -11,40 +11,6 @@ from dbfxsql.exceptions.connection_errors import SQLConnectionFailed
 from dbfxsql.helpers import file_manager, formatters
 
 
-def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
-    """Executes a query returning all rows in the found set"""
-
-    with _get_cursor(engine, filepath) as cursor:
-        cursor.execute(query)
-
-        fields: list[str] = [description[0] for description in cursor.description]
-
-        rows: list = [
-            [field.rstrip() if isinstance(field, str) else field for field in row]
-            for row in cursor.fetchall()
-        ]
-
-        rows = [dict(zip(fields, row)) for row in rows]
-
-    return rows if rows else [{field: "" for field in fields}]
-
-
-def fetch_one(engine: str, filepath: str, query: str) -> list[dict]:
-    """Executes a query and returns the first row as a dictionary."""
-
-    with _get_cursor(engine, filepath) as cursor:
-        cursor.execute(query)
-
-        fields: list[str] = [description[0] for description in cursor.description]
-
-        row: list = []
-
-        for field in cursor.fetchone():
-            row.append(field.rstrip() if isinstance(field, str) else field)
-
-        return [dict(zip(fields, row))]
-
-
 def fetch_none(
     engine: str,
     filepath: str,
@@ -72,6 +38,40 @@ def fetch_none(
 
         else:
             cursor.execute(query, parameters) if parameters else cursor.execute(query)
+
+
+def fetch_one(engine: str, filepath: str, query: str) -> list[dict]:
+    """Executes a query and returns the first row as a dictionary."""
+
+    with _get_cursor(engine, filepath) as cursor:
+        cursor.execute(query)
+
+        fields: list[str] = [description[0] for description in cursor.description]
+
+        row: list = []
+
+        for field in cursor.fetchone():
+            row.append(field.rstrip() if isinstance(field, str) else field)
+
+        return [dict(zip(fields, row))]
+
+
+def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
+    """Executes a query returning all rows in the found set"""
+
+    with _get_cursor(engine, filepath) as cursor:
+        cursor.execute(query)
+
+        fields: list[str] = [description[0] for description in cursor.description]
+
+        rows: list = [
+            [field.rstrip() if isinstance(field, str) else field for field in row]
+            for row in cursor.fetchall()
+        ]
+
+        rows = [dict(zip(fields, row)) for row in rows]
+
+    return rows if rows else [{field: "" for field in fields}]
 
 
 @contextmanager

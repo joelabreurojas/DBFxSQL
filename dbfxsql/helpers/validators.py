@@ -6,10 +6,17 @@ from watchfiles import Change
 from ..helpers import file_manager, formatters
 
 
-def path_exists(filepath: str) -> bool:
-    path: Path = Path(filepath)
+def check_engine(filename: str) -> str:
+    extension: str = formatters.decompose_file(filename)[1]
+    engines: dict[str, dict[str, list[str] | str]] = file_manager.load_config()[
+        "engines"
+    ]
 
-    return path.exists()
+    for engine_name, engine_config in engines.items():
+        if extension in engine_config["extensions"]:
+            return engine_name
+
+    return ""
 
 
 def field_name_in(fields: Iterable[tuple[str, str]], field_name_: str) -> str:
@@ -22,6 +29,16 @@ def field_name_in(fields: Iterable[tuple[str, str]], field_name_: str) -> str:
     return ""
 
 
+def only_modified(change: Change, path: str) -> bool:
+    return change == Change.modified
+
+
+def path_exists(filepath: str) -> bool:
+    path: Path = Path(filepath)
+
+    return path.exists()
+
+
 def same_rows(
     origin_row: dict, destiny_row: dict, fields: tuple[list[str], list[str]]
 ) -> bool:
@@ -30,21 +47,6 @@ def same_rows(
             return False
 
     return True
-
-
-def only_modified(change: Change, path: str) -> bool:
-    return change == Change.modified
-
-
-def values_are_different(rows: list[dict], row_: dict) -> bool:
-    """Checks if a list of rows are different from a given row."""
-
-    for row in rows:
-        for key, value in row_.items():
-            if value != row[key]:
-                return True
-
-    return False
 
 
 def valid_filepath(
@@ -65,14 +67,12 @@ def valid_filepath(
     return False
 
 
-def check_engine(filename: str) -> str:
-    extension: str = formatters.decompose_file(filename)[1]
-    engines: dict[str, dict[str, list[str] | str]] = file_manager.load_config()[
-        "engines"
-    ]
+def values_are_different(rows: list[dict], row_: dict) -> bool:
+    """Checks if a list of rows are different from a given row."""
 
-    for engine_name, engine_config in engines.items():
-        if extension in engine_config["extensions"]:
-            return engine_name
+    for row in rows:
+        for key, value in row_.items():
+            if value != row[key]:
+                return True
 
-    return ""
+    return False

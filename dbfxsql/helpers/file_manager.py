@@ -6,6 +6,19 @@ from ..constants import default_config
 from . import formatters, validators
 
 
+def list_files(engine: str, folder: str) -> list[str]:
+    sql_path: Path = Path(__file__).resolve().parents[1] / "modules/sql"
+    query_folder: str = f"{engine.lower()}_queries/{folder}"
+
+    files: list = []
+
+    for file in Path(sql_path / query_folder).iterdir():
+        if "exists" != file.name:
+            files.append(file.name)
+
+    return files
+
+
 def load_config() -> dict:
     configpath: Path = Path(default_config.PATH).expanduser()
 
@@ -31,10 +44,6 @@ def new_file(filepath: str) -> None:
     Path(filepath).touch()
 
 
-def remove_file(filepath: str) -> None:
-    Path(filepath).unlink()
-
-
 def prioritized_files(
     engines: dict[str, dict[str, list[str] | str]],
     relations: list[dict[str, list[str] | str]],
@@ -53,17 +62,8 @@ def prioritized_files(
     return filenames
 
 
-def list_files(engine: str, folder: str) -> list[str]:
-    sql_path: Path = Path(__file__).resolve().parents[1] / "modules/sql"
-    query_folder: str = f"{engine.lower()}_queries/{folder}"
-
-    files: list = []
-
-    for file in Path(sql_path / query_folder).iterdir():
-        if "exists" != file.name:
-            files.append(file.name)
-
-    return files
+def remove_file(filepath: str) -> None:
+    Path(filepath).unlink()
 
 
 def _create_default_config(configpath: Path) -> None:

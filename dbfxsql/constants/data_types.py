@@ -19,13 +19,6 @@ DBASE: dict[str, type] = {
     "@": datetime.datetime,
 }
 
-SQLITE: dict[str, type] = {
-    "NULL": type(None),
-    "INTEGER": int,
-    "REAL": float,
-    "TEXT": str,
-    "BLOB": bytes,  # Binary data
-}
 
 MSSQL: dict[str, type] = {
     "NULL": type(None),
@@ -56,8 +49,16 @@ MSSQL: dict[str, type] = {
     "UNIQUEIDENTIFIER": uuid.UUID,
 }
 
+SQLITE: dict[str, type] = {
+    "NULL": type(None),
+    "INTEGER": int,
+    "REAL": float,
+    "TEXT": str,
+    "BLOB": bytes,  # Binary data
+}
+
 DATA_TYPES: dict[str, dict[str, type]] = {
     "dBase": DBASE,
-    "SQLite": SQLITE,
     "MSSQL": MSSQL,
+    "SQLite": SQLITE,
 }
