@@ -1,4 +1,4 @@
-from ..models.error_template import ErrorTemplate
+from ..models import ErrorTemplate
 
 
 class ValueNotValid(ErrorTemplate):
