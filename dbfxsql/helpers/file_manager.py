@@ -44,24 +44,6 @@ def new_file(filepath: str) -> None:
     Path(filepath).touch()
 
 
-def prioritized_files(
-    engines: dict[str, dict[str, list[str] | str]],
-    relations: list[dict[str, list[str] | str]],
-) -> list[str]:
-    files: dict[str, list[str]] = formatters.get_filenames(engines, relations)
-
-    filenames: list = []
-
-    for relation in relations:
-        if isinstance(filename := relation.get("priority"), str):
-            engine: str = validators.check_engine(filename)
-
-            if filename in files[engine]:
-                filenames.append(filename)
-
-    return filenames
-
-
 def remove_file(filepath: str) -> None:
     Path(filepath).unlink()
 
