@@ -4,7 +4,7 @@ from pathlib import Path
 
 import dbf
 
-from dbfxsql.exceptions.connection_errors import DBFConnectionFailed
+from dbfxsql.exceptions import DBFConnectionFailed
 from dbfxsql.helpers import formatters
 
 

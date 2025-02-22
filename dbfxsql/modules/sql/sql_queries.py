@@ -1,6 +1,6 @@
 """Database management for the user table"""
 
-from dbfxsql.exceptions.source_errors import SourceNotFound
+from dbfxsql.exceptions import SourceNotFound
 from dbfxsql.helpers import file_manager
 
 from . import sql_connection

@@ -7,7 +7,7 @@ from contextlib import contextmanager
 import pymssql
 
 from dbfxsql.constants.sql_libraries import SQL
-from dbfxsql.exceptions.connection_errors import SQLConnectionFailed
+from dbfxsql.exceptions import SQLConnectionFailed
 from dbfxsql.helpers import file_manager, formatters
 
 
