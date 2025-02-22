@@ -1,4 +1,4 @@
-from ..models import ErrorTemplate
+from .error_template import ErrorTemplate
 
 
 class RowAlreadyExists(ErrorTemplate):
