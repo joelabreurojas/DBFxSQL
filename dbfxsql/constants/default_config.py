@@ -23,4 +23,5 @@ db_password = "MSSQL_PASSWORD?"
 sources = ["users.dbf", "company.sql"]
 tables = ["", "users"]
 fields = [["id", "name"], ["id", "name"]]
+priority = "users.dbf"
 """

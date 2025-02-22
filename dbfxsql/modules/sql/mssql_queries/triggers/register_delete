@@ -1,0 +1,8 @@
+CREATE TRIGGER {table}_register_delete
+ON dbo.{table}
+AFTER DELETE
+AS
+BEGIN
+    EXEC write_file @fileName = '{filepath}', 
+               @fileContents = '{data}'
+END;

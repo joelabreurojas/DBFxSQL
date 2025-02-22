@@ -1,10 +1,12 @@
-from .models.order_commands import OrderCommands
-from .modules import dbf_controller, sql_controller, sync_controller
-from .helpers import validators, utils
+import asyncio
 
 import click
-import asyncio
 from yaspin import yaspin
+
+from .helpers import utils, validators
+from .helpers.alias import FieldsIterable
+from .models import Condition, OrderCommands
+from .modules import dbf_controller, sql_controller, sync_controller
 
 
 @click.group(cls=OrderCommands)
@@ -36,7 +38,7 @@ def cli():
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def create(source: str, table: str | None, fields: tuple) -> None:
+def create(source: str, table: str | None, fields: FieldsIterable) -> None:
     """Create a DBF file/SQL file and table."""
 
     # Use cases
@@ -80,7 +82,7 @@ def create(source: str, table: str | None, fields: tuple) -> None:
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def insert(source: str, table: str | None, fields: tuple) -> None:
+def insert(source: str, table: str | None, fields: FieldsIterable) -> None:
     """Insert a row into a DBF file/SQL table."""
 
     # Use cases
@@ -125,7 +127,7 @@ def insert(source: str, table: str | None, fields: tuple) -> None:
 def read(
     source: str,
     table: str | None,
-    condition: tuple | None,
+    condition: tuple[str, str, str] | None,
 ) -> None:
     """Read rows from a DBF file/SQL table."""
 
@@ -134,18 +136,19 @@ def read(
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     rows: list = []
+    condition_: Condition | None = Condition(*condition) if condition else None
 
     if "dBase" == engine:
         if table:
             raise click.UsageError("No such option '-t' / '--table' for DBF.")
 
-        rows = dbf_controller.read_rows(engine, source, condition)
+        rows = dbf_controller.read_rows(engine, source, condition_)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
     else:
-        rows = sql_controller.read_rows(engine, source, table, condition)
+        rows = sql_controller.read_rows(engine, source, table, condition_)
 
     utils.show_table(rows)
 
@@ -184,8 +187,8 @@ def read(
 def update(
     source: str,
     table: str | None,
-    fields: tuple,
-    condition: tuple,
+    fields: FieldsIterable,
+    condition: tuple[str, str, str],
 ) -> None:
     """Update rows from a DBF file/SQL table."""
 
@@ -197,13 +200,13 @@ def update(
         if table:
             raise click.UsageError("No such option '-t' / '--table' for DBF.")
 
-        dbf_controller.update_rows(engine, source, fields, condition)
+        dbf_controller.update_rows(engine, source, fields, Condition(*condition))
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
     else:
-        sql_controller.update_rows(engine, source, table, fields, condition)
+        sql_controller.update_rows(engine, source, table, fields, Condition(*condition))
 
 
 @cli.command()
@@ -229,7 +232,7 @@ def update(
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def delete(source: str, table: str | None, condition: tuple) -> None:
+def delete(source: str, table: str | None, condition: tuple[str, str, str]) -> None:
     """Delete rows from an DBF file/SQL table."""
 
     # Use cases
@@ -240,13 +243,13 @@ def delete(source: str, table: str | None, condition: tuple) -> None:
         if table:
             raise click.UsageError("No such option '-t' / '--table' for DBF.")
 
-        dbf_controller.delete_rows(engine, source, condition)
+        dbf_controller.delete_rows(engine, source, Condition(*condition))
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
     else:
-        sql_controller.delete_rows(engine, source, table, condition)
+        sql_controller.delete_rows(engine, source, table, Condition(*condition))
 
 
 @cli.command()
@@ -287,29 +290,19 @@ def drop(source: str, table: str | None) -> None:
 
 
 @cli.command()
-@click.option(
-    "-p",
-    "--position",
-    type=click.Choice(["first", "second"], case_sensitive=False),
-    default="first",
-    show_default=True,
-)
-@click.help_option("-h", "--help")
-@utils.embed_examples
-def migrate(position: str) -> None:
+def migrate() -> None:
     """
     Migrate data between DBF and SQL files.
 
-    Based on an source position (from the relationship), selects the
-    appropriate files for migration according to the relationships described in
-    the configuration.
+    Transfers data from the files that have priority in the relations defined
+    in the configuration.
     """
 
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
 
-            _, relations, filenames = sync_controller.init(position)
+            _, relations, filenames = sync_controller.init()
 
             spinner.text = "Migrating..."
 
@@ -322,28 +315,21 @@ def migrate(position: str) -> None:
 
 
 @cli.command()
-@click.option(
-    "-p",
-    "--position",
-    type=click.Choice(["first", "second"], case_sensitive=False),
-    default="first",
-    show_default=True,
-)
 @click.help_option("-h", "--help")
-def sync(position: str) -> None:
+def sync() -> None:
     """
     Synchronize data between DBF and SQL files.
 
     Listens to the folders described in the configuration and performs database
     migrations when changes occur. It performs an initial migration based on the
-    source position received (from the relationship) engine to align the
-    databases before synchronisation.
+    source priority defined (from the relation) to align the databases before
+    synchronisation.
     """
     with yaspin(color="cyan", timer=True) as spinner:
         try:
             spinner.text = "Initializing..."
 
-            engines, relations, filenames = sync_controller.init(position)
+            engines, relations, filenames = sync_controller.init()
 
             spinner.text = "Migrating..."
 

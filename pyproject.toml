@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "DBFxSQL"
-version = "0.2.3"
+version = "0.3.0"
 description = "A CLI tool to manage data between DBF files and SQL databases."
 authors = ["Joel Abreu <joelabreurojas@gmail.com>"]
 license = "MIT"
@@ -24,3 +24,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 dbfxsql = "dbfxsql:run"
+
+[[tool.mypy.overrides]]
+module = ["click.*", "dbf.*", "pymssql.*", "prettytable.*", "watchfiles.*", "yaspin.*"]
+ignore_missing_imports = true

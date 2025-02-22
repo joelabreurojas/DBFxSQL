@@ -1,12 +1,25 @@
-import tomllib
-
-from . import validators, formatters
-from ..constants import default_config
-
 from pathlib import Path
 
+import tomllib
 
-def load_config() -> dict:
+from ..constants import default_config
+from ..models import Config
+
+
+def list_files(engine: str, folder: str) -> list[str]:
+    sql_path: Path = Path(__file__).resolve().parents[1] / "modules/sql"
+    query_folder: str = f"{engine.lower()}_queries/{folder}"
+
+    files: list = []
+
+    for file in Path(sql_path / query_folder).iterdir():
+        if "exists" != file.name:
+            files.append(file.name)
+
+    return files
+
+
+def load_config() -> Config:
     configpath: Path = Path(default_config.PATH).expanduser()
 
     if not configpath.exists():
@@ -15,11 +28,11 @@ def load_config() -> dict:
     with open(configpath.as_posix(), "rb") as configfile:
         toml_data: dict = tomllib.load(configfile)
 
-    return toml_data
+    return Config(**toml_data)
 
 
 def load_query(engine: str, command: str) -> str:
-    sql_path: str = Path(__file__).resolve().parents[1] / "modules/sql"
+    sql_path: Path = Path(__file__).resolve().parents[1] / "modules/sql"
 
     with open(f"{sql_path}/{engine.lower()}_queries/{command}") as sqlfile:
         sql_query: str = sqlfile.read()
@@ -33,26 +46,6 @@ def new_file(filepath: str) -> None:
 
 def remove_file(filepath: str) -> None:
     Path(filepath).unlink()
-
-
-def checked_filenames(engines, relations, position) -> list[str]:
-    files: dict = formatters.get_filenames(engines, relations)
-
-    # Receives the position of the source to return the index
-    indexes: dict = {"first": 0, "second": 1}
-    index: int = indexes[position]
-
-    filenames: list = []
-
-    # Take the filename based on the index, and check if it exists
-    for relation in relations:
-        filename: str = relation["sources"][index]
-        engine: str = validators.check_engine(filename)
-
-        if filename in files[engine]:
-            filenames.append(filename)
-
-    return filenames
 
 
 def _create_default_config(configpath: Path) -> None:

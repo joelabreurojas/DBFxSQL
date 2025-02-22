@@ -1,9 +1,11 @@
-from contextlib import contextmanager
 from collections.abc import Generator
+from contextlib import contextmanager
+from pathlib import Path
 
 import dbf
-import logging
-from pathlib import Path
+
+from dbfxsql.exceptions import DBFConnectionFailed
+from dbfxsql.helpers import formatters
 
 
 @contextmanager
@@ -12,8 +14,8 @@ def get_table(filepath: str) -> Generator[dbf.Table]:
 
     # create the table if it doesn't exist
     if not Path(filepath).read_bytes():
-        table: dbf.Table = dbf.Table(filepath, "tmp N(1,0)").open(dbf.READ_WRITE)
-        table.delete_fields(table.field_names)
+        tmp_table: dbf.Table = dbf.Table(filepath, "tmp N(1,0)").open(dbf.READ_WRITE)
+        tmp_table.delete_fields(tmp_table.field_names)
 
     table: dbf.Table = dbf.Table(filepath).open(dbf.READ_WRITE)
 
@@ -21,7 +23,9 @@ def get_table(filepath: str) -> Generator[dbf.Table]:
         yield table
 
     except Exception as error:
-        logging.error(error)
+        filename: str = formatters.decompose_file(filepath)[0]
+
+        raise DBFConnectionFailed(filename, error)
 
     finally:
         table.close()

@@ -85,41 +85,54 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
-- [x] Support interaction between tables with same engine, using their position to migrate.
+- [x] Detect OS to migrate.
+- [x] Handle temp files for MSSQL in Windows.
+- [x] Create Store Procedures & Triggers for MSSQL in Windows.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[x] Handle 'n' type as 'C' type in DBF.</li>
-      <li>[x] Support for date/datetime/None types.</li>
-      <li>[ ] Transform temporal file extensions to .mdf during modification events.</li>
-      <li>[ ] Equalize rows for indirect table relationships.</li>
-      <li>[ ] Implement field target to indirect table relationships.</li>
-      <li>[ ] Detect indirect table relationships by their destiny tables.</li>
-      <li>[ ] Match the number of rows between indirect table relationships (big over small).</li>
-      <li>[ ] Apply synchronization by target fields, if they exist.</li>
-      <li>[ ] Automatic creation of temporal files based on configuration (Windows).</li>
-      <li>[ ] MSSQL triggers/procedures for table changes.</li>
-      <li>[ ] Integrate Store Procedures & Triggers to modify temporal files (Windows).</li>
-      <li>[ ] Handle starving connections.</li>
-      <li>[ ] Standardize automatic sinchronization tests.</li>
-      <li>[ ] Use models to transmit data between shapes.</li>
-      <li>[ ] Agrupate entities like exceptions and models.</li>
-      <li>[ ] New cli workflow based in stages.</li>
+      <li>[x] Automate creation of temp files for any MSSQL source in Windows.</li>
+      <li>[x] Treat temporary files as MSSQL sources.</li>
+      <li>[x] Create save procedure (write_file) to update temporary files in Windows.</li>
+      <li>[x] Create insert/update/delete triggers for any MSSQL table in Windows.</li>
+      <li>[x] Handle bulk insert by single executions to detect MSSQL changes.</li>
+      <li>[x] Handle migration priority in configuration.</li>
+      <li>[x] Fix date format issues.</li>
+      <li>[x] Specify None type for engine data types.</li>
+      <li>[x] Handle db connection errors.</li>
+      <li>[x] Treat dbf.data_types.NullType as empty string.</li>
+      <li>[x] Order library imports.</li>
+      <li>[x] Specify types that are used throughout the project.</li>
+      <li>[x] Order functions by encapsulation level.</li>
+      <li>[ ] Use alias to mitigate long types.</li>
+      <li>[ ] Remove comparison for bulk operations.</li>
+      <li>[ ] Create a changelog.</li>
+      <li>[ ] Raise an error if an empty string is returned.</li>
+      <li>[ ] Specify temporary files to listen on in configuration.</li>
+      <li>[ ] Specify migration order into the configuration.</li>
+      <li>[ ] Add CDC to SQL.</li>
+      <li>[ ] Balance rows for indirect table relationships.</li>
+      <li>[ ] Implement field target for indirect table relationships.</li>
+      <li>[ ] Recognize indirect table relationships by their target tables.</li>
+      <li>[ ] Balance the number of rows between indirect table relationships (large over small).</li>
+      <li>[ ] Apply synchronization by target fields when they exist.</li>
+      <li>[ ] Standardize automatic synchronization checks.</li>
+      <li>[ ] Use models to pass data between forms.</li>
+      <li>[ ] Aggregate entities like exceptions and models.</li>
+      <li>[ ] New incremental cli workflow.</li>
       <li>[ ] Implement more abstraction in controllers.</li>
-      <li>[ ] Group origin tables by destiny tables to optimize read queries when migrating.</li>
-      <li>[ ] Accept conditions over row_number for DBF.</li>
-      <li>[ ] Add FIELDS options for filtering read queries.</li>
-      <li>[ ] Configuration commands for upload and edit.</li>
-      <li>[ ] Validate the existence of the received field type.</li>
+      <li>[ ] Group origin tables by destiny tables to optimize read queries during migration.</li>
+      <li>[ ] Accept row_number conditions for DBF.</li>
+      <li>[ ] Add FIELDS options to filter read requests.</li>
+      <li>[ ] Configuration commands for uploading and editing.</li>
+      <li>[ ] Validate existence of received field type.</li>
       <li>[ ] Validate KeyErrors for invalid fields.</li>
       <li>[ ] Validate type lengths and names for consistency between DBF and SQL.</li>
-      <li>[ ] Validate the data migration to a the same table.</li>
-      <li>[ ] Support for relationships between +2 tables in the config file.</li>
       <li>[ ] Public project documentation.</li>
-      <li>[ ] Implementation of CQRS (Command Query Responsibility Segregation) patterns.</li>
-      <li>[ ] Sharing as a Python library.</li>
-      <li>[ ] Development of a GUI for managing DBF and SQL.</li>
+      <li>[ ] Command Query Responsibility Segregation (CQRS) pattern implementation.</li>
+      <li>[ ] Released as a Python library.</li>
+      <li>[ ] Development of a GUI to manage DBF and SQL.</li>
   </ul>
 </details>
 

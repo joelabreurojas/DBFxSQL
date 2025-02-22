@@ -1,0 +1,13 @@
+WITH numbered_rows AS (
+	SELECT {primary_key}, ROW_NUMBER()
+	OVER (ORDER BY {primary_key})
+	AS row_number
+	FROM {table}
+)
+SELECT *
+FROM {table}
+WHERE {primary_key} IN (
+	SELECT {primary_key}
+	FROM numbered_rows
+	WHERE {condition}
+)

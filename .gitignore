@@ -3,6 +3,8 @@
 *.sql
 *.dbf
 *.bak
+*.tmp
+.null-ls*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

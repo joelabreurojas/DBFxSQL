@@ -1,0 +1,8 @@
+CREATE TRIGGER {table}_register_insert
+ON dbo.{table}
+AFTER INSERT
+AS
+BEGIN
+    EXEC write_file @fileName = '{filepath}', 
+               @fileContents = '{data}'
+END;

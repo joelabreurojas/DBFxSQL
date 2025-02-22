@@ -1,0 +1,3 @@
+UPDATE {table}
+SET {fields}
+WHERE {condition}
