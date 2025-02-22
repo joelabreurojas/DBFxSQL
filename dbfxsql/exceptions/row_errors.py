@@ -7,5 +7,5 @@ class RowAlreadyExists(ErrorTemplate):
 
 
 class RowNotFound(ErrorTemplate):
-    def __init__(self, condition: tuple[str, str, str]):
-        super().__init__(f"Row not found with: {''.join(condition)}")
+    def __init__(self, condition: str):
+        super().__init__(f"Row not found with: {condition}")
