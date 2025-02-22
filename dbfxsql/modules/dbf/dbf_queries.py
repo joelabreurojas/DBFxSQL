@@ -1,5 +1,7 @@
 import dbf
 
+from dbfxsql.helpers.alias import IndexesList, RowIndexesTuple
+
 from .dbf_connection import get_table
 
 
@@ -36,7 +38,7 @@ def update(filepath: str, row_: dict, indexes: list[int]) -> None:
                     setattr(row, key, value)
 
 
-def bulk_update(filepath: str, filtered_rows: list[tuple[dict, list[int]]]) -> None:
+def bulk_update(filepath: str, filtered_rows: list[RowIndexesTuple]) -> None:
     with get_table(filepath) as table:
         for row_, indexes in filtered_rows:
             for index in indexes:
@@ -54,7 +56,7 @@ def delete(filepath: str, indexes: list[int]) -> None:
         table.pack()
 
 
-def bulk_delete(filepath: str, indexes: list[list[int]]) -> None:
+def bulk_delete(filepath: str, indexes: IndexesList) -> None:
     with get_table(filepath) as table:
         for indexes_ in indexes:
             for index in indexes_:

@@ -1,5 +1,3 @@
-from collections.abc import Iterable
-
 from dbfxsql.exceptions import (
     FieldReserved,
     RowNotFound,
@@ -7,13 +5,13 @@ from dbfxsql.exceptions import (
     SourceNotFound,
 )
 from dbfxsql.helpers import file_manager, formatters, validators
+from dbfxsql.helpers.alias import FieldsIterable
+from dbfxsql.models.condition import Condition
 
 from . import dbf_queries
 
 
-def create_table(
-    engine: str, filename: str, fields_: Iterable[tuple[str, str]]
-) -> None:
+def create_table(engine: str, filename: str, fields_: FieldsIterable) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if validators.path_exists(filepath):
@@ -28,7 +26,7 @@ def create_table(
     dbf_queries.create(filepath, fields)
 
 
-def insert_row(engine: str, filename: str, fields: Iterable[tuple[str, str]]) -> None:
+def insert_row(engine: str, filename: str, fields: FieldsIterable) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if not validators.path_exists(filepath):
@@ -42,7 +40,7 @@ def insert_row(engine: str, filename: str, fields: Iterable[tuple[str, str]]) ->
     dbf_queries.insert(filepath, row)
 
 
-def bulk_insert_rows(engine: str, filename: str, fields_: list[tuple]) -> None:
+def bulk_insert_rows(engine: str, filename: str, fields_: list[FieldsIterable]) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     rows: list[dict] = [formatters.fields_to_dict(fields) for fields in fields_]
@@ -50,9 +48,7 @@ def bulk_insert_rows(engine: str, filename: str, fields_: list[tuple]) -> None:
     dbf_queries.bulk_insert(filepath, rows)
 
 
-def read_rows(
-    engine: str, filename: str, condition: tuple[str, str, str] | None
-) -> list[dict]:
+def read_rows(engine: str, filename: str, condition: Condition | None) -> list[dict]:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if not validators.path_exists(filepath):
@@ -65,16 +61,13 @@ def read_rows(
     rows = [formatters.assign_types(engine, types, row) for row in rows]
 
     if condition and not (rows := formatters.filter_rows(rows, condition)[0]):
-        raise RowNotFound(condition)
+        raise RowNotFound(str(condition))
 
     return rows
 
 
 def update_rows(
-    engine: str,
-    filename: str,
-    fields: Iterable[tuple[str, str]],
-    condition: tuple[str, str, str],
+    engine: str, filename: str, fields: FieldsIterable, condition: Condition
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -97,7 +90,7 @@ def update_rows(
     rows, indexes = formatters.filter_rows(rows, condition)
 
     if not rows:
-        raise RowNotFound(condition)
+        raise RowNotFound(str(condition))
 
     # update filtered rows by their index
     if validators.values_are_different(rows, row):
@@ -107,8 +100,8 @@ def update_rows(
 def bulk_update_rows(
     engine: str,
     filename: str,
-    fields_: list[tuple],
-    conditions: list[tuple[str, str, str]],
+    fields_: list[FieldsIterable],
+    conditions: list[Condition],
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -127,7 +120,7 @@ def bulk_update_rows(
     dbf_queries.bulk_update(filepath, update_rows)
 
 
-def delete_rows(engine: str, filename: str, condition: tuple[str, str, str]) -> None:
+def delete_rows(engine: str, filename: str, condition: Condition) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if not validators.path_exists(filepath):
@@ -142,14 +135,12 @@ def delete_rows(engine: str, filename: str, condition: tuple[str, str, str]) -> 
     rows, indexes = formatters.filter_rows(rows, condition)
 
     if not rows:
-        raise RowNotFound(condition)
+        raise RowNotFound(str(condition))
 
     dbf_queries.delete(filepath, indexes)
 
 
-def bulk_delete_rows(
-    engine: str, filename: str, conditions: list[tuple[str, str, str]]
-) -> None:
+def bulk_delete_rows(engine: str, filename: str, conditions: list[Condition]) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     table_rows: list[dict] = dbf_queries.read(filepath)

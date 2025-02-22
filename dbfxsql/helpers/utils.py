@@ -5,6 +5,7 @@ from prettytable import PrettyTable
 from ..constants import sample_commands
 from ..models.sync_table import SyncTable
 from . import file_manager, validators
+from .alias import OperationsList
 
 
 def embed_examples(func: Callable) -> Callable:
@@ -38,7 +39,7 @@ def generate_tmp_files(filepaths: list[str]) -> None:
             file_manager.new_file(filepath)
 
 
-def notify(operations: list[dict[str, list[dict]]], tables: list[SyncTable]) -> None:
+def notify(operations: OperationsList, tables: list[SyncTable]) -> None:
     for operation, table in zip(operations, tables):
         if operation["insert"] or operation["update"] or operation["delete"]:
             message: str = f"\nMake changes in: {table.source}"

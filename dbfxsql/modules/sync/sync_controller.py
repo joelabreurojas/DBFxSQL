@@ -6,7 +6,8 @@ import os
 from watchfiles import arun_process
 
 from dbfxsql.helpers import file_manager, formatters, utils, validators
-from dbfxsql.models.sync_table import SyncTable
+from dbfxsql.helpers.alias import TablesDict
+from dbfxsql.models import Config, Engine, Relation, SyncTable
 
 from . import sync_connection
 
@@ -15,29 +16,32 @@ def init() -> tuple:
     # Disable watchfiles logging
     logging.getLogger("watchfiles").setLevel(logging.ERROR)
 
-    setup: dict = file_manager.load_config()
+    config: Config = file_manager.load_config()
+    engines: dict[str, Engine] = {k: Engine(**v) for k, v in config.engines.items()}
+    relations: list[Relation] = [Relation(**r) for r in config.relations]
 
-    engines: dict[str, dict[str, list[str] | str]] = setup["engines"]
-    relations: list[dict[str, list[str] | str]] = setup["relations"]
-    filenames: list[str] = file_manager.prioritized_files(engines, relations)
+    filenames: list[str] = formatters.prioritized_files(engines, relations)
 
     # MSSQL edge cases
-    engines["MSSQL"]["listen"] = "_log.ldf"
+    engines["MSSQL"] = Engine(**config.engines["MSSQL"])
+    to_convert: str = ".log"
 
     if os.name != "posix":  # For Windows cache
-        entities: dict[str, list[str]] = formatters.get_mssql_entities(relations)
+        entities: TablesDict = formatters.get_mssql_entities(relations)
         databases: list[str] = list(entities.keys())
         filepaths: list[str] = formatters.db_to_tmp(engines, databases)
 
         sync_connection.deploy_sql_statements(entities, databases)
         utils.generate_tmp_files(filepaths)
 
-        engines["MSSQL"]["listen"] = ".tmp"
+        to_convert = ".tmp"
+
+    engines["MSSQL"].convert_to_extension.append(to_convert)
 
     return engines, relations, filenames
 
 
-def migrate(filenames: list, relations: list[dict[str, list[str] | str]]) -> None:
+def migrate(filenames: list, relations: list[Relation]) -> None:
     changes: list[dict] = formatters.package_changes(filenames, relations)
 
     for tables in changes:
@@ -55,8 +59,8 @@ def migrate(filenames: list, relations: list[dict[str, list[str] | str]]) -> Non
         _execute_operations(operations, destinies)
 
 
-async def synchronize(engines: dict, relations: dict) -> None:
-    folders: tuple = tuple(engine["folderpaths"] for engine in engines.values())
+async def synchronize(engines: dict[str, Engine], relations: list[Relation]) -> None:
+    folders: tuple = tuple(engine.folderpaths for engine in engines.values())
     folders = tuple(set(itertools.chain.from_iterable(folders)))
 
     await arun_process(
@@ -109,7 +113,7 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
 
 
 def _listen(
-    folders: tuple, relations: list[dict[str, list[str] | str]], engines: dict
+    folders: tuple, relations: list[Relation], engines: dict[str, Engine]
 ) -> None:
     if changes := json.loads(str(os.getenv("WATCHFILES_CHANGES"))):
         changes = formatters.filter_filepaths(changes, engines)

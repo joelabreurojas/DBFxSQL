@@ -3,7 +3,7 @@ from pathlib import Path
 import tomllib
 
 from ..constants import default_config
-from . import formatters, validators
+from ..models import Config
 
 
 def list_files(engine: str, folder: str) -> list[str]:
@@ -19,7 +19,7 @@ def list_files(engine: str, folder: str) -> list[str]:
     return files
 
 
-def load_config() -> dict:
+def load_config() -> Config:
     configpath: Path = Path(default_config.PATH).expanduser()
 
     if not configpath.exists():
@@ -28,7 +28,7 @@ def load_config() -> dict:
     with open(configpath.as_posix(), "rb") as configfile:
         toml_data: dict = tomllib.load(configfile)
 
-    return toml_data
+    return Config(**toml_data)
 
 
 def load_query(engine: str, command: str) -> str:

@@ -1,36 +1,52 @@
-from collections.abc import Iterable
 from datetime import date, datetime
 from pathlib import Path
+from typing import Any
 
 from dbf.data_types import NullType
 
 from ..constants.data_types import DATA_TYPES
-from ..models.sync_table import SyncTable
 from ..exceptions import FieldNotFound, FolderPathNotProvided, ValueNotValid
+from ..models import Condition, Config, Engine, Relation, SyncTable
 from . import file_manager, validators
+from .alias import (
+    ChangeDict,
+    ChangesList,
+    FieldsIterable,
+    FieldsTuple,
+    FilesDict,
+    OperationsList,
+    RowsIndexesTuple,
+    SyncTableDict,
+    TablesDict,
+    TablesTuple,
+    TypesList,
+    VariableFieldsTuple,
+)
 
 
-def add_folderpath(engine: str, filename: str) -> str:
+def add_folderpath(engine_: str, filename: str) -> str:
     """Adds the folderpath to the filename depending on the engine."""
-    engines: dict[str, dict[str, list[str] | str]] = file_manager.load_config()[
-        "engines"
-    ]
-    folderpath: str = engines[engine]["folderpaths"][0]
+    config: Config = file_manager.load_config()
+    engine: Engine = Engine(**config.engines[engine_])
+    folderpath: str = engine.folderpaths[0]
+
+    if not folderpath:
+        raise FolderPathNotProvided(engine_)
 
     return str(Path(folderpath).resolve() / filename)
 
 
-def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> dict:
+def assign_types(engine: str, types: dict[str, str], row: dict[str, str]) -> dict:
     data_type: dict[str, type] = DATA_TYPES[engine]
 
     field_names: list[str] = [field.lower() for field in row.keys()]
-    type_names: list[str] = [type_.lower() for type_ in types_.keys()]
+    type_names: list[str] = [type_.lower() for type_ in types.keys()]
 
     for field in field_names:
         if field not in type_names:
             raise FieldNotFound(field)
 
-        type_: str = types_[field].upper()
+        type_: str = types[field].upper()
         value: str = row[field]
 
         try:
@@ -60,9 +76,7 @@ def assign_types(engine: str, types_: dict[str, str], row: dict[str, str]) -> di
     return row
 
 
-def classify_operations(
-    residual_tables: list[tuple[list[dict], list[dict]]],
-) -> list[dict[str, list[dict]]]:
+def classify_operations(residual_tables: list[TablesTuple]) -> OperationsList:
     operations: list = []
 
     for residual_table in residual_tables:
@@ -92,13 +106,11 @@ def classify_operations(
     return operations
 
 
-def compare_tables(
-    origin: SyncTable, destinies: list[SyncTable]
-) -> list[tuple[list[dict], list[dict]]]:
+def compare_tables(origin: SyncTable, destinies: list[SyncTable]) -> list[TablesTuple]:
     residual_tables: list = []
 
     for origin_fields, destiny in zip(origin.fields, destinies):
-        fields: tuple[list[str], list[str]] = (origin_fields, destiny.fields)
+        fields: FieldsTuple = (origin_fields, destiny.fields)
 
         origin_rows: list[dict] = list(origin.rows)
         destiny_rows: list[dict] = list(destiny.rows)
@@ -118,15 +130,14 @@ def compare_tables(
     return residual_tables
 
 
-def db_to_tmp(
-    engines: dict[str, dict[str, list[str] | str]], databases: list
-) -> list[str]:
-    extension: str = engines["MSSQL"]["extensions"][0]
+def db_to_tmp(engines: dict[str, Engine], databases: list[str]) -> list[str]:
+    engine: Engine = engines["MSSQL"]
+    extension: str = engine.extensions[0]
 
     filepaths: list = []
 
     for database in databases:
-        for folderpath in engines["MSSQL"]["folderpaths"]:
+        for folderpath in engine.folderpaths:
             if validators.path_exists(f"{folderpath}{database}"):
                 tmp_file: str = database.replace(extension, ".tmp")
                 filepaths.append(f"{folderpath}{tmp_file}")
@@ -182,25 +193,26 @@ def extract_data(name: str, dataset: list[dict], destiny: SyncTable) -> list[dic
     return values
 
 
-def fields_to_dict(fields: Iterable[tuple[str, str]]) -> dict:
+def fields_to_dict(fields: FieldsIterable) -> dict:
     return {field[0]: field[1] for field in fields}
 
 
-def fields_to_str(fields: Iterable[tuple[str, str]], sep: str = ", ") -> str:
+def fields_to_str(fields: FieldsIterable, sep: str = ", ") -> str:
     return sep.join([f"{field[0]} {field[1]}" for field in fields])
 
 
-def filter_filepaths(
-    changes: list[list[str]], engines: dict[str, dict[str, list[str] | str]]
-) -> list:
+def filter_filepaths(changes: ChangesList, engines: dict[str, Engine]) -> list:
     filepaths: list = []
 
     for change in changes:
         filepath: str = change[-1]
 
-        if isinstance((listened := engines["MSSQL"]["listen"]), str):
-            if filepath.endswith(listened):
-                filepath = filepath.replace(listened, engines["MSSQL"]["extensions"][0])
+        engine: Engine = engines["MSSQL"]
+        to_convert: list = engine.convert_to_extension
+
+        for suffix in to_convert:
+            if filepath.endswith(suffix):
+                filepath = filepath.replace(suffix, engine.extensions[0])
 
             if validators.valid_filepath(filepath, engines):
                 filepaths.append(filepath)
@@ -208,62 +220,28 @@ def filter_filepaths(
     return filepaths
 
 
-def filter_rows(
-    rows_: list[dict], condition: tuple[str, str, str]
-) -> tuple[list[dict], list[int]]:
-    filter: str = ""
+def filter_rows(rows_: list[dict], condition: Condition) -> RowsIndexesTuple:
     rows: list = []
     indexes: list = []
 
-    field, operator, value = _parse_condition(condition)
-
-    if "==" == operator and "row_number" == field:
-        return [rows_[value]], [value]
-
     for index, row in enumerate(rows_):
-        if isinstance(row[field], str):
-            filter = f"'{row[field]}'{operator}'{value}'"
-        else:
-            filter = f"{row[field]}{operator}{value}"
-
-        if eval(filter):
+        if eval(condition.apply_filter(row, index)):
             rows.append(row)
             indexes.append(index)
 
     return rows, indexes
 
 
-def get_filenames(
-    engines: dict[str, dict[str, list[str] | str]],
-    relations: list[dict[str, list[str] | str]],
-) -> dict:
-    """
-    Returns a dict with the filenames based on the engines
-    """
-    paths: list = []
-
-    for engine in engines.values():
-        files: list = []
-
-        for folder in list(set(engine["folderpaths"])):
-            for path in Path(folder).iterdir():
-                files.append("".join(decompose_file(path.as_posix())))
-
-        paths.append(files)
-
-    return dict(zip(engines.keys(), paths))
-
-
-def get_mssql_entities(relations: list[dict]) -> dict:
+def get_mssql_entities(relations: list[Relation]) -> TablesDict:
     entities: dict = {}
 
     for relation in relations:
-        for index, filename in enumerate(relation["sources"]):
+        for index, filename in enumerate(relation.sources):
             if "MSSQL" == validators.check_engine(filename):
                 if filename not in entities.keys():
                     entities[filename] = []
 
-                entities[filename].append(relation["tables"][index])
+                entities[filename].append(relation.tables[index])
 
     return entities
 
@@ -273,8 +251,8 @@ def merge_fields(row: dict, start: str, end: str) -> str:
 
 
 def package_changes(
-    filenames: list[str], relations: list[dict[str, list[str] | str]]
-) -> list[dict[str, SyncTable | list[SyncTable]]]:
+    filenames: list[str], relations: list[Relation]
+) -> list[ChangeDict]:
     changes: list = []
 
     for filename in filenames:
@@ -297,42 +275,57 @@ def package_changes(
     return changes
 
 
-def quote_values(
-    engine: str, types: dict[str, str], condition: tuple[str, str, str]
-) -> tuple[str, str, str]:
-    field, operator, value = condition
+def parse_filenames(filepaths: list[str]) -> list:
+    filenames: list = []
 
-    if "==" == operator:
-        operator = "="
+    for filepath in filepaths:
+        name, extension = decompose_file(filepath)
+        filenames.append(f"{name}{extension}")
 
-    if field == "row_number":
-        return field, operator, value
+    return filenames
 
-    if field not in types:
-        raise FieldNotFound(field)
 
-    type_: str = types[field].upper()
+def prioritized_files(
+    engines: dict[str, Engine], relations: list[Relation]
+) -> list[str]:
+    files: FilesDict = _get_filenames(engines, relations)
+
+    filenames: list = []
+
+    for relation in relations:
+        if validators.should_add_filename(relation, files):
+            filenames.append(relation.priority)
+
+    return filenames
+
+
+def quote_values(engine: str, types: dict[str, str], condition: Condition) -> Condition:
+    if "row_number" == condition.field:
+        return condition
+
+    if condition.field not in types:
+        raise FieldNotFound(condition.field)
+
+    type_: str = types[condition.field].upper()
+    data_type: type = DATA_TYPES[engine][type_]
 
     # SQL
-    if DATA_TYPES[engine][type_] is str:
-        value = f"'{value}'"
+    value: Any = f"{condition.value}" if data_type is str else condition.value
 
-    return field, operator, value
+    return Condition(condition.field, condition.operator, value)
 
 
-def relevant_filenames(
-    filenames: list[str], relations: list[dict[str, list[str] | str]]
-) -> list[str]:
+def relevant_filenames(filenames: list[str], relations: list[Relation]) -> list[str]:
     relevant_filenames: list = []
 
-    for filename in filenames:
-        if filename := _search_filenames(filename, relations):
+    for filename_ in filenames:
+        if filename := _search_filenames(filename_, relations):
             relevant_filenames.append(filename)
 
     return relevant_filenames
 
 
-def scourgify_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+def scourgify_rows(rows: list[dict]) -> list[dict]:
     """Convert fields to lowercase and stripping values."""
 
     lower_fields: list[str] = [key.lower() for key in rows[0].keys()]
@@ -344,7 +337,7 @@ def scourgify_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     return [dict(zip(lower_fields, row.values())) for row in rows]
 
 
-def scourgify_types(types: list[dict[str, str]]) -> dict[str, str]:
+def scourgify_types(types: TypesList) -> dict[str, str]:
     names: list[str] = [type_["name"] for type_ in types]
     data_structure: list[str] = [type_["type"] for type_ in types]
 
@@ -360,8 +353,8 @@ def _change_fields(row: dict, fields: list[str]) -> dict:
 
 
 def _compare_rows(
-    origin_rows: list, destiny_rows: list, fields_: tuple
-) -> tuple[list[dict], list[dict]]:
+    origin_rows: list[dict], destiny_rows: list[dict], fields_: FieldsTuple
+) -> TablesTuple:
     residual_origin: list = []
     residual_destiny: list = [
         {"index": index, "fields": fields}
@@ -405,7 +398,9 @@ def _compare_rows(
     return residual_origin, residual_destiny
 
 
-def _define_tables(tables: list[SyncTable], filename: str) -> tuple:
+def _define_tables(
+    tables: list[SyncTable], filename: str
+) -> tuple[SyncTable, SyncTable]:
     for table in tables:
         if filename == table.source:
             origin: SyncTable = table
@@ -423,33 +418,33 @@ def _depurate_fields(row: dict, fields: list[str]) -> dict:
     return {key: row[key] for key in fields}
 
 
-def _fields_to_tuple(fields: dict[str, str]) -> tuple[tuple[str, str], ...]:
+def _fields_to_tuple(fields: dict[str, str]) -> VariableFieldsTuple:
     return tuple(fields.items())
 
 
-def _parse_condition(condition: tuple[str, str, str]) -> tuple:
-    field: str = condition[0]
-    operator: str = condition[1]
-    value: int | str = condition[2]
+def _get_filenames(engines: dict[str, Engine], relations: list[Relation]) -> FilesDict:
+    """
+    Returns a dict with the filenames based on the engines
+    """
+    paths: list = []
 
-    if "=" == operator:
-        operator = "=="
+    for engine in engines.values():
+        files: list = []
 
-    try:
-        if "row_number" == field.lower():
-            value = int(value) - 1
+        for folder in list(set(engine.folderpaths)):
+            for path in Path(folder).iterdir():
+                files.append("".join(decompose_file(path.as_posix())))
 
-    except ValueError:
-        raise ValueNotValid(value, field, "int")
+        paths.append(files)
 
-    return field, operator, value
+    return dict(zip(engines.keys(), paths))
 
 
-def _parse_origin(filename: str, relations: list[dict[str, list[str] | str]]) -> dict:
+def _parse_origin(filename: str, relations: list[Relation]) -> SyncTableDict:
     origin_tables: dict = {}
 
     for relation in relations:
-        if filename in relation["sources"]:
+        if filename in relation.sources:
             tables: list[SyncTable] = _parse_tables(relation)
             origin, destiny = _define_tables(tables, filename)
 
@@ -469,16 +464,17 @@ def _parse_origin(filename: str, relations: list[dict[str, list[str] | str]]) ->
     return origin_tables
 
 
-def _parse_tables(relation: dict) -> list:
+def _parse_tables(relation: Relation) -> list[SyncTable]:
     tables: list = []
 
-    for index, _ in enumerate(relation["sources"]):
-        table: SyncTable = SyncTable(
-            engine=validators.check_engine(relation["sources"][index]),
-            source=relation["sources"][index],
-            name=relation["tables"][index],
-            fields=relation["fields"][index],
-        )
+    for index, _ in enumerate(relation.sources):
+        if engine := validators.check_engine(relation.sources[index]):
+            table: SyncTable = SyncTable(
+                engine=engine,
+                source=relation.sources[index],
+                name=relation.tables[index],
+                fields=relation.fields[index],
+            )
 
         tables.append(table)
 
@@ -491,9 +487,9 @@ def _residual_rows(origin_row: dict, destiny_row: dict) -> dict:
     }
 
 
-def _search_filenames(filename: str, relations: list[dict]) -> str:
+def _search_filenames(filename: str, relations: list[Relation]) -> str | None:
     for relation in relations:
-        if filename in relation["sources"]:
+        if filename in relation.sources:
             return filename
 
-    return ""
+    return None

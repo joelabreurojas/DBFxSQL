@@ -1,5 +1,3 @@
-from collections.abc import Iterable
-
 from dbfxsql.exceptions import (
     FieldReserved,
     RowAlreadyExists,
@@ -9,6 +7,8 @@ from dbfxsql.exceptions import (
     TableNotFound,
 )
 from dbfxsql.helpers import file_manager, formatters, validators
+from dbfxsql.helpers.alias import FieldsIterable, TypesList
+from dbfxsql.models.condition import Condition
 
 from . import sql_queries
 
@@ -25,7 +25,7 @@ def create_database(engine: str, filename: str) -> None:
 
 
 def create_table(
-    engine: str, filename: str, table: str, fields_: Iterable[tuple[str, str]]
+    engine: str, filename: str, table: str, fields_: FieldsIterable
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -40,9 +40,7 @@ def create_table(
     sql_queries.create_table(engine, filepath, table, fields)
 
 
-def insert_row(
-    engine: str, filename: str, table: str, fields_: Iterable[tuple[str, str]]
-) -> None:
+def insert_row(engine: str, filename: str, table: str, fields_: FieldsIterable) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
     if not validators.path_exists(filepath):
@@ -51,16 +49,16 @@ def insert_row(
     if not sql_queries.statement_exists(engine, filepath, table, statement="tables"):
         raise TableNotFound(table)
 
-    types: list[dict[str, str]] = sql_queries.fetch_types(engine, filepath, table)
+    types: TypesList = sql_queries.fetch_types(engine, filepath, table)
     types_map: dict[str, str] = formatters.scourgify_types(types)
 
     row: dict = formatters.fields_to_dict(fields_)
     row = formatters.assign_types(engine, types_map, row)
 
-    primary_key: str = sql_queries.fetch_primary_key(engine, filepath, table)
+    primary_key_: str = sql_queries.fetch_primary_key(engine, filepath, table)
 
-    if primary_key := validators.field_name_in(fields_, primary_key):
-        condition: tuple[str, str, str] = (primary_key, "=", row[primary_key])
+    if primary_key := validators.field_name_in(fields_, primary_key_):
+        condition: Condition = Condition(primary_key, "=", row[primary_key])
 
         if _row_exists(engine, filepath, table, condition):
             raise RowAlreadyExists(row[primary_key])
@@ -73,7 +71,7 @@ def insert_row(
 
 
 def bulk_insert_rows(
-    engine: str, filename: str, table: str, fields_: list[tuple]
+    engine: str, filename: str, table: str, fields_: list[FieldsIterable]
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -87,7 +85,7 @@ def bulk_insert_rows(
 
 
 def read_rows(
-    engine: str, filename: str, table: str, condition: tuple[str, str, str] | None
+    engine: str, filename: str, table: str, condition: Condition | None
 ) -> list[dict]:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -100,7 +98,7 @@ def read_rows(
     if not condition:
         return sql_queries.read(engine, filepath, table)
 
-    types: list[dict[str, str]] = sql_queries.fetch_types(engine, filepath, table)
+    types: TypesList = sql_queries.fetch_types(engine, filepath, table)
     types_map: dict[str, str] = formatters.scourgify_types(types)
 
     condition = formatters.quote_values(engine, types_map, condition)
@@ -108,7 +106,7 @@ def read_rows(
     rows: list[dict] = sql_queries.read(engine, filepath, table, condition)
 
     if not formatters.depurate_empty_rows(rows):
-        raise RowNotFound(condition)
+        raise RowNotFound(str(condition))
 
     return [formatters.assign_types(engine, types_map, row) for row in rows]
 
@@ -117,8 +115,8 @@ def update_rows(
     engine: str,
     filename: str,
     table: str,
-    fields_: Iterable[tuple[str, str]],
-    condition: tuple[str, str, str],
+    fields_: FieldsIterable,
+    condition: Condition,
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
@@ -129,7 +127,7 @@ def update_rows(
         raise TableNotFound(table)
 
     # assign types to each row's value
-    types: list[dict[str, str]] = sql_queries.fetch_types(engine, filepath, table)
+    types: TypesList = sql_queries.fetch_types(engine, filepath, table)
     types_map: dict[str, str] = formatters.scourgify_types(types)
 
     condition = formatters.quote_values(engine, types_map, condition)
@@ -138,16 +136,16 @@ def update_rows(
     row = formatters.assign_types(engine, types_map, row)
 
     # check if other row have the same pk
-    primary_key: str = sql_queries.fetch_primary_key(engine, filepath, table)
+    primary_key_: str = sql_queries.fetch_primary_key(engine, filepath, table)
 
-    if primary_key := validators.field_name_in(fields_, primary_key):
-        condition_: tuple[str, str, str] = (primary_key, "=", row[primary_key])
+    if primary_key := validators.field_name_in(fields_, primary_key_):
+        condition_: Condition = Condition(primary_key, "=", row[primary_key])
 
         if _row_exists(engine, filepath, table, condition_):
             raise RowAlreadyExists(row[primary_key])
 
     if not _row_exists(engine, filepath, table, condition):
-        raise RowNotFound(condition)
+        raise RowNotFound(str(condition))
 
     start, end = (":", "") if "SQLite" == engine else ("%(", ")s")
 
@@ -160,12 +158,12 @@ def bulk_update_rows(
     engine: str,
     filename: str,
     table: str,
-    fields_: list[tuple],
-    conditions: list[tuple[str, str, str]],
+    fields_: list[FieldsIterable],
+    conditions: list[Condition],
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    types: list[dict[str, str]] = sql_queries.fetch_types(engine, filepath, table)
+    types: TypesList = sql_queries.fetch_types(engine, filepath, table)
     types_map: dict[str, str] = formatters.scourgify_types(types)
 
     conditions = [
@@ -182,10 +180,10 @@ def bulk_update_rows(
     sql_queries.bulk_update(engine, filepath, table, rows, fields, conditions)
 
 
-def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> None:
+def delete_rows(engine: str, filename: str, table: str, condition: Condition) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    types: list[dict[str, str]] = sql_queries.fetch_types(engine, filepath, table)
+    types: TypesList = sql_queries.fetch_types(engine, filepath, table)
     types_map: dict[str, str] = formatters.scourgify_types(types)
 
     condition = formatters.quote_values(engine, types_map, condition)
@@ -197,17 +195,17 @@ def delete_rows(engine: str, filename: str, table: str, condition: tuple) -> Non
         raise TableNotFound(table)
 
     if not _row_exists(engine, filepath, table, condition):
-        raise RowNotFound(condition)
+        raise RowNotFound(str(condition))
 
     sql_queries.delete(engine, filepath, table, condition)
 
 
 def bulk_delete_rows(
-    engine: str, filename: str, table: str, conditions: list[tuple]
+    engine: str, filename: str, table: str, conditions: list[Condition]
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    types: list[dict[str, str]] = sql_queries.fetch_types(engine, filepath, table)
+    types: TypesList = sql_queries.fetch_types(engine, filepath, table)
     types_map: dict[str, str] = formatters.scourgify_types(types)
 
     conditions = [
@@ -254,7 +252,5 @@ def deploy_statements(entities: dict, databases: list[str], engine: str) -> None
             sql_queries.deploy_triggers(engine, filepath, database, table)
 
 
-def _row_exists(
-    engine: str, filepath: str, table: str, condition: tuple[str, str, str]
-) -> dict:
+def _row_exists(engine: str, filepath: str, table: str, condition: Condition) -> dict:
     return sql_queries.fetch_row(engine, filepath, table, condition)

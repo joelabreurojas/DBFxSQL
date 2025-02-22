@@ -4,7 +4,8 @@ import click
 from yaspin import yaspin
 
 from .helpers import utils, validators
-from .models.order_commands import OrderCommands
+from .helpers.alias import FieldsIterable
+from .models import Condition, OrderCommands
 from .modules import dbf_controller, sql_controller, sync_controller
 
 
@@ -37,7 +38,7 @@ def cli():
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def create(source: str, table: str | None, fields: tuple[tuple[str, str]]) -> None:
+def create(source: str, table: str | None, fields: FieldsIterable) -> None:
     """Create a DBF file/SQL file and table."""
 
     # Use cases
@@ -81,7 +82,7 @@ def create(source: str, table: str | None, fields: tuple[tuple[str, str]]) -> No
 )
 @click.help_option("-h", "--help")
 @utils.embed_examples
-def insert(source: str, table: str | None, fields: tuple[tuple[str, str]]) -> None:
+def insert(source: str, table: str | None, fields: FieldsIterable) -> None:
     """Insert a row into a DBF file/SQL table."""
 
     # Use cases
@@ -135,18 +136,19 @@ def read(
         raise click.UsageError(f"Unknown extension for '{source}' source.")
 
     rows: list = []
+    condition_: Condition | None = Condition(*condition) if condition else None
 
     if "dBase" == engine:
         if table:
             raise click.UsageError("No such option '-t' / '--table' for DBF.")
 
-        rows = dbf_controller.read_rows(engine, source, condition)
+        rows = dbf_controller.read_rows(engine, source, condition_)
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
     else:
-        rows = sql_controller.read_rows(engine, source, table, condition)
+        rows = sql_controller.read_rows(engine, source, table, condition_)
 
     utils.show_table(rows)
 
@@ -185,7 +187,7 @@ def read(
 def update(
     source: str,
     table: str | None,
-    fields: tuple[tuple[str, str]],
+    fields: FieldsIterable,
     condition: tuple[str, str, str],
 ) -> None:
     """Update rows from a DBF file/SQL table."""
@@ -198,13 +200,13 @@ def update(
         if table:
             raise click.UsageError("No such option '-t' / '--table' for DBF.")
 
-        dbf_controller.update_rows(engine, source, fields, condition)
+        dbf_controller.update_rows(engine, source, fields, Condition(*condition))
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
     else:
-        sql_controller.update_rows(engine, source, table, fields, condition)
+        sql_controller.update_rows(engine, source, table, fields, Condition(*condition))
 
 
 @cli.command()
@@ -241,13 +243,13 @@ def delete(source: str, table: str | None, condition: tuple[str, str, str]) -> N
         if table:
             raise click.UsageError("No such option '-t' / '--table' for DBF.")
 
-        dbf_controller.delete_rows(engine, source, condition)
+        dbf_controller.delete_rows(engine, source, Condition(*condition))
 
     elif not table:
         raise click.UsageError("Missing option '-t' / '--table' for SQL.")
 
     else:
-        sql_controller.delete_rows(engine, source, table, condition)
+        sql_controller.delete_rows(engine, source, table, Condition(*condition))
 
 
 @cli.command()

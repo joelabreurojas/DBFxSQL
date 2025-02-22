@@ -1,3 +1,5 @@
+from dbfxsql.helpers.alias import FieldsIterable
+from dbfxsql.models import Condition
 from dbfxsql.modules import dbf_controller, sql_controller
 
 
@@ -18,7 +20,7 @@ def bulk_insert(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    fields: list[tuple[str, str]] = [value["fields"] for value in values]
+    fields: list[FieldsIterable] = [value["fields"] for value in values]
 
     if "dBase" == engine:
         dbf_controller.bulk_insert_rows(engine, filename, fields)
@@ -38,8 +40,8 @@ def update(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    fields: tuple[tuple[str, str]] = tuple(values[0]["fields"])
-    condition: tuple[str, str, str] = ("row_number", "==", f"{values[0]['index']}")
+    fields: FieldsIterable = tuple(values[0]["fields"])
+    condition: Condition = Condition("row_number", "==", f"{values[0]['index']}")
 
     if "dBase" == engine:
         dbf_controller.update_rows(engine, filename, fields, condition)
@@ -52,9 +54,9 @@ def bulk_update(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    fields: list[tuple[str, str]] = [value["fields"] for value in values]
-    conditions: list[tuple[str, str, str]] = [
-        ("row_number", "==", f"{value['index']}") for value in values
+    fields: list[FieldsIterable] = [value["fields"] for value in values]
+    conditions: list[Condition] = [
+        Condition("row_number", "==", f"{value['index']}") for value in values
     ]
 
     if "dBase" == engine:
@@ -68,7 +70,7 @@ def delete(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    condition: tuple[str, str, str] = ("row_number", "==", f"{values[0]['index']}")
+    condition: Condition = Condition("row_number", "==", f"{values[0]['index']}")
 
     if "dBase" == engine:
         dbf_controller.delete_rows(engine, filename, condition)
@@ -81,8 +83,8 @@ def bulk_delete(values: list[dict]) -> None:
     engine: str = values[0]["engine"]
     filename: str = values[0]["filename"]
     table: str = values[0]["table"]
-    conditions: list[tuple[str, str, str]] = [
-        ("row_number", "==", f"{value['index']}") for value in values
+    conditions: list[Condition] = [
+        Condition("row_number", "==", f"{value['index']}") for value in values
     ]
 
     if "dBase" == engine:

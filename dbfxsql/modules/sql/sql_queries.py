@@ -2,6 +2,8 @@
 
 from dbfxsql.exceptions import SourceNotFound
 from dbfxsql.helpers import file_manager
+from dbfxsql.helpers.alias import TypesList
+from dbfxsql.models import Condition
 
 from . import sql_connection
 
@@ -35,25 +37,24 @@ def insert(
 
 
 def read(
-    engine: str, filepath: str, table: str, condition_: tuple | None = None
+    engine: str, filepath: str, table: str, condition: Condition | None = None
 ) -> list[dict]:
     command: str = "rows/read"
-    query: str = file_manager.load_query(engine, command)
 
-    if not condition_:
+    if not condition:
+        query: str = file_manager.load_query(engine, command)
         query = query.format(table=table)
 
         return sql_connection.fetch_all(engine, filepath, query)
 
-    field_name, operator, *_ = condition_
-    command += "_by_condition" if "row_number" != field_name else "_by_row_number"
+    command += "_by_condition" if "row_number" != condition.field else "_by_row_number"
 
-    condition: str = "".join(condition_)
     primary_key: str = fetch_primary_key(engine, filepath, table)
 
-    query = query.format(table=table, condition=condition, primary_key=primary_key)
+    query = file_manager.load_query(engine, command)
+    query = query.format(table=table, condition=str(condition), primary_key=primary_key)
 
-    if operator == "=" and field_name in ["row_number", primary_key]:
+    if condition.operator == "=" and condition.field in ["row_number", primary_key]:
         return sql_connection.fetch_one(engine, filepath, query)
 
     return sql_connection.fetch_all(engine, filepath, query)
@@ -73,17 +74,15 @@ def bulk_insert(
 
 
 def update(
-    engine: str, filepath: str, table: str, row: dict, fields: str, condition: tuple
+    engine: str, filepath: str, table: str, row: dict, fields: str, condition: Condition
 ) -> None:
-    field_name, *_ = condition
-
     command: str = "rows/update"
 
-    if "row_number" == field_name:
+    if "row_number" == condition.field:
         command += "_by_row_number"
 
     query: str = file_manager.load_query(engine, command)
-    data: dict = {"table": table, "fields": fields, "condition": "".join(condition)}
+    data: dict = {"table": table, "fields": fields, "condition": str(condition)}
 
     if "SQLite" != engine:
         data["primary_key"] = fetch_primary_key(engine, filepath, table)
@@ -101,7 +100,7 @@ def bulk_update(
     table: str,
     rows: list[dict],
     fields_: list[str],
-    conditions: list[tuple],
+    conditions: list[Condition],
 ) -> None:
     queries: list = []
 
@@ -113,7 +112,7 @@ def bulk_update(
 
     for fields, condition in zip(fields_, conditions):
         data["fields"] = fields
-        data["condition"] = "".join(condition)
+        data["condition"] = str(condition)
         query: str = text.format(**data)
 
         queries.append(query)
@@ -123,16 +122,14 @@ def bulk_update(
     sql_connection.fetch_none(engine, filepath, queries, parameters)
 
 
-def delete(engine: str, filepath: str, table: str, condition: tuple) -> None:
-    field_name, *_ = condition
-
+def delete(engine: str, filepath: str, table: str, condition: Condition) -> None:
     command: str = "rows/delete"
 
-    if "row_number" == field_name:
+    if "row_number" == condition.field:
         command += "_by_row_number"
 
     query: str = file_manager.load_query(engine, command)
-    data: dict = {"table": table, "condition": "".join(condition)}
+    data: dict = {"table": table, "condition": str(condition)}
 
     if "SQLite" != engine:
         data["primary_key"] = fetch_primary_key(engine, filepath, table)
@@ -146,7 +143,7 @@ def bulk_delete(
     engine: str,
     filepath: str,
     table: str,
-    conditions: list[tuple],
+    conditions: list[Condition],
 ) -> None:
     queries: list = []
 
@@ -157,7 +154,7 @@ def bulk_delete(
         data["primary_key"] = fetch_primary_key(engine, filepath, table)
 
     for condition in conditions:
-        data["condition"] = "".join(condition)
+        data["condition"] = str(condition)
         query: str = text.format(**data)
 
         queries.append(query)
@@ -202,35 +199,31 @@ def fetch_primary_key(engine: str, filepath: str, table: str) -> str:
     query: str = file_manager.load_query(engine, command="tables/fetch_primary_key")
     query = query.format(table=table)
 
-    primary_key: list | None = sql_connection.fetch_one(engine, filepath, query)
+    primary_key: list[dict] = sql_connection.fetch_one(engine, filepath, query)
 
     return "" if not primary_key else primary_key[0]["name"]
 
 
-def fetch_row(
-    engine: str, filepath: str, table: str, condition: tuple[str, str, str]
-) -> dict:
-    field_name, *_ = condition
-
+def fetch_row(engine: str, filepath: str, table: str, condition: Condition) -> dict:
     command: str = "rows/fetch"
 
-    if "row_number" == field_name:
+    if "row_number" == condition.field:
         command += "_by_row_number"
 
     query: str = file_manager.load_query(engine, command)
-    data: dict = {"table": table, "condition": "".join(condition)}
+    data: dict = {"table": table, "condition": str(condition)}
 
     if "SQLite" != engine:
         data["primary_key"] = fetch_primary_key(engine, filepath, table)
 
     query = query.format(**data)
 
-    row: list = sql_connection.fetch_one(engine, filepath, query)
+    row: list[dict] = sql_connection.fetch_one(engine, filepath, query)
 
     return row[0]["COUNT(1)"]
 
 
-def fetch_types(engine: str, filepath: str, table: str) -> list[dict[str, str]]:
+def fetch_types(engine: str, filepath: str, table: str) -> TypesList:
     query: str = file_manager.load_query(engine, command="tables/fetch_types")
     query = query.format(table=table)
 
