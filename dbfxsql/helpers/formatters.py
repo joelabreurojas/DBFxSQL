@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -47,7 +48,7 @@ def assign_types(engine: str, types: dict[str, str], row: dict[str, str]) -> dic
             raise FieldNotFound(field)
 
         type_: str = types[field].upper()
-        value: str = row[field]
+        value: Any = row[field]
 
         try:
             # date case
@@ -61,6 +62,10 @@ def assign_types(engine: str, types: dict[str, str], row: dict[str, str]) -> dic
                 if type(value) is str:
                     iso_datetime: datetime = datetime.fromisoformat(value)
                     row[field] = iso_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+            # Decimal case
+            elif value and data_type[type_] is Decimal:
+                row[field] = data_type[type_](str(value))
 
             # NullType case
             elif type(value) is NullType:
