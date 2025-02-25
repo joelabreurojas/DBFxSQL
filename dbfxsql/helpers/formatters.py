@@ -315,7 +315,7 @@ def quote_values(engine: str, types: dict[str, str], condition: Condition) -> Co
     data_type: type = DATA_TYPES[engine][type_]
 
     # SQL
-    value: Any = f"{condition.value}" if data_type is str else condition.value
+    value: Any = f"'{condition.value}'" if data_type is str else condition.value
 
     return Condition(condition.field, condition.operator, value)
 
