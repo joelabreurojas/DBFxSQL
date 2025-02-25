@@ -230,7 +230,7 @@ def filter_rows(rows_: list[dict], condition: Condition) -> RowsIndexesTuple:
     indexes: list = []
 
     for index, row in enumerate(rows_):
-        if eval(condition.apply_filter(row, index)):
+        if condition.compare(row, index):
             rows.append(row)
             indexes.append(index)
 
