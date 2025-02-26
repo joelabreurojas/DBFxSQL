@@ -105,10 +105,11 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Order library imports.</li>
       <li>[x] Specify types that are used throughout the project.</li>
       <li>[x] Order functions by encapsulation level.</li>
-      <li>[ ] Use alias to mitigate long types.</li>
+      <li>[x] Use alias to mitigate long types.</li>
       <li>[ ] Remove comparison for bulk operations.</li>
       <li>[ ] Create a changelog.</li>
-      <li>[ ] Raise an error if an empty string is returned.</li>
+      <li>[x] Replace unsafe eval() for a operators dict.</li>
+      <li>[x] Raise an error if an empty string is returned.</li>
       <li>[ ] Specify temporary files to listen on in configuration.</li>
       <li>[ ] Specify migration order into the configuration.</li>
       <li>[ ] Add CDC to SQL.</li>
@@ -118,12 +119,12 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[ ] Balance the number of rows between indirect table relationships (large over small).</li>
       <li>[ ] Apply synchronization by target fields when they exist.</li>
       <li>[ ] Standardize automatic synchronization checks.</li>
-      <li>[ ] Use models to pass data between forms.</li>
-      <li>[ ] Aggregate entities like exceptions and models.</li>
+      <li>[x] Use models to pass data between modules.</li>
+      <li>[x] Group entities like exceptions and models with smart imports.</li>
       <li>[ ] New incremental cli workflow.</li>
       <li>[ ] Implement more abstraction in controllers.</li>
       <li>[ ] Group origin tables by destiny tables to optimize read queries during migration.</li>
-      <li>[ ] Accept row_number conditions for DBF.</li>
+      <li>[x] Accept row_number conditions for DBF.</li>
       <li>[ ] Add FIELDS options to filter read requests.</li>
       <li>[ ] Configuration commands for uploading and editing.</li>
       <li>[ ] Validate existence of received field type.</li>
