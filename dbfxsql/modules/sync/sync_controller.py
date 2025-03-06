@@ -24,7 +24,7 @@ def init() -> tuple:
 
     # MSSQL edge cases
     engines["MSSQL"] = Engine(**config.engines["MSSQL"])
-    to_convert: str = ".log"
+    to_convert: str = "_log.ldf"
 
     if os.name != "posix":  # For Windows cache
         entities: TablesDict = formatters.get_mssql_entities(relations)
