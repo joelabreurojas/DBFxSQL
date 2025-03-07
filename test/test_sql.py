@@ -76,10 +76,12 @@ def test_drop_table() -> None:
     os.system(sample_commands.SQL["drop_table"] + " --yes")
 
     filename: str = "company.sql"
-    engine: str = check_engine(filename)
+    engine: str = str(check_engine(filename))
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    assert not sql_queries.table_exists(engine, filepath, table="users")
+    assert not not sql_queries.statement_exists(
+        engine, filepath, statement="tables", value="users"
+    )
 
 
 def test_drop_database() -> None:
