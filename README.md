@@ -106,7 +106,9 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[x] Specify types that are used throughout the project.</li>
       <li>[x] Order functions by encapsulation level.</li>
       <li>[x] Use alias to mitigate long types.</li>
-      <li>[ ] Remove comparison for bulk operations.</li>
+      <li>[x] Remove comparison for bulk operations.</li>
+      <li>[ ] Fix timetuple issues in DBF by using a string as a date.</li>
+      <li>[ ] Add loading bar during migration.</li>
       <li>[ ] Create a changelog.</li>
       <li>[x] Replace unsafe eval() for a operators dict.</li>
       <li>[x] Raise an error if an empty string is returned.</li>
