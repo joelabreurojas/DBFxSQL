@@ -29,7 +29,7 @@ def create_table(
 ) -> None:
     filepath: str = formatters.add_folderpath(engine, filename)
 
-    if not sql_queries.statement_exists(engine, filepath, table, statement="tables"):
+    if sql_queries.statement_exists(engine, filepath, table, statement="tables"):
         raise TableAlreadyExists(table)
 
     if row_number := validators.field_name_in(fields_, "row_number"):
