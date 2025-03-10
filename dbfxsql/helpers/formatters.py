@@ -37,7 +37,7 @@ def add_folderpath(engine_: str, filename: str) -> str:
     return str(Path(folderpath).resolve() / filename)
 
 
-def assign_types(engine: str, types: dict[str, str], row: dict[str, str]) -> dict:
+def assign_types(engine: str, types: dict[str, str], row: dict[str, Any]) -> dict:
     data_type: dict[str, type] = DATA_TYPES[engine]
 
     field_names: list[str] = [field.lower() for field in row.keys()]
@@ -54,14 +54,12 @@ def assign_types(engine: str, types: dict[str, str], row: dict[str, str]) -> dic
             # date case
             if value and data_type[type_] is date:
                 if type(value) is str:
-                    iso_date: date = date.fromisoformat(value)
-                    row[field] = iso_date.strftime("%Y-%m-%d")
+                    row[field] = date.fromisoformat(value)
 
             # datetime case
             elif value and data_type[type_] is datetime:
                 if type(value) is str:
-                    iso_datetime: datetime = datetime.fromisoformat(value)
-                    row[field] = iso_datetime.strftime("%Y-%m-%d %H:%M:%S")
+                    row[field] = datetime.fromisoformat(value)
 
             # Decimal case
             elif value and data_type[type_] is Decimal:
