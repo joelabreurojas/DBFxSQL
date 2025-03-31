@@ -62,9 +62,9 @@ async def synchronize(engines: dict[str, Engine], relations: list[Relation]) -> 
     folders = tuple(set(itertools.chain.from_iterable(folders)))
 
     await utils.arun_signal_safe(
+        _listen,
         *folders,
         watch_filter=validators.only_modified,
-        target=_listen,
         args=(folders, relations, engines),
     )
 

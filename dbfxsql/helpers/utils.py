@@ -96,6 +96,6 @@ async def arun_signal_safe(
     run.start_process = start_process_signal_safe
 
     try:
-        return await arun_process(target, *args, **kwargs)
+        return await arun_process(target=target, *args, **kwargs)
     finally:
         run.start_process = original_start_process
