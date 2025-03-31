@@ -85,33 +85,17 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
-- [x] Detect OS to migrate.
-- [x] Handle temp files for MSSQL in Windows.
-- [x] Create Store Procedures & Triggers for MSSQL in Windows.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[x] Automate creation of temp files for any MSSQL source in Windows.</li>
-      <li>[x] Treat temporary files as MSSQL sources.</li>
-      <li>[x] Create save procedure (write_file) to update temporary files in Windows.</li>
-      <li>[x] Create insert/update/delete triggers for any MSSQL table in Windows.</li>
-      <li>[x] Handle bulk insert by single executions to detect MSSQL changes.</li>
-      <li>[x] Handle migration priority in configuration.</li>
-      <li>[x] Fix date format issues.</li>
-      <li>[x] Specify None type for engine data types.</li>
-      <li>[x] Handle db connection errors.</li>
-      <li>[x] Treat dbf.data_types.NullType as empty string.</li>
-      <li>[x] Order library imports.</li>
-      <li>[x] Specify types that are used throughout the project.</li>
-      <li>[x] Order functions by encapsulation level.</li>
-      <li>[x] Use alias to mitigate long types.</li>
-      <li>[x] Remove comparison for bulk operations.</li>
+      <li>[ ] Omit os.kill from watch_files (Windows issues).</li>
+      <li>[ ] Rename triggers.</li>
+      <li>[ ] Improve store procedure write_file (use CLR procedures).</li>
+      <li>[ ] Option to initialize triggers/procedures.</li>
       <li>[ ] Fix timetuple issues in DBF by using a string as a date.</li>
       <li>[ ] Add loading bar during migration.</li>
       <li>[ ] Create a changelog.</li>
-      <li>[x] Replace unsafe eval() for a operators dict.</li>
-      <li>[x] Raise an error if an empty string is returned.</li>
       <li>[ ] Specify temporary files to listen on in configuration.</li>
       <li>[ ] Specify migration order into the configuration.</li>
       <li>[ ] Add CDC to SQL.</li>
@@ -121,12 +105,9 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[ ] Balance the number of rows between indirect table relationships (large over small).</li>
       <li>[ ] Apply synchronization by target fields when they exist.</li>
       <li>[ ] Standardize automatic synchronization checks.</li>
-      <li>[x] Use models to pass data between modules.</li>
-      <li>[x] Group entities like exceptions and models with smart imports.</li>
       <li>[ ] New incremental cli workflow.</li>
       <li>[ ] Implement more abstraction in controllers.</li>
       <li>[ ] Group origin tables by destiny tables to optimize read queries during migration.</li>
-      <li>[x] Accept row_number conditions for DBF.</li>
       <li>[ ] Add FIELDS options to filter read requests.</li>
       <li>[ ] Configuration commands for uploading and editing.</li>
       <li>[ ] Validate existence of received field type.</li>
