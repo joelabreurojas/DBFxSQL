@@ -3,8 +3,6 @@ import json
 import logging
 import os
 
-from watchfiles import arun_process
-
 from dbfxsql.helpers import file_manager, formatters, utils, validators
 from dbfxsql.helpers.alias import TablesDict
 from dbfxsql.models import Config, Engine, Relation, SyncTable
@@ -63,7 +61,7 @@ async def synchronize(engines: dict[str, Engine], relations: list[Relation]) -> 
     folders: tuple = tuple(engine.folderpaths for engine in engines.values())
     folders = tuple(set(itertools.chain.from_iterable(folders)))
 
-    await arun_process(
+    await utils.arun_signal_safe(
         *folders,
         watch_filter=validators.only_modified,
         target=_listen,
