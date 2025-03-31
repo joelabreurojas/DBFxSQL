@@ -18,11 +18,6 @@ class SignalSafeCombinedProcess(run.CombinedProcess):
         """
         Stops the managed process, attempting graceful termination with SIGINT
         followed by SIGKILL if necessary.
-
-        Args:
-            sigint_timeout: Time in seconds to wait for SIGINT termination.
-            sigkill_timeout: Time in seconds to wait for SIGKILL termination
-                after SIGINT timeout.
         """
         os.environ.pop("WATCHFILES_CHANGES", None)
 
@@ -43,9 +38,6 @@ class SignalSafeCombinedProcess(run.CombinedProcess):
     def _force_kill(self, sigkill_timeout: int) -> None:
         """
         Sends SIGKILL to the process and waits for it to terminate.
-
-        Args:
-            sigkill_timeout: Time in seconds to wait for SIGKILL termination.
         """
         if self.exitcode is None:
             logger.warning("Process did not terminate after SIGINT, sending SIGKILL.")
