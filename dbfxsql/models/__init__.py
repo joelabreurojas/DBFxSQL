@@ -4,6 +4,7 @@ from .engine import Engine
 from .lazy_group import LazyGroup
 from .order_commands import OrderCommands
 from .relation import Relation
+from .signal_process import SignalSafeCombinedProcess
 from .sync_table import SyncTable
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "LazyGroup",
     "OrderCommands",
     "Relation",
+    "SignalSafeCombinedProcess",
     "SyncTable",
 ]
