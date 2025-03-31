@@ -1,9 +1,12 @@
-from typing import Callable
+from collections.abc import Callable
 
 from prettytable import PrettyTable
+from watchfiles import arun_process, run
+from watchfiles.main import FileChange
 
 from ..constants import sample_commands
 from ..models.sync_table import SyncTable
+from ..models.watchfiles_models import SignalSafeCombinedProcess
 from . import file_manager, validators
 from .alias import OperationsList
 
@@ -66,3 +69,33 @@ def show_table(rows: list[dict]) -> None:
         table.add_row([row[field] for field in table.field_names])
 
     print(table, end="\n\n")
+
+
+async def arun_signal_safe(
+    target: Callable | str,
+    *args,
+    **kwargs,
+) -> int:
+    """
+    Wraps watchfiles.arun_process to use SignalSafeCombinedProcess, preventing
+    signal-based termination and returning the number of reloads performed.
+    """
+    original_start_process = run.start_process
+
+    def start_process_signal_safe(
+        target: Callable | str,
+        target_type: str,
+        args: tuple,
+        kwargs: dict | None,
+        changes: set[FileChange] | None = None,
+    ) -> SignalSafeCombinedProcess:
+        """Replaces watchfiles' start_process to return SignalSafeCombinedProcess."""
+        process = original_start_process(target, target_type, args, kwargs, changes)
+        return SignalSafeCombinedProcess(process._p)
+
+    run.start_process = start_process_signal_safe
+
+    try:
+        return await arun_process(target, *args, **kwargs)
+    finally:
+        run.start_process = original_start_process
