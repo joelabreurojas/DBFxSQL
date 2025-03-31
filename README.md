@@ -89,7 +89,7 @@ This early version of the code demonstrates a basic interaction with the tool.
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[ ] Omit os.kill from watch_files (Windows issues).</li>
+      <li>[x] Omit os.kill from watch_files (Windows issues).</li>
       <li>[ ] Rename triggers.</li>
       <li>[ ] Improve store procedure write_file (use CLR procedures).</li>
       <li>[ ] Option to initialize triggers/procedures.</li>
