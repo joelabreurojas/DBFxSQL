@@ -193,7 +193,7 @@ def deploy_triggers(engine: str, filepath: str, database: str, table: str) -> No
     triggers: list[str] = file_manager.list_files(engine, folder="triggers")
 
     for trigger in triggers:
-        trigger_: str = f"{table}_{trigger}"
+        trigger_: str = f"{table}_{trigger.split('_')[1].upper()}"
 
         if not statement_exists(engine, filepath, trigger_, statement="triggers"):
             query: str = file_manager.load_query(engine, command=f"triggers/{trigger}")

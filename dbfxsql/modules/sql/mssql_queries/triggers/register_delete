@@ -1,4 +1,4 @@
-CREATE TRIGGER {table}_register_delete
+CREATE TRIGGER {table}_DELETE
 ON dbo.{table}
 AFTER DELETE
 AS

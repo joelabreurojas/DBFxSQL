@@ -1,4 +1,4 @@
-CREATE TRIGGER {table}_register_update
+CREATE TRIGGER {table}_UPDATE
 ON dbo.{table}
 AFTER UPDATE
 AS

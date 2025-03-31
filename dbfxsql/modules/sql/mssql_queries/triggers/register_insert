@@ -1,4 +1,4 @@
-CREATE TRIGGER {table}_register_insert
+CREATE TRIGGER {table}_INSERT
 ON dbo.{table}
 AFTER INSERT
 AS
