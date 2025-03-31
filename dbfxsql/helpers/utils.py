@@ -5,8 +5,8 @@ from watchfiles import arun_process, run
 from watchfiles.main import FileChange
 
 from ..constants import sample_commands
+from ..models.signal_process import SignalSafeCombinedProcess
 from ..models.sync_table import SyncTable
-from ..models.watchfiles_models import SignalSafeCombinedProcess
 from . import file_manager, validators
 from .alias import OperationsList
 
