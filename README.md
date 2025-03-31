@@ -89,7 +89,7 @@ This early version of the code demonstrates a basic interaction with the tool.
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[ ] Rename triggers.</li>
+      <li>[x] Rename triggers.</li>
       <li>[ ] Improve store procedure write_file (use CLR procedures).</li>
       <li>[ ] Option to initialize triggers/procedures.</li>
       <li>[ ] Fix timetuple issues in DBF by using a string as a date.</li>
