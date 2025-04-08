@@ -290,6 +290,7 @@ def drop(source: str, table: str | None) -> None:
 
 
 @cli.command()
+@click.help_option("-h", "--help")
 def migrate() -> None:
     """
     Migrate data between DBF and SQL files.
