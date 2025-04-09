@@ -91,7 +91,7 @@ This early version of the code demonstrates a basic interaction with the tool.
   <ul>
       <li>[ ] Improve store procedure write_file (use CLR procedures).</li>
       <li>[ ] Option to initialize triggers/procedures.</li>
-      <li>[ ] Option to notify changes during migration/synchronization.</li>
+      <li>[x] Option to notify changes during migration/synchronization.</li>
       <li>[ ] Fix timetuple issues in DBF by using a string as a date.</li>
       <li>[ ] Add loading bar during migration.</li>
       <li>[ ] Create a changelog.</li>
