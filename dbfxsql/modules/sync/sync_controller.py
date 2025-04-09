@@ -9,6 +9,8 @@ from dbfxsql.models import Config, Engine, Relation, SyncTable
 
 from . import sync_connection
 
+notify: bool
+
 
 def init() -> tuple:
     # Disable watchfiles logging
@@ -39,7 +41,7 @@ def init() -> tuple:
     return engines, relations, filenames
 
 
-def migrate(filenames: list, relations: list[Relation]) -> None:
+def migrate(filenames: list, relations: list[Relation], notify: bool) -> None:
     changes: list[dict] = formatters.package_changes(filenames, relations)
 
     for tables in changes:
@@ -52,12 +54,15 @@ def migrate(filenames: list, relations: list[Relation]) -> None:
         operations: list = formatters.classify_operations(residual_tables)
 
         # Operations to be executed in the correspond source
-        # utils.notify(operations, destinies)
+        if notify:
+            utils.notify(operations, [origin])
 
         _execute_operations(operations, destinies)
 
 
-async def synchronize(engines: dict[str, Engine], relations: list[Relation]) -> None:
+async def synchronize(
+    engines: dict[str, Engine], relations: list[Relation], notify: bool
+) -> None:
     folders: tuple = tuple(engine.folderpaths for engine in engines.values())
     folders = tuple(set(itertools.chain.from_iterable(folders)))
 
@@ -65,7 +70,7 @@ async def synchronize(engines: dict[str, Engine], relations: list[Relation]) -> 
         _listen,
         *folders,
         watch_filter=validators.only_modified,
-        args=(folders, relations, engines),
+        args=(folders, relations, engines, notify),
     )
 
 
@@ -111,11 +116,11 @@ def _execute_operations(operations: list, destinies: list[SyncTable]) -> None:
 
 
 def _listen(
-    folders: tuple, relations: list[Relation], engines: dict[str, Engine]
+    folders: tuple, relations: list[Relation], engines: dict[str, Engine], notify: bool
 ) -> None:
     if changes := json.loads(str(os.getenv("WATCHFILES_CHANGES"))):
         changes = formatters.filter_filepaths(changes, engines)
 
         filenames: list = formatters.parse_filenames(changes)
 
-        migrate(filenames, relations)
+        migrate(filenames, relations, notify)

@@ -290,8 +290,14 @@ def drop(source: str, table: str | None) -> None:
 
 
 @cli.command()
+@click.option(
+    "-n",
+    "--notify",
+    help="Notify the changes.",
+    is_flag=True,
+)
 @click.help_option("-h", "--help")
-def migrate() -> None:
+def migrate(notify: bool) -> None:
     """
     Migrate data between DBF and SQL files.
 
@@ -307,7 +313,7 @@ def migrate() -> None:
 
             spinner.text = "Migrating..."
 
-            sync_controller.migrate(filenames, relations)
+            sync_controller.migrate(filenames, relations, notify)
 
             spinner.ok("DONE")
 
@@ -316,8 +322,14 @@ def migrate() -> None:
 
 
 @cli.command()
+@click.option(
+    "-n",
+    "--notify",
+    help="Notify the changes.",
+    is_flag=True,
+)
 @click.help_option("-h", "--help")
-def sync() -> None:
+def sync(notify: bool) -> None:
     """
     Synchronize data between DBF and SQL files.
 
@@ -334,11 +346,11 @@ def sync() -> None:
 
             spinner.text = "Migrating..."
 
-            sync_controller.migrate(filenames, relations)
+            sync_controller.migrate(filenames, relations, notify)
 
             spinner.text = "Listening..."
 
-            asyncio.run(sync_controller.synchronize(engines, relations))
+            asyncio.run(sync_controller.synchronize(engines, relations, notify))
 
         except KeyboardInterrupt:
             spinner.ok("END")
