@@ -7,7 +7,7 @@ from watchfiles.main import FileChange
 from ..constants import sample_commands
 from ..models.signal_process import SignalSafeCombinedProcess
 from ..models.sync_table import SyncTable
-from . import file_manager, validators
+from . import file_manager, formatters, validators
 from .alias import OperationsList
 
 
@@ -61,9 +61,12 @@ def notify(operations: OperationsList, tables: list[SyncTable]) -> None:
 def show_table(rows: list[dict]) -> None:
     """Displays a list of rows in a table format."""
 
-    table = PrettyTable()
+    table: PrettyTable = PrettyTable()
 
-    table.field_names = rows[0].keys() if rows else []
+    table.field_names = rows[0].keys()
+
+    # Replace None dict values with empty strings for display
+    rows = [formatters.none_to_str(row) for row in rows]
 
     for row in rows:
         table.add_row([row[field] for field in table.field_names])
