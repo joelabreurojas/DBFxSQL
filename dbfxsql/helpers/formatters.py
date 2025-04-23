@@ -166,9 +166,6 @@ def deglose_fields(row: dict, start: str, end: str) -> tuple[str, str]:
 def depurate_empty_rows(rows: list[dict]) -> list:
     """Return an empty list if a list of rows only contains empty rows."""
 
-    if not rows:
-        return rows
-
     if all(all(not value for value in row.values()) for row in rows):
         return []
 
