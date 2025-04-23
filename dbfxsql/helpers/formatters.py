@@ -250,6 +250,12 @@ def merge_fields(row: dict, start: str, end: str) -> str:
     return ", ".join([f"{key} = {start}{key}{end}" for key in row.keys()])
 
 
+def normalize_row(row: dict) -> dict:
+    """Convert empty values to None"""
+
+    return {key: None if value == "" else value for key, value in row.items()}
+
+
 def package_changes(
     filenames: list[str], relations: list[Relation]
 ) -> list[ChangeDict]:
