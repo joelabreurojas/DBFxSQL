@@ -254,6 +254,8 @@ def merge_fields(row: dict, start: str, end: str) -> str:
     return ", ".join([f"{key} = {start}{key}{end}" for key in row.keys()])
 
 
+def none_to_empty_str(row: dict) -> dict:
+    return {key: "" if value is None else value for key, value in row.items()}
 
 
 def package_changes(
