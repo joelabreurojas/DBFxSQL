@@ -79,7 +79,7 @@ def _assing_rows(tables_: list[SyncTable]) -> list[SyncTable]:
 
     for table in tables_:
         rows: list[dict] = sync_connection.read(table.engine, table.source, table.name)
-        rows = [formatters.normalize_row(row) for row in rows]
+        rows = [formatters.empty_str_to_none(row) for row in rows]
 
         destiny: SyncTable = SyncTable(
             engine=table.engine,

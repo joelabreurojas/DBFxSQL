@@ -35,7 +35,7 @@ def insert_row(engine: str, filename: str, fields: FieldsIterable) -> None:
     types: dict[str, str] = dbf_queries.fetch_types(filepath)
     row: dict = formatters.fields_to_dict(fields)
 
-    row = formatters.normalize_row(row)
+    row = formatters.empty_str_to_none(row)
     row = formatters.assign_types(engine, types, row)
 
     dbf_queries.insert(filepath, row)
@@ -59,7 +59,7 @@ def read_rows(engine: str, filename: str, condition: Condition | None) -> list[d
     rows: list[dict] = dbf_queries.read(filepath)
 
     rows = formatters.scourgify_rows(rows)
-    rows = [formatters.normalize_row(row) for row in rows]
+    rows = [formatters.empty_str_to_none(row) for row in rows]
     rows = [formatters.assign_types(engine, types, row) for row in rows]
 
     if condition and not (rows := formatters.filter_rows(rows, condition)[0]):
@@ -80,7 +80,7 @@ def update_rows(
     types: dict[str, str] = dbf_queries.fetch_types(filepath)
     row: dict = formatters.fields_to_dict(fields)
 
-    row = formatters.normalize_row(row)
+    row = formatters.empty_str_to_none(row)
     row = formatters.assign_types(engine, types, row)
 
     # get a sanitized list of rows

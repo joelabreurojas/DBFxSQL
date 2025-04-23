@@ -172,6 +172,10 @@ def depurate_empty_rows(rows: list[dict]) -> list:
     return rows
 
 
+def empty_str_to_none(row: dict) -> dict:
+    return {key: None if value == "" else value for key, value in row.items()}
+
+
 def extract_data(name: str, dataset: list[dict], destiny: SyncTable) -> list[dict]:
     values: list = []
 
@@ -250,10 +254,6 @@ def merge_fields(row: dict, start: str, end: str) -> str:
     return ", ".join([f"{key} = {start}{key}{end}" for key in row.keys()])
 
 
-def normalize_row(row: dict) -> dict:
-    """Convert empty values to None"""
-
-    return {key: None if value == "" else value for key, value in row.items()}
 
 
 def package_changes(
