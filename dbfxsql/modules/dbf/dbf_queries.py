@@ -27,7 +27,7 @@ def read(filepath: str) -> list[dict]:
 
         rows: list[dict] = [dict(zip(field_names, row)) for row in table]
 
-    return rows if rows else [{field: "" for field in field_names}]
+    return rows if rows else [{field: None for field in field_names}]
 
 
 def update(filepath: str, row_: dict, indexes: list[int]) -> None:

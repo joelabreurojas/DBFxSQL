@@ -53,6 +53,7 @@ def insert_row(engine: str, filename: str, table: str, fields_: FieldsIterable) 
     types_map: dict[str, str] = formatters.scourgify_types(types)
 
     row: dict = formatters.fields_to_dict(fields_)
+    row = formatters.normalize_row(row)
     row = formatters.assign_types(engine, types_map, row)
 
     primary_key_: str = sql_queries.fetch_primary_key(engine, filepath, table)
@@ -104,6 +105,7 @@ def read_rows(
     condition = formatters.quote_values(engine, types_map, condition)
 
     rows: list[dict] = sql_queries.read(engine, filepath, table, condition)
+    rows = [formatters.normalize_rows(row) for row in rows]
 
     if not formatters.depurate_empty_rows(rows):
         raise RowNotFound(str(condition))
@@ -133,6 +135,7 @@ def update_rows(
     condition = formatters.quote_values(engine, types_map, condition)
 
     row: dict = formatters.fields_to_dict(fields_)
+    row = formatters.normalize_row(row)
     row = formatters.assign_types(engine, types_map, row)
 
     # check if other row have the same pk

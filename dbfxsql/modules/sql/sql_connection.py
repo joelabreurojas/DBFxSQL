@@ -53,7 +53,7 @@ def fetch_one(engine: str, filepath: str, query: str) -> list[dict]:
         row: list = []
 
         if not (rows := cursor.fetchone()):
-            return [{field: "" for field in fields}]
+            return [{field: None for field in fields}]
 
         for field in rows:
             row.append(field.rstrip() if isinstance(field, str) else field)
@@ -76,7 +76,7 @@ def fetch_all(engine: str, filepath: str, query: str) -> list[dict]:
 
         rows = [dict(zip(fields, row)) for row in rows]
 
-    return rows if rows else [{field: "" for field in fields}]
+    return rows if rows else [{field: None for field in fields}]
 
 
 @contextmanager
