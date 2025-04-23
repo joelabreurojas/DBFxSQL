@@ -89,9 +89,9 @@ This early version of the code demonstrates a basic interaction with the tool.
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
+      <li>[x] Handle None instead of empty strings.</li>
       <li>[ ] Improve store procedure write_file (use CLR procedures).</li>
       <li>[ ] Option to initialize triggers/procedures.</li>
-      <li>[x] Option to notify changes during migration/synchronization.</li>
       <li>[ ] Fix timetuple issues in DBF by using a string as a date.</li>
       <li>[ ] Add loading bar during migration.</li>
       <li>[ ] Create a changelog.</li>
