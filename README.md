@@ -85,11 +85,11 @@ This early version of the code demonstrates a basic interaction with the tool.
 ### 📝 To do
 
 **Required:**
+- [ ] Fix connection in DB manipulation commands for MSSQL.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[x] Handle None instead of empty strings.</li>
       <li>[ ] Improve store procedure write_file (use CLR procedures).</li>
       <li>[ ] Option to initialize triggers/procedures.</li>
       <li>[ ] Fix timetuple issues in DBF by using a string as a date.</li>
