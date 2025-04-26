@@ -66,7 +66,7 @@ def show_table(rows: list[dict]) -> None:
     table.field_names = rows[0].keys()
 
     # Replace None dict values with empty strings for display
-    rows = [formatters.none_to_str(row) for row in rows]
+    rows = [formatters.none_to_empty_str(row) for row in rows]
 
     for row in rows:
         table.add_row([row[field] for field in table.field_names])
