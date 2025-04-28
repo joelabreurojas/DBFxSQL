@@ -67,7 +67,7 @@ def assign_types(engine: str, types: dict[str, str], row: dict[str, Any]) -> dic
 
             # NullType case
             elif type(value) is NullType:
-                row[field] = ""
+                row[field] = type(None)
 
             # other cases
             elif value:
