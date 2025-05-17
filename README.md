@@ -97,6 +97,7 @@ This early version of the code demonstrates a basic interaction with the tool.
       <li>[ ] Create a changelog.</li>
       <li>[ ] Specify temporary files to listen on in configuration.</li>
       <li>[ ] Specify migration order into the configuration.</li>
+      <li>[ ] Add errors for wrong configurations.</li>
       <li>[ ] Add CDC to SQL.</li>
       <li>[ ] Balance rows for indirect table relationships.</li>
       <li>[ ] Implement field target for indirect table relationships.</li>
