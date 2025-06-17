@@ -1,9 +1,34 @@
-# DBFxSQL
+<h1 align='center'>
+    DBFxSQL
+</h1>
 
+<p align='center'>
+    <em>Configure once, sync automatically!</em>
+</p>
+
+<h6 align='center'>
+    <a href="https://github.com/joelabreurojas/DBFxSQL/blob/main/LICENSE">
+        <img alt='MIT License' src='https://img.shields.io/static/v1.svg?label=License&message=MIT&logoColor=d9e0ee&colorA=302d41&colorB=blue'/>
+    </a>
+    <a href="https://github.com/joelabreurojas/DBFxSQL/blob/main/dbfxsql/constants/data_types.py">
+        <img alt='Supports dBase, SQLite & MSSQL' src='https://img.shields.io/static/v1.svg?label=Support&message=dBase/SQLite/MSSQL&logoColor=d9e0ee&colorA=302d41&colorB=blue'/>
+    </a>
+     <a href="https://deepwiki.com/joelabreurojas/DBFxSQL">
+        <img alt='Ask DeepWiki' src='https://img.shields.io/static/v1.svg?label=Ask&message=DeepWiki&logoColor=d9e0ee&colorA=302d41&colorB=blue'/>
+    </a>
+</h6>
+
+&nbsp;
 
 ### ✨ Overview
 
-A tool that enables bi-directional data synchronization between [DBF](https://en.wikipedia.org/wiki/DBF) (dBase) files and a [SQL](https://en.wikipedia.org/wiki/SQL) databases. It facilitates seamless data migration from DBF to SQL and vice versa.
+DBFxSQL enables seamless data consistency between legacy DBF (dBase) files and modern SQL databases during migration projects. Instead of managing two separate data systems manually, DBFxSQL automatically synchronizes changes in both directions, eliminating data reconciliation headaches.
+
+Suitable for:
+
+- Organizations migrating from DBF to SQL while maintaining production systems.
+- Development teams building new SQL systems alongside existing DBF infrastructure.
+- One-time clean migrations without ongoing DBF dependencies.
 
 &nbsp;
 
@@ -21,102 +46,117 @@ python --version
 git clone https://github.com/joelabreurojas/DBFxSQL.git
 ```
 
-3. Install Poetry (if not alredy installed)
+3. Create and activate a virtual environment.
+
+4. Install the source code:
 
 ```bash
-pip install poetry
-```
-
-4. Set up the environment:
-
-```bash
-cd DBFxSQL
-poetry shell
-poetry install
+pip install DBFxSQL/
 ```
 
 5. Run the tool:
 
 ```bash
-python run.py # python -m dbfxsql
-```
-
-<details>
-  <summary><strong>As a library:</strong></summary>
-  <br>
-  <ol>
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/joelabreurojas/DBFxSQL.git
-```
-
-2. Install the project as a Python library:
-
-```bash
-cd DBFxSQL
-pip install .
-````
-
-3. Run the tool:
-
-```bash
 dbfxsql
 ```
-  </ol>
-</details>
+
 &nbsp;
 
 ### 💻 Usage
 
-**Detailed Usage Instructions Coming Soon!**
+1. Create a DBF file:
 
-Comprehensive documentation with usage instructions and code examples will be available in a separate file shortly. Stay tuned!
+```bash
+dbfxsql create -s users.dbf -f id "N(20,0)" -f name "C(20)"
+```
 
-**Early Code Example:**
+2. Insert data into DBF:
 
-This early version of the code demonstrates a basic interaction with the tool.
+```bash
+dbfxsql insert -s users.dbf -f id 1 -f name "John Doe"
+```
 
-[Link to Asciinema code example](https://asciinema.org/a/675516)
+3. Create SQL database and table:
+
+```bash
+dbfxsql create -s company.sql -t users -f id 'integer primary key' -f name text
+```
+
+4. One-time migration:
+
+```bash
+dbfxsql migrate --notify
+```
+
+5. Continuous synchronization:
+
+```bash
+dbfxsql sync --notify
+```
+
+<br>
+
+> [!TIP]
+> Use the `--help` flag to see all available commands and options.
+>
+> Example: `dbfxsql <command> --help`
+
+&nbsp;
+
+### ⚙️ Configuration
+
+DBFxSQL uses TOML configuration files to define:
+
+- Database engines and their file extensions.
+- Folder paths to monitor.
+- Table relationships and synchronization priorities.
+- Field mappings between DBF and SQL schemas.
+
+The tool automatically creates a default configuration on the first run at `~/.config/DBFxSQL/config.toml`.
+
+&nbsp;
+
+### 📌 Disclaimer
+
+Before using, create backups of your DBF files and SQL databases.
+
+Known limitations:
+
+- Requires local file system access.
+- MSSQL connection issues in database manipulation commands.
+- Some advanced features are still under development.
+
+Use at your own risk and _carefully_ verify data integrity after operations.
 
 &nbsp;
 
 ### 📝 To do
 
 **Required:**
+
 - [ ] Fix connection in DB manipulation commands for MSSQL.
 <details>
   <summary><strong>Desirable:</strong></summary>
   <br>
   <ul>
-      <li>[ ] Improve store procedure write_file (use CLR procedures).</li>
-      <li>[ ] Option to initialize triggers/procedures.</li>
-      <li>[ ] Fix timetuple issues in DBF by using a string as a date.</li>
+      <li>[ ] Add a changelog.</li>
       <li>[ ] Add loading bar during migration.</li>
-      <li>[ ] Create a changelog.</li>
-      <li>[ ] Specify temporary files to listen on in configuration.</li>
-      <li>[ ] Specify migration order into the configuration.</li>
-      <li>[ ] Add errors for wrong configurations.</li>
-      <li>[ ] Add CDC to SQL.</li>
-      <li>[ ] Balance rows for indirect table relationships.</li>
-      <li>[ ] Implement field target for indirect table relationships.</li>
-      <li>[ ] Recognize indirect table relationships by their target tables.</li>
+      <li>[ ] Add option to initialize triggers/procedures in cli.</li>
+      <li>[ ] Add option to listen alternative files in config.</li>
+      <li>[ ] Add option to specify migration/sync order in config.</li>
+      <li>[ ] Add errors for wrong config.</li>
+      <li>[ ] Add FIELDS option to filter read requests.</li>
+      <li>[ ] Add option to specify field target for indirect table relations in config.</li>
       <li>[ ] Balance the number of rows between indirect table relationships (large over small).</li>
-      <li>[ ] Apply synchronization by target fields when they exist.</li>
-      <li>[ ] Standardize automatic synchronization checks.</li>
-      <li>[ ] New incremental cli workflow.</li>
-      <li>[ ] Implement more abstraction in controllers.</li>
-      <li>[ ] Group origin tables by destiny tables to optimize read queries during migration.</li>
-      <li>[ ] Add FIELDS options to filter read requests.</li>
-      <li>[ ] Configuration commands for uploading and editing.</li>
+      <li>[ ] Add CDC into SQL layers.</li>
+      <li>[ ] Add Command Query Responsibility Segregation (CQRS) pattern.</li>
+      <li>[ ] Refactor store procedure write_file (use CLR procedures).</li>
+      <li>[ ] Refactor read queries by group origin tables by destiny tables for migration/sync optimizations.</li>
       <li>[ ] Validate existence of received field type.</li>
       <li>[ ] Validate KeyErrors for invalid fields.</li>
       <li>[ ] Validate type lengths and names for consistency between DBF and SQL.</li>
-      <li>[ ] Public project documentation.</li>
-      <li>[ ] Command Query Responsibility Segregation (CQRS) pattern implementation.</li>
-      <li>[ ] Released as a Python library.</li>
-      <li>[ ] Development of a GUI to manage DBF and SQL.</li>
+      <li>[ ] Validate existence of target fields during sync.</li>
+      <li>[ ] Release as a Python library.</li>
   </ul>
 </details>
 
@@ -130,16 +170,15 @@ This early version of the code demonstrates a basic interaction with the tool.
 
 > Problems?
 
-- Feel free to open a new issue!
+- Feel free to open a new [issue](https://github.com/joelabreurojas/DBFxSQL/issues/new)!
 
 &nbsp;
 
-### ❤️  Gratitude
+### ❤️ Gratitude
 
 Special thanks to the following projects for making this tool possible:
 
-- [Flask Boilerplate](https://www.youtube.com/watch?v=TTYdcZ4aYz8&feature=youtu.be) - Python Structure Guide by [Ezequiel L. Castaño](https://github.com/ELC)
-- [DBF library](https://github.com/ethanfurman/dbf/tree/master/dbf) - Pure Python DBF reader/writer by [Ethan Furman](https://github.com/ethanfurman)
-- [Watchfiles library](https://watchfiles.helpmanual.io) - Simple, modern and fast file watching and code reload in Python by [Samuel Colvin](https://github.com/samuelcolvin)
-- [Click library](https://click.palletsprojects.com/en/) - A Python command line interface toolkit by [Pallets Organization](https://github.com/pallets)
-
+- [Flask Boilerplate](https://www.youtube.com/watch?v=TTYdcZ4aYz8&feature=youtu.be) - Python Structure Guide by [Ezequiel L. Castaño](https://github.com/ELC).
+- [DBF library](https://github.com/ethanfurman/dbf/tree/master/dbf) - Pure Python DBF reader/writer by [Ethan Furman](https://github.com/ethanfurman).
+- [Watchfiles library](https://watchfiles.helpmanual.io) - Simple, modern and fast file watching and code reload in Python by [Samuel Colvin](https://github.com/samuelcolvin).
+- [Click library](https://click.palletsprojects.com/en/) - A Python command line interface toolkit by [Pallets Organization](https://github.com/pallets).
