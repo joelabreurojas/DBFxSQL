@@ -8,13 +8,13 @@
 
 <h6 align='center'>
     <a href="https://github.com/joelabreurojas/DBFxSQL/blob/main/LICENSE">
-        <img alt='MIT License' src='https://img.shields.io/static/v1.svg?label=License&message=MIT&logoColor=d9e0ee&colorA=302d41&colorB=blue'/>
+        <img alt='MIT License' src='https://img.shields.io/static/v1.svg?label=License&message=MIT&logoColor=d9e0ee&colorA=302d41&colorB=3094FF'/>
     </a>
     <a href="https://github.com/joelabreurojas/DBFxSQL/blob/main/dbfxsql/constants/data_types.py">
-        <img alt='Supports dBase, SQLite & MSSQL' src='https://img.shields.io/static/v1.svg?label=Support&message=dBase/SQLite/MSSQL&logoColor=d9e0ee&colorA=302d41&colorB=blue'/>
+        <img alt='Supports dBase, SQLite & MSSQL' src='https://img.shields.io/static/v1.svg?label=Support&message=dBase/SQLite/MSSQL&logoColor=d9e0ee&colorA=302d41&colorB=3094FF'/>
     </a>
      <a href="https://deepwiki.com/joelabreurojas/DBFxSQL">
-        <img alt='Ask DeepWiki' src='https://img.shields.io/static/v1.svg?label=Ask&message=DeepWiki&logoColor=d9e0ee&colorA=302d41&colorB=blue'/>
+        <img alt='Ask DeepWiki' src='https://img.shields.io/static/v1.svg?label=Ask&message=DeepWiki&logoColor=d9e0ee&colorA=302d41&colorB=3094FF'/>
     </a>
 </h6>
 
